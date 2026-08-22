@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.EventAvailable
+import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.Button
@@ -36,8 +36,8 @@ enum class SuperPlannerIcon {
 }
 
 private fun SuperPlannerIcon.imageVector(): ImageVector = when (this) {
-    SuperPlannerIcon.CALENDAR -> Icons.Outlined.CalendarMonth
-    SuperPlannerIcon.EVENT -> Icons.Outlined.EventAvailable
+    SuperPlannerIcon.CALENDAR -> Icons.Outlined.CalendarToday
+    SuperPlannerIcon.EVENT -> Icons.Outlined.Event
     SuperPlannerIcon.COMPLETED -> Icons.Outlined.CheckCircle
     SuperPlannerIcon.GOAL -> Icons.Outlined.Flag
     SuperPlannerIcon.IDEA -> Icons.Outlined.Lightbulb
