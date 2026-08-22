@@ -1,10 +1,19 @@
 package com.gpsdavida.app.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -15,9 +24,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -48,8 +59,9 @@ fun SuperPlannerSectionHeader(
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
     ) {
-        androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
@@ -78,7 +90,7 @@ fun SuperPlannerProgress(
     label: String? = null,
 ) {
     val safeProgress = progress.coerceIn(0f, 1f)
-    androidx.compose.foundation.layout.Column(
+    Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -96,10 +108,118 @@ fun SuperPlannerProgress(
                 .height(6.dp)
                 .semantics {
                     progressBarRangeInfo = ProgressBarRangeInfo(safeProgress, 0f..1f)
+                    label?.let { contentDescription = it }
                 },
             color = GpsDaVidaColors.Terracotta,
             trackColor = GpsDaVidaColors.RoseSoft,
         )
+    }
+}
+
+/** The visual state of an item in the planner timeline. */
+enum class SuperPlannerTimelineState {
+    COMPLETED,
+    CURRENT,
+    UPCOMING,
+}
+
+data class SuperPlannerTimelineItem(
+    val time: String,
+    val title: String,
+    val supportingText: String? = null,
+    val state: SuperPlannerTimelineState = SuperPlannerTimelineState.UPCOMING,
+)
+
+/**
+ * A low-density vertical timeline for day and week views.
+ * The current item receives the strongest visual anchor; completed items recede.
+ */
+@Composable
+fun SuperPlannerTimeline(
+    items: List<SuperPlannerTimelineItem>,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+    ) {
+        items.forEachIndexed { index, item ->
+            SuperPlannerTimelineRow(
+                item = item,
+                isLast = index == items.lastIndex,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SuperPlannerTimelineRow(
+    item: SuperPlannerTimelineItem,
+    isLast: Boolean,
+) {
+    val accent = when (item.state) {
+        SuperPlannerTimelineState.CURRENT -> GpsDaVidaColors.Terracotta
+        SuperPlannerTimelineState.COMPLETED -> GpsDaVidaColors.Sage
+        SuperPlannerTimelineState.UPCOMING -> GpsDaVidaColors.BlueGray
+    }
+    val textAlpha = when (item.state) {
+        SuperPlannerTimelineState.COMPLETED -> 0.62f
+        else -> 1f
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            text = item.time,
+            modifier = Modifier.width(52.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = GpsDaVidaColors.InkSoft.copy(alpha = textAlpha),
+        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.width(20.dp),
+        ) {
+            Spacer(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .size(if (item.state == SuperPlannerTimelineState.CURRENT) 10.dp else 8.dp)
+                    .background(accent, CircleShape),
+            )
+            if (!isLast) {
+                Spacer(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .width(1.dp)
+                        .height(48.dp)
+                        .background(GpsDaVidaColors.Outline.copy(alpha = 0.8f)),
+                )
+            }
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 12.dp, bottom = if (isLast) 0.dp else 20.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = item.title,
+                style = if (item.state == SuperPlannerTimelineState.CURRENT) {
+                    MaterialTheme.typography.titleMedium
+                } else {
+                    MaterialTheme.typography.bodyLarge
+                },
+                color = GpsDaVidaColors.Ink.copy(alpha = textAlpha),
+            )
+            item.supportingText?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = GpsDaVidaColors.InkSoft.copy(alpha = textAlpha),
+                )
+            }
+        }
     }
 }
 
