@@ -25,12 +25,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.gpsdavida.app.R
-import com.gpsdavida.app.ui.agora.AgoraScreen
 import com.gpsdavida.app.ui.availability.AvailabilityScreen
 import com.gpsdavida.app.ui.events.EventFormScreen
 import com.gpsdavida.app.ui.events.EventsListScreen
 import com.gpsdavida.app.ui.habits.HabitFormScreen
 import com.gpsdavida.app.ui.habits.HabitsListScreen
+import com.gpsdavida.app.ui.home.HomeScreen
 import com.gpsdavida.app.ui.meudia.MeuDiaScreen
 import com.gpsdavida.app.ui.routines.RoutineFormScreen
 import com.gpsdavida.app.ui.routines.RoutinesListScreen
@@ -62,7 +62,7 @@ fun GpsNavHost() {
         },
     ) { padding ->
         NavHost(navController, GpsRoutes.AGORA, Modifier.padding(padding)) {
-            composable(GpsRoutes.AGORA) { AgoraScreen() }
+            composable(GpsRoutes.AGORA) { HomeScreen() }
             composable(GpsRoutes.MEU_DIA) {
                 MeuDiaScreen(
                     onAddEvent = { navController.navigate(GpsRoutes.eventEditor()) },
