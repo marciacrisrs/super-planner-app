@@ -193,7 +193,7 @@ private fun SuperPlannerTimelineRow(
                         .padding(top = 4.dp)
                         .width(1.dp)
                         .height(48.dp)
-                        .background(GpsDaVidaColors.BorderSoft.copy(alpha = 0.8f)),
+                        .background(GpsDaVidaColors.Outline.copy(alpha = 0.8f)),
                 )
             }
         }
