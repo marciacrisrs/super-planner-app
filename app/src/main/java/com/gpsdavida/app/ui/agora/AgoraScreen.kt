@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,6 +22,8 @@ import com.gpsdavida.app.ui.next.NextActionCard
 import com.gpsdavida.app.ui.next.NextActionUiModel
 import com.gpsdavida.app.ui.tasks.labelRes
 import com.gpsdavida.app.ui.theme.GpsDaVidaColors
+import com.gpsdavida.app.ui.widget.AgoraWidgetProvider
+import com.gpsdavida.app.ui.widget.AgoraWidgetSnapshot
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -32,6 +35,20 @@ fun AgoraScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
     val dateFmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
+
+    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity) {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        AgoraWidgetSnapshot.write(
+            context = context,
+            snapshot = AgoraWidgetSnapshot(
+                title = state.title,
+                scheduledTime = state.scheduledTime?.format(timeFmt).orEmpty(),
+                durationMinutes = state.durationMinutes?.toInt() ?: 0,
+                isEmpty = state.currentActivity == null,
+            ),
+        )
+        AgoraWidgetProvider.updateAll(context)
+    }
 
     Column(
         modifier = Modifier
