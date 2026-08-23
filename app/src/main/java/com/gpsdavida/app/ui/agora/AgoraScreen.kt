@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,11 +34,11 @@ fun AgoraScreen(
     viewModel: AgoraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
     val dateFmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
 
     LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity) {
-        val context = androidx.compose.ui.platform.LocalContext.current
         AgoraWidgetSnapshot.write(
             context = context,
             snapshot = AgoraWidgetSnapshot(
