@@ -42,6 +42,7 @@ fun PlanningScreen(
     onOpenReview: () -> Unit,
     onOpenFinance: () -> Unit,
     onOpenLifeAreas: () -> Unit,
+    onOpenDayCheckpoint: () -> Unit,
     viewModel: PlanningViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -53,6 +54,7 @@ fun PlanningScreen(
         TextButton(onClick = onOpenReview) { Text("Revisão") }
         TextButton(onClick = onOpenFinance) { Text("Finanças") }
         TextButton(onClick = onOpenLifeAreas) { Text("Áreas") }
+        TextButton(onClick = onOpenDayCheckpoint) { Text("Dia") }
     }) }, floatingActionButton = { FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") } }) { padding ->
         Column(Modifier.padding(padding)) {
             TabRow(tab) { Tab(tab == 0, { tab = 0 }, text = { Text("Metas") }); Tab(tab == 1, { tab = 1 }, text = { Text("Projetos") }); Tab(tab == 2, { tab = 2 }, text = { Text("Inbox") }) }
