@@ -6,7 +6,7 @@ Data: 2026-08-15
 
 ## Contexto
 
-O GPS transforma cadastros em uma rota diária. Precisa distinguir o que é horário fixo do que pode deslizar, e guardar planejado × realizado. Cadastro (issues #2–#8) e motor (#9+) dependem deste contrato. Código em `com.gpsdavida.app.domain.model` — Kotlin puro.
+O **Super Planner** transforma cadastros em uma rota diária. Precisa distinguir o que é horário fixo do que pode deslizar, e guardar planejado × realizado. Cadastro e motor dependem deste contrato. Código em `com.gpsdavida.app.domain.model` — Kotlin puro.
 
 ## Vocabulário
 
@@ -20,20 +20,20 @@ O GPS transforma cadastros em uma rota diária. Precisa distinguir o que é hor�
 | **Priority** | Peso: obrigatório, importante, desejável, lazer. Obrigatório não é descartado sozinho. |
 | **Duration** | `java.time.Duration`. Toda atividade tem duração planejada; a realizada só existe depois da execução. |
 | **Goal** | Direção de longo prazo. Atividades podem apontar para uma meta. Sem CRUD nesta fase. |
-| **Energy** | Custo estimado (baixa / média / alta). O motor pode ignorar até existir regra. |
-| **Dependency** | A só depois de B. O motor respeita quando for implementado. |
+| **Energy** | Custo estimado (baixa / média / alta). O motor pode usar como preferência. |
+| **Dependency** | A só depois de B. O motor respeita quando houver dependência declarada. |
 | **ActivityInstance** | Ocorrência **do dia**: liga a origem (evento/tarefa/hábito/passo) a um intervalo planejado e, depois, ao realizado e ao status. |
 
 ## Fixo vs flexível
 
 - **Fixo:** `Event` (e bloqueios de disponibilidade). Conflito se outro item invade o intervalo.
-- **Flexível:** `Task`, `Habit`, passos de `Routine`. Podem ser reposicionados; obrigatórios mudam de hora, não somem.
+- **Flexível:** `Task`, `Habit`, passos de `Routine`. Podem ser reposicionados; obrigações seguem preservadas conforme as regras do motor.
 
 `ActivityInstance.flexibility` deriva da origem.
 
 ## Planejado × realizado
 
-`ActivityInstance` carrega `planned` (`TimeRange`) sempre. `actual` só após concluir (ou pular/adiar, conforme #15). Duração realizada = `actual.end - actual.start` quando `actual` existe.
+`ActivityInstance` carrega `planned` (`TimeRange`) sempre. `actual` só após concluir. Duração realizada = `actual.end - actual.start` quando `actual` existe.
 
 ## Relações
 
@@ -59,12 +59,8 @@ flowchart TB
   avail -.-> inst
 ```
 
-Disponibilidade não gera instância; o motor só encaixa flexíveis em janelas livres.
+Disponibilidade não gera instância; o motor encaixa flexíveis em janelas livres.
 
 ## Fora deste ADR
 
-CRUD Room/UI (#2–#8). Regras do motor (#9). Telas Agora / Meu Dia (#13–#14).
-
-## Próximo
-
-Issue **#2** (cadastro de eventos) usando estes tipos.
+CRUD Room/UI e regras específicas de produto. A separação entre Plano, Programação, Rota e Execução está em [ADR 003](003-plano-programacao-rota-execucao.md).
