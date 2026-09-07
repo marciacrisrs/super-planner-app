@@ -1,12 +1,14 @@
 package com.gpsdavida.app.ui.meudia
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -35,6 +37,8 @@ fun MeuDiaScreen(
     viewModel: MeuDiaViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val empty = state.events.isEmpty() && state.tasks.isEmpty() && state.habits.isEmpty()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -46,30 +50,33 @@ fun MeuDiaScreen(
                 },
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddEvent) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.cd_add_event))
-            }
-        },
     ) { padding ->
-        val empty = state.events.isEmpty() && state.tasks.isEmpty() && state.habits.isEmpty()
-        Column(modifier = Modifier.padding(padding)) {
-            if (empty) {
-                Text(stringResource(R.string.meu_dia_empty), modifier = Modifier.padding(24.dp))
-            } else {
+        if (empty) {
+            Text(
+                text = stringResource(R.string.meu_dia_empty),
+                modifier = Modifier.padding(padding).padding(24.dp),
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 if (state.events.isNotEmpty()) {
-                    Text(stringResource(R.string.nav_eventos), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-                    state.events.forEach { event -> EventRow(event = event, onClick = { onOpenEvent(event.id.value) }) }
+                    item { Text(stringResource(R.string.nav_eventos), modifier = Modifier.padding(vertical = 8.dp)) }
+                    items(state.events, key = { it.id.value }) { event ->
+                        EventRow(event = event, onClick = { onOpenEvent(event.id.value) })
+                    }
                 }
                 if (state.tasks.isNotEmpty()) {
-                    Text(stringResource(R.string.nav_tarefas), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-                    state.tasks.forEach { task ->
+                    item { Text(stringResource(R.string.nav_tarefas), modifier = Modifier.padding(vertical = 8.dp)) }
+                    items(state.tasks, key = { it.id.value }) { task ->
                         TaskRow(task = task, onClick = { onOpenTask(task.id.value) }, onToggleDone = { viewModel.setTaskDone(task.id.value, it) })
                     }
                 }
                 if (state.habits.isNotEmpty()) {
-                    Text(stringResource(R.string.nav_habitos), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-                    state.habits.forEach { habitDay ->
+                    item { Text(stringResource(R.string.nav_habitos), modifier = Modifier.padding(vertical = 8.dp)) }
+                    items(state.habits, key = { it.habit.id.value }) { habitDay ->
                         HabitDayRow(item = habitDay, onClick = { onOpenHabit(habitDay.habit.id.value) }, onToggleDone = { viewModel.setHabitDone(habitDay.habit.id.value, it) })
                     }
                 }
