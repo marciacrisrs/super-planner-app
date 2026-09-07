@@ -27,4 +27,7 @@
     <string name="next_action_empty_title">Você está em dia.</string>
     <string name="next_action_empty_body">Quando houver uma próxima ação, ela aparecerá aqui.</string>
     <string name="next_action_completed_label">Concluído</string>
+    <string name="widget_agora_label">AGORA</string>
+    <string name="widget_agora_empty">Você está em dia.</string>
+    <string name="widget_agora_meta">%1$s · %2$d min</string>
 </resources>
