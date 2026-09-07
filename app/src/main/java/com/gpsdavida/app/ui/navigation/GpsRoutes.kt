@@ -6,6 +6,8 @@ object GpsRoutes {
     const val WEEK = "week"
     const val WEEK_DAY = "week_day/{date}"
     const val PLANNING = "planning"
+    const val HORIZONS = "horizons"
+    const val REVIEW = "review"
     const val EVENTS = "events"
     const val TASKS = "tasks"
     const val HABITS = "habits"

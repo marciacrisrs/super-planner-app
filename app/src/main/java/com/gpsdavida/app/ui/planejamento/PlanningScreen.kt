@@ -37,13 +37,25 @@ import com.gpsdavida.app.domain.model.Project
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlanningScreen(viewModel: PlanningViewModel = hiltViewModel()) {
+fun PlanningScreen(
+    onOpenHorizons: () -> Unit,
+    onOpenReview: () -> Unit,
+    viewModel: PlanningViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var tab by remember { mutableIntStateOf(0) }
     var addDialog by remember { mutableStateOf<String?>(null) }
     var projectForStep by remember { mutableStateOf<Project?>(null) }
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Planejamento") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Planejamento") },
+                actions = {
+                    TextButton(onClick = onOpenHorizons) { Text("Horizontes") }
+                    TextButton(onClick = onOpenReview) { Text("Revisão") }
+                },
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") }
         },
@@ -60,26 +72,10 @@ fun PlanningScreen(viewModel: PlanningViewModel = hiltViewModel()) {
                         Card(Modifier.fillMaxWidth()) { Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(goal.title); TextButton({ viewModel.deleteGoal(goal.id.value) }) { Text("Excluir") } } }
                     }
                     1 -> items(state.projects) { project ->
-                        Card(Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(project.title); Text("${project.steps.size} etapas")
-                                project.steps.forEach { Text("• ${it.title} — ${it.plannedDuration.toMinutes()} min") }
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { TextButton({ projectForStep = project }) { Text("Adicionar etapa") }; TextButton({ viewModel.deleteProject(project.id.value) }) { Text("Excluir") } }
-                            }
-                        }
+                        Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(project.title); Text("${project.steps.size} etapas"); project.steps.forEach { Text("• ${it.title} — ${it.plannedDuration.toMinutes()} min") }; Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { TextButton({ projectForStep = project }) { Text("Adicionar etapa") }; TextButton({ viewModel.deleteProject(project.id.value) }) { Text("Excluir") } } } }
                     }
                     else -> items(state.inbox.filter { it.status != InboxStatus.DISCARDED }) { item ->
-                        Card(Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(item.text); Text(item.status.name.lowercase().replace('_', ' '))
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    TextButton({ viewModel.setInboxStatus(item, InboxStatus.SOMEDAY) }) { Text("Someday") }
-                                    TextButton({ viewModel.setInboxStatus(item, InboxStatus.WAITING) }) { Text("Aguardando") }
-                                    TextButton({ viewModel.setInboxStatus(item, InboxStatus.PROCESSED) }) { Text("Processado") }
-                                }
-                                TextButton({ viewModel.deleteInbox(item.id.value) }) { Text("Excluir") }
-                            }
-                        }
+                        Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(item.text); Text(item.status.name.lowercase().replace('_', ' ')); Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { TextButton({ viewModel.setInboxStatus(item, InboxStatus.SOMEDAY) }) { Text("Someday") }; TextButton({ viewModel.setInboxStatus(item, InboxStatus.WAITING) }) { Text("Aguardando") }; TextButton({ viewModel.setInboxStatus(item, InboxStatus.PROCESSED) }) { Text("Processado") } }; TextButton({ viewModel.deleteInbox(item.id.value) }) { Text("Excluir") } } }
                     }
                 }
             }
