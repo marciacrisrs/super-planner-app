@@ -3,6 +3,8 @@ package com.gpsdavida.app.ui.navigation
 object GpsRoutes {
     const val AGORA = "agora"
     const val MEU_DIA = "meu_dia"
+    const val WEEK = "week"
+    const val WEEK_DAY = "week_day/{date}"
     const val EVENTS = "events"
     const val TASKS = "tasks"
     const val HABITS = "habits"
@@ -21,4 +23,5 @@ object GpsRoutes {
     fun taskEditor(taskId: String = NEW_TASK_ID): String = "task_editor/$taskId"
     fun habitEditor(habitId: String = NEW_HABIT_ID): String = "habit_editor/$habitId"
     fun routineEditor(routineId: String = NEW_ROUTINE_ID): String = "routine_editor/$routineId"
+    fun weekDay(date: String): String = "week_day/$date"
 }

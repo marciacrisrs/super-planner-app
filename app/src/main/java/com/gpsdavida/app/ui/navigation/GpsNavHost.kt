@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -35,8 +34,11 @@ import com.gpsdavida.app.ui.home.HomeScreen
 import com.gpsdavida.app.ui.meudia.MeuDiaScreen
 import com.gpsdavida.app.ui.routines.RoutineFormScreen
 import com.gpsdavida.app.ui.routines.RoutinesListScreen
+import com.gpsdavida.app.ui.semana.WeekDayScreen
+import com.gpsdavida.app.ui.semana.WeekScreen
 import com.gpsdavida.app.ui.tasks.TaskFormScreen
 import com.gpsdavida.app.ui.tasks.TasksListScreen
+import java.time.LocalDate
 
 @Composable
 fun GpsNavHost() {
@@ -101,7 +103,14 @@ fun GpsNavHost() {
                     onOpenTask = { id -> navController.navigate(GpsRoutes.taskEditor(id)) },
                     onOpenHabit = { id -> navController.navigate(GpsRoutes.habitEditor(id)) },
                     onOpenAvailability = { navController.navigate(GpsRoutes.AVAILABILITY) },
+                    onOpenWeek = { navController.navigate(GpsRoutes.WEEK) },
                 )
+            }
+            composable(GpsRoutes.WEEK) {
+                WeekScreen(onOpenDay = { date -> navController.navigate(GpsRoutes.weekDay(date)) })
+            }
+            composable(GpsRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry ->
+                WeekDayScreen(date = LocalDate.parse(entry.arguments?.getString("date")))
             }
             composable(GpsRoutes.AVAILABILITY) { AvailabilityScreen() }
             composable(GpsRoutes.EVENTS) { EventsListScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }) }
