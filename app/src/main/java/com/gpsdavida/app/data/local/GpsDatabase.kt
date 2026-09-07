@@ -10,9 +10,9 @@ import androidx.room.RoomDatabase
         AvailabilityEntity::class, ActivityExecutionEntity::class, GoalEntity::class,
         ProjectEntity::class, InboxItemEntity::class, MilestoneEntity::class,
         AccountEntity::class, TransactionEntity::class, PayableEntity::class,
-        BudgetEntity::class, FinancialGoalEntity::class,
+        BudgetEntity::class, FinancialGoalEntity::class, LifeAreaEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false,
 )
 abstract class GpsDatabase : RoomDatabase() {
@@ -29,4 +29,5 @@ abstract class GpsDatabase : RoomDatabase() {
     abstract fun inboxItemDao(): InboxItemDao
     abstract fun milestoneDao(): MilestoneDao
     abstract fun financeDao(): FinanceDao
+    abstract fun lifeAreaDao(): LifeAreaDao
 }

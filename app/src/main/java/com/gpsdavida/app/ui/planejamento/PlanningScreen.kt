@@ -41,28 +41,21 @@ fun PlanningScreen(
     onOpenHorizons: () -> Unit,
     onOpenReview: () -> Unit,
     onOpenFinance: () -> Unit,
+    onOpenLifeAreas: () -> Unit,
     viewModel: PlanningViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var tab by remember { mutableIntStateOf(0) }
     var addDialog by remember { mutableStateOf<String?>(null) }
     var projectForStep by remember { mutableStateOf<Project?>(null) }
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Planejamento") }, actions = {
-                TextButton(onClick = onOpenHorizons) { Text("Horizontes") }
-                TextButton(onClick = onOpenReview) { Text("Revisão") }
-                TextButton(onClick = onOpenFinance) { Text("Finanças") }
-            })
-        },
-        floatingActionButton = { FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") } },
-    ) { padding ->
+    Scaffold(topBar = { TopAppBar(title = { Text("Planejamento") }, actions = {
+        TextButton(onClick = onOpenHorizons) { Text("Horizontes") }
+        TextButton(onClick = onOpenReview) { Text("Revisão") }
+        TextButton(onClick = onOpenFinance) { Text("Finanças") }
+        TextButton(onClick = onOpenLifeAreas) { Text("Áreas") }
+    }) }, floatingActionButton = { FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") } }) { padding ->
         Column(Modifier.padding(padding)) {
-            TabRow(selectedTabIndex = tab) {
-                Tab(tab == 0, { tab = 0 }, text = { Text("Metas") })
-                Tab(tab == 1, { tab = 1 }, text = { Text("Projetos") })
-                Tab(tab == 2, { tab = 2 }, text = { Text("Inbox") })
-            }
+            TabRow(tab) { Tab(tab == 0, { tab = 0 }, text = { Text("Metas") }); Tab(tab == 1, { tab = 1 }, text = { Text("Projetos") }); Tab(tab == 2, { tab = 2 }, text = { Text("Inbox") }) }
             LazyColumn(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 when (tab) {
                     0 -> items(state.goals) { goal -> Card(Modifier.fillMaxWidth()) { Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(goal.title); TextButton({ viewModel.deleteGoal(goal.id.value) }) { Text("Excluir") } } } }

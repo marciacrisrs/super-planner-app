@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.gpsdavida.app.R
 import com.gpsdavida.app.ui.availability.AvailabilityScreen
+import com.gpsdavida.app.ui.contexto.LifeAreaScreen
 import com.gpsdavida.app.ui.events.EventFormScreen
 import com.gpsdavida.app.ui.events.EventsListScreen
 import com.gpsdavida.app.ui.financas.FinanceScreen
@@ -64,10 +65,11 @@ fun GpsNavHost() {
             composable(GpsRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }, { navController.navigate(GpsRoutes.taskEditor(it)) }, { navController.navigate(GpsRoutes.habitEditor(it)) }, { navController.navigate(GpsRoutes.AVAILABILITY) }, { navController.navigate(GpsRoutes.WEEK) }) }
             composable(GpsRoutes.WEEK) { WeekScreen { date -> navController.navigate(GpsRoutes.weekDay(date)) } }
             composable(GpsRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry -> WeekDayScreen(LocalDate.parse(entry.arguments?.getString("date"))) }
-            composable(GpsRoutes.PLANNING) { PlanningScreen(onOpenHorizons = { navController.navigate(GpsRoutes.HORIZONS) }, onOpenReview = { navController.navigate(GpsRoutes.REVIEW) }, onOpenFinance = { navController.navigate(GpsRoutes.FINANCE) }) }
+            composable(GpsRoutes.PLANNING) { PlanningScreen(onOpenHorizons = { navController.navigate(GpsRoutes.HORIZONS) }, onOpenReview = { navController.navigate(GpsRoutes.REVIEW) }, onOpenFinance = { navController.navigate(GpsRoutes.FINANCE) }, onOpenLifeAreas = { navController.navigate(GpsRoutes.LIFE_AREAS) }) }
             composable(GpsRoutes.HORIZONS) { HorizonsScreen() }
             composable(GpsRoutes.REVIEW) { WeeklyReviewScreen() }
             composable(GpsRoutes.FINANCE) { FinanceScreen() }
+            composable(GpsRoutes.LIFE_AREAS) { LifeAreaScreen() }
             composable(GpsRoutes.AVAILABILITY) { AvailabilityScreen() }
             composable(GpsRoutes.EVENTS) { EventsListScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }) }
             composable(GpsRoutes.TASKS) { TasksListScreen({ navController.navigate(GpsRoutes.taskEditor()) }, { navController.navigate(GpsRoutes.taskEditor(it)) }) }
