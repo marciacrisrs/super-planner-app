@@ -5,21 +5,14 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [
-        AppMetaEntity::class,
-        EventEntity::class,
-        TaskEntity::class,
-        HabitEntity::class,
-        HabitCompletionEntity::class,
-        RoutineEntity::class,
-        RoutineStepEntity::class,
-        AvailabilityEntity::class,
-        ActivityExecutionEntity::class,
-        GoalEntity::class,
-        ProjectEntity::class,
-        InboxItemEntity::class,
-        MilestoneEntity::class,
+        AppMetaEntity::class, EventEntity::class, TaskEntity::class, HabitEntity::class,
+        HabitCompletionEntity::class, RoutineEntity::class, RoutineStepEntity::class,
+        AvailabilityEntity::class, ActivityExecutionEntity::class, GoalEntity::class,
+        ProjectEntity::class, InboxItemEntity::class, MilestoneEntity::class,
+        AccountEntity::class, TransactionEntity::class, PayableEntity::class,
+        BudgetEntity::class, FinancialGoalEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = false,
 )
 abstract class GpsDatabase : RoomDatabase() {
@@ -35,4 +28,5 @@ abstract class GpsDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
     abstract fun inboxItemDao(): InboxItemDao
     abstract fun milestoneDao(): MilestoneDao
+    abstract fun financeDao(): FinanceDao
 }
