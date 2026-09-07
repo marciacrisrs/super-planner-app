@@ -1,11 +1,10 @@
-# GPS da Vida
+# Super Planner
 
-App Android offline-first: rota do dia e “o que faço agora?”.
+App Android offline-first para planejar a vida e transformar Programações em uma Rota adaptativa — com foco em “o que faço agora?”.
 
 - Arquitetura: [ADR 001](docs/adr/001-arquitetura-inicial.md)
 - Domínio: [ADR 002](docs/adr/002-modelo-de-dominio.md)
+- Plano → Programação → Rota → Execução: [ADR 003](docs/adr/003-plano-programacao-rota-execucao.md)
 - Entrega: [WORKFLOW](docs/WORKFLOW.md)
 
-Abrir a pasta no Android Studio, sync Gradle, rodar no emulador (`com.gpsdavida.app`).
-
-Próximo: rotinas — issue [#5](https://github.com/marciacrisrs/gps-da-vida-app/issues/5).
+Abrir a pasta no Android Studio, sincronizar o Gradle e rodar no emulador. O package Android legado permanece `com.gpsdavida.app` por compatibilidade interna.
