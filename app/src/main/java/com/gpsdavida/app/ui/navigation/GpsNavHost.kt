@@ -28,6 +28,7 @@ import com.gpsdavida.app.R
 import com.gpsdavida.app.ui.availability.AvailabilityScreen
 import com.gpsdavida.app.ui.events.EventFormScreen
 import com.gpsdavida.app.ui.events.EventsListScreen
+import com.gpsdavida.app.ui.financas.FinanceScreen
 import com.gpsdavida.app.ui.habits.HabitFormScreen
 import com.gpsdavida.app.ui.habits.HabitsListScreen
 import com.gpsdavida.app.ui.home.HomeScreen
@@ -63,9 +64,10 @@ fun GpsNavHost() {
             composable(GpsRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }, { navController.navigate(GpsRoutes.taskEditor(it)) }, { navController.navigate(GpsRoutes.habitEditor(it)) }, { navController.navigate(GpsRoutes.AVAILABILITY) }, { navController.navigate(GpsRoutes.WEEK) }) }
             composable(GpsRoutes.WEEK) { WeekScreen { date -> navController.navigate(GpsRoutes.weekDay(date)) } }
             composable(GpsRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry -> WeekDayScreen(LocalDate.parse(entry.arguments?.getString("date"))) }
-            composable(GpsRoutes.PLANNING) { PlanningScreen(onOpenHorizons = { navController.navigate(GpsRoutes.HORIZONS) }, onOpenReview = { navController.navigate(GpsRoutes.REVIEW) }) }
+            composable(GpsRoutes.PLANNING) { PlanningScreen(onOpenHorizons = { navController.navigate(GpsRoutes.HORIZONS) }, onOpenReview = { navController.navigate(GpsRoutes.REVIEW) }, onOpenFinance = { navController.navigate(GpsRoutes.FINANCE) }) }
             composable(GpsRoutes.HORIZONS) { HorizonsScreen() }
             composable(GpsRoutes.REVIEW) { WeeklyReviewScreen() }
+            composable(GpsRoutes.FINANCE) { FinanceScreen() }
             composable(GpsRoutes.AVAILABILITY) { AvailabilityScreen() }
             composable(GpsRoutes.EVENTS) { EventsListScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }) }
             composable(GpsRoutes.TASKS) { TasksListScreen({ navController.navigate(GpsRoutes.taskEditor()) }, { navController.navigate(GpsRoutes.taskEditor(it)) }) }

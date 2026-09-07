@@ -10,16 +10,8 @@ import com.gpsdavida.app.data.RoomMilestoneRepository
 import com.gpsdavida.app.data.RoomProjectRepository
 import com.gpsdavida.app.data.RoomRoutineRepository
 import com.gpsdavida.app.data.RoomTaskRepository
-import com.gpsdavida.app.domain.port.ActivityExecutionRepository
-import com.gpsdavida.app.domain.port.AvailabilityRepository
-import com.gpsdavida.app.domain.port.EventRepository
-import com.gpsdavida.app.domain.port.GoalRepository
-import com.gpsdavida.app.domain.port.HabitRepository
-import com.gpsdavida.app.domain.port.InboxRepository
-import com.gpsdavida.app.domain.port.MilestoneRepository
-import com.gpsdavida.app.domain.port.ProjectRepository
-import com.gpsdavida.app.domain.port.RoutineRepository
-import com.gpsdavida.app.domain.port.TaskRepository
+import com.gpsdavida.app.data.RoomFinanceRepository
+import com.gpsdavida.app.domain.port.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -39,4 +31,5 @@ abstract class RepositoryModule {
     @Binds @Singleton abstract fun bindProjectRepository(impl: RoomProjectRepository): ProjectRepository
     @Binds @Singleton abstract fun bindInboxRepository(impl: RoomInboxRepository): InboxRepository
     @Binds @Singleton abstract fun bindMilestoneRepository(impl: RoomMilestoneRepository): MilestoneRepository
+    @Binds @Singleton abstract fun bindFinanceRepository(impl: RoomFinanceRepository): FinanceRepository
 }
