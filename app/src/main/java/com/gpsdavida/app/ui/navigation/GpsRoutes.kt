@@ -8,6 +8,7 @@ object GpsRoutes {
     const val PLANNING = "planning"
     const val HORIZONS = "horizons"
     const val REVIEW = "review"
+    const val FINANCE = "finance"
     const val EVENTS = "events"
     const val TASKS = "tasks"
     const val HABITS = "habits"
