@@ -16,14 +16,9 @@ import java.time.Instant
 import java.time.LocalTime
 import javax.inject.Inject
 
-/**
- * Chooses the best executable activity without knowing where it came from.
- */
+/** Chooses the best executable activity without knowing where it came from. */
 class ChooseNextActivity @Inject constructor() {
-    operator fun invoke(
-        activities: List<ActivityInstance>,
-        now: Instant,
-    ): ActivityInstance? = invoke(
+    operator fun invoke(activities: List<ActivityInstance>, now: Instant): ActivityInstance? = invoke(
         activities = activities,
         context = NextActionContext(now = now),
     ).recommended
@@ -44,8 +39,7 @@ class ChooseNextActivity @Inject constructor() {
             .filter { it.planned.start <= context.now && context.now < it.planned.end }
             .minWithOrNull(currentComparator)
 
-        val executable = baseExecutable
-            .filter { travelAndBufferFitBeforeStart(it, current, context) }
+        val executable = baseExecutable.filter { travelAndBufferFitBeforeStart(it, current, context) }
 
         val next = executable
             .asSequence()
@@ -57,13 +51,14 @@ class ChooseNextActivity @Inject constructor() {
             current = current,
             next = next,
             travelDurationToNext = travelDurationTo(next, current, context),
-            currentReasons = current?.let { reasonsFor(it, context, isCurrent = true) }.orEmpty(),
-            nextReasons = next?.let { reasonsFor(it, context, isCurrent = false) }.orEmpty(),
+            currentReasons = current?.let { reasonsFor(it, activities, context, true) }.orEmpty(),
+            nextReasons = next?.let { reasonsFor(it, activities, context, false) }.orEmpty(),
         )
     }
 
     private fun reasonsFor(
         activity: ActivityInstance,
+        activities: List<ActivityInstance>,
         context: NextActionContext,
         isCurrent: Boolean,
     ): List<NextActionReason> = buildList {
@@ -77,7 +72,7 @@ class ChooseNextActivity @Inject constructor() {
         if (activity.energy == null || context.currentEnergy == null || activity.energy == context.currentEnergy) {
             add(NextActionReason.ENERGY_MATCH)
         }
-        if (dependenciesSatisfied(activity, listOf(activity), emptyList())) {
+        if (dependenciesSatisfied(activity, activities, context.dependencies)) {
             add(NextActionReason.DEPENDENCIES_SATISFIED)
         }
         if (activity.flexibility != Flexibility.FIXED) add(NextActionReason.FLEXIBLE_SLOT)
@@ -86,52 +81,29 @@ class ChooseNextActivity @Inject constructor() {
         }
     }
 
-    private fun matchesContext(
-        activity: ActivityInstance,
-        currentContext: ExecutionContext?,
-    ): Boolean {
-        if (currentContext == null || activity.contexts.isEmpty()) return true
-        return currentContext in activity.contexts
-    }
+    private fun matchesContext(activity: ActivityInstance, currentContext: ExecutionContext?): Boolean =
+        currentContext == null || activity.contexts.isEmpty() || currentContext in activity.contexts
 
-    private fun isAvailable(
-        activity: ActivityInstance,
-        context: NextActionContext,
-    ): Boolean {
+    private fun isAvailable(activity: ActivityInstance, context: NextActionContext): Boolean {
         if (context.availability.isEmpty()) return true
-
         val start = activity.planned.start.atZone(context.zoneId)
         val end = activity.planned.end.atZone(context.zoneId)
         if (start.toLocalDate() != end.toLocalDate()) return false
-
         val dayRules = context.availability.filter { it.dayOfWeek == start.dayOfWeek }
         if (dayRules.isEmpty()) return true
-
-        val blocked = dayRules
-            .filter { it.kind == AvailabilityKind.BLOCKED }
-            .any { rangesOverlap(start.toLocalTime(), end.toLocalTime(), it.window.start, it.window.end) }
-        if (blocked) return false
-
-        val freeWindows = dayRules
-            .filter { it.kind == AvailabilityKind.FREE }
-            .map { it.window }
-
-        return freeWindows.isEmpty() || freeWindows.any {
-            it.start <= start.toLocalTime() && end.toLocalTime() <= it.end
-        }
+        if (dayRules.filter { it.kind == AvailabilityKind.BLOCKED }
+                .any { rangesOverlap(start.toLocalTime(), end.toLocalTime(), it.window.start, it.window.end) }) return false
+        val freeWindows = dayRules.filter { it.kind == AvailabilityKind.FREE }.map { it.window }
+        return freeWindows.isEmpty() || freeWindows.any { it.start <= start.toLocalTime() && end.toLocalTime() <= it.end }
     }
 
     private fun dependenciesSatisfied(
         activity: ActivityInstance,
         activities: List<ActivityInstance>,
         dependencies: List<Dependency>,
-    ): Boolean = dependencies
-        .filter { it.successor == activity.source }
-        .all { dependency ->
-            activities.any {
-                it.source == dependency.predecessor && it.status == ActivityStatus.DONE
-            }
-        }
+    ): Boolean = dependencies.filter { it.successor == activity.source }.all { dependency ->
+        activities.any { it.source == dependency.predecessor && it.status == ActivityStatus.DONE }
+    }
 
     private fun travelAndBufferFitBeforeStart(
         activity: ActivityInstance,
@@ -139,11 +111,10 @@ class ChooseNextActivity @Inject constructor() {
         context: NextActionContext,
     ): Boolean {
         if (activity.id == current?.id || activity.planned.start <= context.now) return true
-
         val departure = current?.planned?.end ?: context.now
-        val travel = travelDurationTo(activity, current, context)
-        val buffer = current?.bufferAfter ?: context.defaultBuffer
-        return departure.plus(travel).plus(buffer) <= activity.planned.start
+        return departure
+            .plus(travelDurationTo(activity, current, context))
+            .plus(current?.bufferAfter ?: context.defaultBuffer) <= activity.planned.start
     }
 
     private fun travelDurationTo(
@@ -154,41 +125,25 @@ class ChooseNextActivity @Inject constructor() {
         val targetLocation = target?.location?.id ?: return Duration.ZERO
         val origin = current?.location?.id ?: context.currentLocation ?: return Duration.ZERO
         if (origin == targetLocation) return Duration.ZERO
-
-        return context.travelTimes
-            .firstOrNull { it.from == origin && it.to == targetLocation }
-            ?.duration
-            ?: Duration.ZERO
+        return context.travelTimes.firstOrNull { it.from == origin && it.to == targetLocation }?.duration ?: Duration.ZERO
     }
 
-    private fun rangesOverlap(
-        start: LocalTime,
-        end: LocalTime,
-        otherStart: LocalTime,
-        otherEnd: LocalTime,
-    ): Boolean = start < otherEnd && end > otherStart
+    private fun rangesOverlap(start: LocalTime, end: LocalTime, otherStart: LocalTime, otherEnd: LocalTime): Boolean =
+        start < otherEnd && end > otherStart
 
-    private val currentComparator = compareBy<ActivityInstance> { it.priority.weight }
+    private val currentComparator = compareBy<ActivityInstance> { it.priority.weight }.thenBy { it.planned.start }
+
+    private fun nextComparator(context: NextActionContext) = compareBy<ActivityInstance> { urgency(it, context.now) }
+        .thenBy { it.priority.weight }
+        .thenBy { energyPenalty(it.energy, context.currentEnergy) }
+        .thenBy { it.flexibility != Flexibility.FIXED }
         .thenBy { it.planned.start }
 
-    private fun nextComparator(context: NextActionContext) =
-        compareBy<ActivityInstance> { urgency(it, context.now) }
-            .thenBy { it.priority.weight }
-            .thenBy { energyPenalty(it.energy, context.currentEnergy) }
-            .thenBy { it.flexibility != Flexibility.FIXED }
-            .thenBy { it.planned.start }
-
-    private fun urgency(activity: ActivityInstance, now: Instant): Int =
-        if (activity.planned.start <= now) 0 else 1
+    private fun urgency(activity: ActivityInstance, now: Instant): Int = if (activity.planned.start <= now) 0 else 1
 
     private fun energyPenalty(activityEnergy: Energy?, currentEnergy: Energy?): Int {
         if (currentEnergy == null || activityEnergy == null) return 0
-
-        val distance = mapOf(
-            Energy.LOW to 0,
-            Energy.MEDIUM to 1,
-            Energy.HIGH to 2,
-        )
+        val distance = mapOf(Energy.LOW to 0, Energy.MEDIUM to 1, Energy.HIGH to 2)
         return kotlin.math.abs(distance.getValue(activityEnergy) - distance.getValue(currentEnergy))
     }
 }
