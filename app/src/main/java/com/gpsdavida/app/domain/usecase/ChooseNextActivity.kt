@@ -40,9 +40,7 @@ class ChooseNextActivity @Inject constructor() {
             .minWithOrNull(currentComparator)
 
         val executable = baseExecutable.filter { travelAndBufferFitBeforeStart(it, current, context) }
-
-        val next = executable
-            .asSequence()
+        val next = executable.asSequence()
             .filter { it.id != current?.id }
             .sortedWith(nextComparator(context))
             .firstOrNull()
@@ -107,8 +105,7 @@ class ChooseNextActivity @Inject constructor() {
         return context.travelTimes.firstOrNull { it.from == origin && it.to == targetLocation }?.duration ?: Duration.ZERO
     }
 
-    private fun rangesOverlap(start: LocalTime, end: LocalTime, otherStart: LocalTime, otherEnd: LocalTime): Boolean =
-        start < otherEnd && end > otherStart
+    private fun rangesOverlap(start: LocalTime, end: LocalTime, otherStart: LocalTime, otherEnd: LocalTime): Boolean = start < otherEnd && end > otherStart
 
     private val currentComparator = compareBy<ActivityInstance> { it.priority.weight }.thenBy { it.planned.start }
 
