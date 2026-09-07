@@ -28,8 +28,8 @@ import com.gpsdavida.app.domain.model.WeeklyDaySummary
 import com.gpsdavida.app.ui.theme.GpsDaVidaColors
 import com.gpsdavida.app.ui.theme.SuperPlannerCard
 import com.gpsdavida.app.ui.theme.SuperPlannerMetadata
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 
 @Composable
@@ -38,8 +38,8 @@ fun WeekScreen(
     viewModel: WeekViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val startDate by viewModel.selectedStartDate.collectAsStateWithLifecycle()
     val formatter = DateTimeFormatter.ofPattern("d MMM", Locale("pt", "BR"))
+    val currentWeekStart = LocalDate.now().with(java.time.DayOfWeek.MONDAY)
 
     Column(
         modifier = Modifier
@@ -69,13 +69,11 @@ fun WeekScreen(
             }
         }
 
-        if (!state.startDate.isEqual(startDate)) {
+        if (state.startDate != currentWeekStart) {
             TextButton(onClick = viewModel::currentWeek) { Text("Voltar para esta semana") }
         }
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(state.days, key = { it.date.toString() }) { day ->
                 WeeklyDayCard(day = day, onOpenDay = onOpenDay)
             }
