@@ -1,7 +1,6 @@
 package com.gpsdavida.app.ui.contexto
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -47,7 +47,14 @@ fun LifeAreaScreen(viewModel: LifeAreaViewModel = hiltViewModel()) {
     Scaffold(topBar = { TopAppBar(title = { Text("Áreas da vida") }) }, floatingActionButton = { FloatingActionButton({ add = true }) { Icon(Icons.Filled.Add, "Adicionar área") } }) { padding ->
         LazyColumn(Modifier.padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(areas, key = { it.id }) { area ->
-                Card(Modifier.fillMaxWidth()) { Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(area.name); TextButton({ viewModel.delete(area.id) }) { Text("Excluir") } } }
+                val visual = lifeAreaVisual(area.name)
+                Card(Modifier.fillMaxWidth()) {
+                    Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Icon(visual.icon, contentDescription = area.name, tint = visual.accent)
+                        Text(area.name, modifier = Modifier.weight(1f))
+                        TextButton({ viewModel.delete(area.id) }) { Text("Excluir") }
+                    }
+                }
             }
         }
     }
