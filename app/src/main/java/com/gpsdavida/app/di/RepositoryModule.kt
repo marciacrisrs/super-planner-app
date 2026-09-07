@@ -3,13 +3,19 @@ package com.gpsdavida.app.di
 import com.gpsdavida.app.data.RoomActivityExecutionRepository
 import com.gpsdavida.app.data.RoomAvailabilityRepository
 import com.gpsdavida.app.data.RoomEventRepository
+import com.gpsdavida.app.data.RoomGoalRepository
 import com.gpsdavida.app.data.RoomHabitRepository
+import com.gpsdavida.app.data.RoomInboxRepository
+import com.gpsdavida.app.data.RoomProjectRepository
 import com.gpsdavida.app.data.RoomRoutineRepository
 import com.gpsdavida.app.data.RoomTaskRepository
 import com.gpsdavida.app.domain.port.ActivityExecutionRepository
 import com.gpsdavida.app.domain.port.AvailabilityRepository
 import com.gpsdavida.app.domain.port.EventRepository
+import com.gpsdavida.app.domain.port.GoalRepository
 import com.gpsdavida.app.domain.port.HabitRepository
+import com.gpsdavida.app.domain.port.InboxRepository
+import com.gpsdavida.app.domain.port.ProjectRepository
 import com.gpsdavida.app.domain.port.RoutineRepository
 import com.gpsdavida.app.domain.port.TaskRepository
 import dagger.Binds
@@ -27,4 +33,7 @@ abstract class RepositoryModule {
     @Binds @Singleton abstract fun bindHabitRepository(impl: RoomHabitRepository): HabitRepository
     @Binds @Singleton abstract fun bindRoutineRepository(impl: RoomRoutineRepository): RoutineRepository
     @Binds @Singleton abstract fun bindAvailabilityRepository(impl: RoomAvailabilityRepository): AvailabilityRepository
+    @Binds @Singleton abstract fun bindGoalRepository(impl: RoomGoalRepository): GoalRepository
+    @Binds @Singleton abstract fun bindProjectRepository(impl: RoomProjectRepository): ProjectRepository
+    @Binds @Singleton abstract fun bindInboxRepository(impl: RoomInboxRepository): InboxRepository
 }
