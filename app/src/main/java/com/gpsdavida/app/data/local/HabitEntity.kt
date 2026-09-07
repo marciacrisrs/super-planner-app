@@ -12,4 +12,5 @@ data class HabitEntity(
     val windowStartMinute: Int?,
     val windowEndMinute: Int?,
     val priority: String,
+    val goalId: String?,
 )
