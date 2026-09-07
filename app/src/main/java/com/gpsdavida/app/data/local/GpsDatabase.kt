@@ -14,7 +14,7 @@ import androidx.room.RoomDatabase
         PlanEntity::class, PlanItemEntity::class,
         LeisureItemEntity::class, ReadingGoalEntity::class, ContextNoteEntity::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = false,
 )
 abstract class GpsDatabase : RoomDatabase() {
