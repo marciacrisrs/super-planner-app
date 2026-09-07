@@ -32,6 +32,8 @@ class PlanImportViewModel @Inject constructor(
         }
     }
 
+    fun cancel() { _state.value = State() }
+
     fun confirm(planId: String) {
         val proposal = _state.value.proposal ?: return
         viewModelScope.launch {
