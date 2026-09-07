@@ -4,6 +4,7 @@ import com.gpsdavida.app.domain.model.ActivityInstance
 import com.gpsdavida.app.domain.model.ActivityStatus
 import com.gpsdavida.app.domain.model.DailyActivity
 import com.gpsdavida.app.domain.model.NextActionDecision
+import com.gpsdavida.app.domain.model.NextActionReason
 import com.gpsdavida.app.domain.model.Priority
 import com.gpsdavida.app.ui.next.NextActionState
 import java.time.Instant
@@ -28,6 +29,7 @@ data class AgoraUiState(
     val laterUpcoming: List<AgoraUpcomingItem> = emptyList(),
     val state: NextActionState = NextActionState.Empty,
     val currentActivity: ActivityInstance? = null,
+    val reasons: List<NextActionReason> = emptyList(),
 )
 
 object AgoraUiMapper {
@@ -44,9 +46,7 @@ object AgoraUiMapper {
         )
         if (recommended == null || recommended.status != ActivityStatus.PENDING) {
             val hasPending = activities.any { it.instance.status == ActivityStatus.PENDING }
-            return base.copy(
-                state = if (hasPending) NextActionState.Empty else NextActionState.Completed,
-            )
+            return base.copy(state = if (hasPending) NextActionState.Empty else NextActionState.Completed)
         }
 
         val current = activities.first { it.instance.id == recommended.id }
@@ -61,6 +61,7 @@ object AgoraUiMapper {
             laterUpcoming = laterUpcoming,
             state = NextActionState.Ready,
             currentActivity = recommended,
+            reasons = decision.recommendedReasons,
         )
     }
 
@@ -70,10 +71,7 @@ object AgoraUiMapper {
         next: ActivityInstance?,
         zoneId: ZoneId,
     ): Pair<AgoraUpcomingItem?, List<AgoraUpcomingItem>> {
-        val pending = activities
-            .filter { it.instance.status == ActivityStatus.PENDING }
-            .sortedBy { it.instance.planned.start }
-
+        val pending = activities.filter { it.instance.status == ActivityStatus.PENDING }.sortedBy { it.instance.planned.start }
         val excluded = mutableSetOf(recommended.id)
         val nextUpcoming = next
             ?.takeIf { it.status == ActivityStatus.PENDING && it.id != recommended.id }
@@ -81,12 +79,7 @@ object AgoraUiMapper {
                 excluded.add(instance.id)
                 pending.first { it.instance.id == instance.id }.toUpcoming(zoneId)
             }
-
-        val laterUpcoming = pending
-            .filter { it.instance.id !in excluded }
-            .take(3)
-            .map { it.toUpcoming(zoneId) }
-
+        val laterUpcoming = pending.filter { it.instance.id !in excluded }.take(3).map { it.toUpcoming(zoneId) }
         return nextUpcoming to laterUpcoming
     }
 

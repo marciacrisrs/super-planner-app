@@ -52,27 +52,17 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(28.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Text(greeting, style = androidx.compose.material3.MaterialTheme.typography.headlineSmall, color = GpsDaVidaColors.Ink)
             Text(
-                text = greeting,
-                style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
-                color = GpsDaVidaColors.Ink,
-            )
-            Text(
-                text = state.currentDate.format(dateFormatter).replaceFirstChar { it.uppercase() },
+                state.currentDate.format(dateFormatter).replaceFirstChar { it.uppercase() },
                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                 color = GpsDaVidaColors.InkSoft,
             )
         }
 
         SuperPlannerCard(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
-            ) {
-                SuperPlannerSectionHeader(
-                    title = "Agora",
-                    supportingText = state.currentTime.format(timeFormatter),
-                )
+            Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                SuperPlannerSectionHeader(title = "Agora", supportingText = state.currentTime.format(timeFormatter))
                 NextActionCard(
                     modifier = Modifier.fillMaxWidth(),
                     model = NextActionUiModel(
@@ -80,6 +70,20 @@ fun HomeScreen(
                         durationMinutes = state.durationMinutes,
                         scheduledTime = state.scheduledTime,
                         priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
+                        reasonLabels = state.reasons.map { reason ->
+                            when (reason) {
+                                com.gpsdavida.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
+                                com.gpsdavida.app.domain.model.NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
+                                com.gpsdavida.app.domain.model.NextActionReason.HIGHER_PRIORITY -> stringResource(R.string.reason_higher_priority)
+                                com.gpsdavida.app.domain.model.NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
+                                com.gpsdavida.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
+                                com.gpsdavida.app.domain.model.NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
+                                com.gpsdavida.app.domain.model.NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
+                                com.gpsdavida.app.domain.model.NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
+                                com.gpsdavida.app.domain.model.NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
+                                com.gpsdavida.app.domain.model.NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
+                            }
+                        },
                         state = state.state,
                     ),
                     oneTapComplete = true,
@@ -92,33 +96,16 @@ fun HomeScreen(
 
         val timeline = buildList {
             state.nextUpcoming?.let {
-                add(
-                    SuperPlannerTimelineItem(
-                        time = it.scheduledTime.format(timeFormatter),
-                        title = it.title,
-                        supportingText = "${it.durationMinutes} min",
-                        state = SuperPlannerTimelineState.UPCOMING,
-                    ),
-                )
+                add(SuperPlannerTimelineItem(it.scheduledTime.format(timeFormatter), it.title, "${it.durationMinutes} min", SuperPlannerTimelineState.UPCOMING))
             }
             state.laterUpcoming.forEach {
-                add(
-                    SuperPlannerTimelineItem(
-                        time = it.scheduledTime.format(timeFormatter),
-                        title = it.title,
-                        supportingText = "${it.durationMinutes} min",
-                        state = SuperPlannerTimelineState.UPCOMING,
-                    ),
-                )
+                add(SuperPlannerTimelineItem(it.scheduledTime.format(timeFormatter), it.title, "${it.durationMinutes} min", SuperPlannerTimelineState.UPCOMING))
             }
         }
 
         if (timeline.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                SuperPlannerSectionHeader(
-                    title = "Depois",
-                    supportingText = "O que vem a seguir",
-                )
+                SuperPlannerSectionHeader(title = "Depois", supportingText = "O que vem a seguir")
                 SuperPlannerTimeline(items = timeline)
             }
         }
