@@ -32,6 +32,8 @@ import com.gpsdavida.app.ui.events.EventsListScreen
 import com.gpsdavida.app.ui.habits.HabitFormScreen
 import com.gpsdavida.app.ui.habits.HabitsListScreen
 import com.gpsdavida.app.ui.home.HomeScreen
+import com.gpsdavida.app.ui.horizontes.HorizonsScreen
+import com.gpsdavida.app.ui.horizontes.WeeklyReviewScreen
 import com.gpsdavida.app.ui.meudia.MeuDiaScreen
 import com.gpsdavida.app.ui.planejamento.PlanningScreen
 import com.gpsdavida.app.ui.routines.RoutineFormScreen
@@ -47,56 +49,37 @@ fun GpsNavHost() {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
-    val showBar = currentRoute in setOf(
-        GpsRoutes.AGORA, GpsRoutes.MEU_DIA, GpsRoutes.EVENTS,
-        GpsRoutes.TASKS, GpsRoutes.HABITS, GpsRoutes.ROUTINES, GpsRoutes.PLANNING,
-    )
-
-    Scaffold(
-        bottomBar = {
-            if (showBar) {
-                NavigationBar {
-                    NavigationBarItem(currentRoute == GpsRoutes.AGORA, { navController.navigateToTab(GpsRoutes.AGORA) }, { Icon(Icons.Filled.Home, null) }, label = { Text(stringResource(R.string.nav_agora)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.MEU_DIA, { navController.navigateToTab(GpsRoutes.MEU_DIA) }, { Icon(Icons.Filled.DateRange, null) }, label = { Text(stringResource(R.string.nav_meu_dia)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.PLANNING, { navController.navigateToTab(GpsRoutes.PLANNING) }, { Icon(Icons.Filled.Tune, null) }, label = { Text("Planejar") })
-                    NavigationBarItem(currentRoute == GpsRoutes.EVENTS, { navController.navigateToTab(GpsRoutes.EVENTS) }, { Icon(Icons.Filled.List, null) }, label = { Text(stringResource(R.string.nav_eventos)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.TASKS, { navController.navigateToTab(GpsRoutes.TASKS) }, { Icon(Icons.Filled.Check, null) }, label = { Text(stringResource(R.string.nav_tarefas)) })
-                }
-            }
-        },
-    ) { padding ->
+    val showBar = currentRoute in setOf(GpsRoutes.AGORA, GpsRoutes.MEU_DIA, GpsRoutes.PLANNING, GpsRoutes.EVENTS, GpsRoutes.TASKS)
+    Scaffold(bottomBar = {
+        if (showBar) NavigationBar {
+            NavigationBarItem(currentRoute == GpsRoutes.AGORA, { navController.navigateToTab(GpsRoutes.AGORA) }, { Icon(Icons.Filled.Home, null) }, label = { Text(stringResource(R.string.nav_agora)) })
+            NavigationBarItem(currentRoute == GpsRoutes.MEU_DIA, { navController.navigateToTab(GpsRoutes.MEU_DIA) }, { Icon(Icons.Filled.DateRange, null) }, label = { Text(stringResource(R.string.nav_meu_dia)) })
+            NavigationBarItem(currentRoute == GpsRoutes.PLANNING, { navController.navigateToTab(GpsRoutes.PLANNING) }, { Icon(Icons.Filled.Tune, null) }, label = { Text("Planejar") })
+            NavigationBarItem(currentRoute == GpsRoutes.EVENTS, { navController.navigateToTab(GpsRoutes.EVENTS) }, { Icon(Icons.Filled.List, null) }, label = { Text(stringResource(R.string.nav_eventos)) })
+            NavigationBarItem(currentRoute == GpsRoutes.TASKS, { navController.navigateToTab(GpsRoutes.TASKS) }, { Icon(Icons.Filled.Check, null) }, label = { Text(stringResource(R.string.nav_tarefas)) })
+        }
+    }) { padding ->
         NavHost(navController, GpsRoutes.AGORA, Modifier.padding(padding)) {
             composable(GpsRoutes.AGORA) { HomeScreen() }
-            composable(GpsRoutes.MEU_DIA) {
-                MeuDiaScreen(
-                    onAddEvent = { navController.navigate(GpsRoutes.eventEditor()) },
-                    onOpenEvent = { id -> navController.navigate(GpsRoutes.eventEditor(id)) },
-                    onOpenTask = { id -> navController.navigate(GpsRoutes.taskEditor(id)) },
-                    onOpenHabit = { id -> navController.navigate(GpsRoutes.habitEditor(id)) },
-                    onOpenAvailability = { navController.navigate(GpsRoutes.AVAILABILITY) },
-                    onOpenWeek = { navController.navigate(GpsRoutes.WEEK) },
-                )
-            }
-            composable(GpsRoutes.WEEK) { WeekScreen(onOpenDay = { date -> navController.navigate(GpsRoutes.weekDay(date)) }) }
-            composable(GpsRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry -> WeekDayScreen(date = LocalDate.parse(entry.arguments?.getString("date"))) }
+            composable(GpsRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }, { navController.navigate(GpsRoutes.taskEditor(it)) }, { navController.navigate(GpsRoutes.habitEditor(it)) }, { navController.navigate(GpsRoutes.AVAILABILITY) }, { navController.navigate(GpsRoutes.WEEK) }) }
+            composable(GpsRoutes.WEEK) { WeekScreen { date -> navController.navigate(GpsRoutes.weekDay(date)) } }
+            composable(GpsRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry -> WeekDayScreen(LocalDate.parse(entry.arguments?.getString("date"))) }
             composable(GpsRoutes.PLANNING) { PlanningScreen() }
+            composable(GpsRoutes.HORIZONS) { HorizonsScreen() }
+            composable(GpsRoutes.REVIEW) { WeeklyReviewScreen() }
             composable(GpsRoutes.AVAILABILITY) { AvailabilityScreen() }
             composable(GpsRoutes.EVENTS) { EventsListScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }) }
             composable(GpsRoutes.TASKS) { TasksListScreen({ navController.navigate(GpsRoutes.taskEditor()) }, { navController.navigate(GpsRoutes.taskEditor(it)) }) }
             composable(GpsRoutes.HABITS) { HabitsListScreen({ navController.navigate(GpsRoutes.habitEditor()) }, { navController.navigate(GpsRoutes.habitEditor(it)) }) }
             composable(GpsRoutes.ROUTINES) { RoutinesListScreen({ navController.navigate(GpsRoutes.routineEditor()) }, { navController.navigate(GpsRoutes.routineEditor(it)) }) }
-            composable(GpsRoutes.EVENT_EDITOR, arguments = listOf(navArgument("eventId") { type = NavType.StringType })) { EventFormScreen(onDone = { navController.popBackStack() }) }
-            composable(GpsRoutes.TASK_EDITOR, arguments = listOf(navArgument("taskId") { type = NavType.StringType })) { TaskFormScreen(onDone = { navController.popBackStack() }) }
-            composable(GpsRoutes.HABIT_EDITOR, arguments = listOf(navArgument("habitId") { type = NavType.StringType })) { HabitFormScreen(onDone = { navController.popBackStack() }) }
-            composable(GpsRoutes.ROUTINE_EDITOR, arguments = listOf(navArgument("routineId") { type = NavType.StringType })) { RoutineFormScreen(onDone = { navController.popBackStack() }) }
+            composable(GpsRoutes.EVENT_EDITOR, arguments = listOf(navArgument("eventId") { type = NavType.StringType })) { EventFormScreen { navController.popBackStack() } }
+            composable(GpsRoutes.TASK_EDITOR, arguments = listOf(navArgument("taskId") { type = NavType.StringType })) { TaskFormScreen { navController.popBackStack() } }
+            composable(GpsRoutes.HABIT_EDITOR, arguments = listOf(navArgument("habitId") { type = NavType.StringType })) { HabitFormScreen { navController.popBackStack() } }
+            composable(GpsRoutes.ROUTINE_EDITOR, arguments = listOf(navArgument("routineId") { type = NavType.StringType })) { RoutineFormScreen { navController.popBackStack() } }
         }
     }
 }
 
 private fun NavHostController.navigateToTab(route: String) {
-    navigate(route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
-    }
+    navigate(route) { popUpTo(graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true }
 }
