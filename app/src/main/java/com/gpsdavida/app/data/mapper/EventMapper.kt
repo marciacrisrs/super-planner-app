@@ -4,27 +4,30 @@ import com.gpsdavida.app.data.local.EventEntity
 import com.gpsdavida.app.domain.model.Event
 import com.gpsdavida.app.domain.model.EventId
 import com.gpsdavida.app.domain.model.Priority
+import com.gpsdavida.app.domain.model.RecurrenceUnit
 import com.gpsdavida.app.domain.model.TimeRange
 import java.time.Instant
+import java.time.LocalDate
 
-fun EventEntity.toDomain(): Event =
-    Event(
-        id = EventId(id),
-        title = title,
-        range = TimeRange(
-            start = Instant.ofEpochMilli(startEpochMilli),
-            end = Instant.ofEpochMilli(endEpochMilli),
-        ),
-        recurrenceDays = recurrenceDays.toDaySet(),
-        priority = Priority.valueOf(priority),
-    )
+fun EventEntity.toDomain(): Event = Event(
+    id = EventId(id),
+    title = title,
+    range = TimeRange(Instant.ofEpochMilli(startEpochMilli), Instant.ofEpochMilli(endEpochMilli)),
+    recurrenceDays = recurrenceDays.toDaySet(),
+    recurrenceInterval = recurrenceInterval.coerceAtLeast(1),
+    recurrenceUnit = recurrenceUnit?.let { runCatching { RecurrenceUnit.valueOf(it) }.getOrNull() },
+    recurrenceEndDate = recurrenceEndEpochDay?.let(LocalDate::ofEpochDay),
+    priority = Priority.valueOf(priority),
+)
 
-fun Event.toEntity(): EventEntity =
-    EventEntity(
-        id = id.value,
-        title = title,
-        startEpochMilli = range.start.toEpochMilli(),
-        endEpochMilli = range.end.toEpochMilli(),
-        recurrenceDays = recurrenceDays.joinToString(",") { it.name },
-        priority = priority.name,
-    )
+fun Event.toEntity(): EventEntity = EventEntity(
+    id = id.value,
+    title = title,
+    startEpochMilli = range.start.toEpochMilli(),
+    endEpochMilli = range.end.toEpochMilli(),
+    recurrenceDays = recurrenceDays.joinToString(",") { it.name },
+    recurrenceInterval = recurrenceInterval,
+    recurrenceUnit = recurrenceUnit?.name,
+    recurrenceEndEpochDay = recurrenceEndDate?.toEpochDay(),
+    priority = priority.name,
+)
