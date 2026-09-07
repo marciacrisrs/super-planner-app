@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -51,12 +52,42 @@ fun GpsNavHost() {
         bottomBar = {
             if (showBar) {
                 NavigationBar {
-                    NavigationBarItem(currentRoute == GpsRoutes.AGORA, { navController.navigateToTab(GpsRoutes.AGORA) }, { Icon(Icons.Filled.Home, null) }, label = { Text(stringResource(R.string.nav_agora)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.MEU_DIA, { navController.navigateToTab(GpsRoutes.MEU_DIA) }, { Icon(Icons.Filled.DateRange, null) }, label = { Text(stringResource(R.string.nav_meu_dia)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.EVENTS, { navController.navigateToTab(GpsRoutes.EVENTS) }, { Icon(Icons.Filled.List, null) }, label = { Text(stringResource(R.string.nav_eventos)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.TASKS, { navController.navigateToTab(GpsRoutes.TASKS) }, { Icon(Icons.Filled.Check, null) }, label = { Text(stringResource(R.string.nav_tarefas)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.HABITS, { navController.navigateToTab(GpsRoutes.HABITS) }, { Icon(Icons.Filled.Favorite, null) }, label = { Text(stringResource(R.string.nav_habitos)) })
-                    NavigationBarItem(currentRoute == GpsRoutes.ROUTINES, { navController.navigateToTab(GpsRoutes.ROUTINES) }, { Icon(Icons.Filled.List, null) }, label = { Text(stringResource(R.string.nav_rotinas)) })
+                    NavigationBarItem(
+                        selected = currentRoute == GpsRoutes.AGORA,
+                        onClick = { navController.navigateToTab(GpsRoutes.AGORA) },
+                        icon = { Icon(Icons.Filled.Home, contentDescription = null) },
+                        label = { Text(stringResource(R.string.nav_agora)) },
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute == GpsRoutes.MEU_DIA,
+                        onClick = { navController.navigateToTab(GpsRoutes.MEU_DIA) },
+                        icon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
+                        label = { Text(stringResource(R.string.nav_meu_dia)) },
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute == GpsRoutes.EVENTS,
+                        onClick = { navController.navigateToTab(GpsRoutes.EVENTS) },
+                        icon = { Icon(Icons.Filled.List, contentDescription = null) },
+                        label = { Text(stringResource(R.string.nav_eventos)) },
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute == GpsRoutes.TASKS,
+                        onClick = { navController.navigateToTab(GpsRoutes.TASKS) },
+                        icon = { Icon(Icons.Filled.Check, contentDescription = null) },
+                        label = { Text(stringResource(R.string.nav_tarefas)) },
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute == GpsRoutes.HABITS,
+                        onClick = { navController.navigateToTab(GpsRoutes.HABITS) },
+                        icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+                        label = { Text(stringResource(R.string.nav_habitos)) },
+                    )
+                    NavigationBarItem(
+                        selected = currentRoute == GpsRoutes.ROUTINES,
+                        onClick = { navController.navigateToTab(GpsRoutes.ROUTINES) },
+                        icon = { Icon(Icons.Filled.List, contentDescription = null) },
+                        label = { Text(stringResource(R.string.nav_rotinas)) },
+                    )
                 }
             }
         },
