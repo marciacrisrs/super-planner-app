@@ -10,6 +10,7 @@ import com.gpsdavida.app.domain.model.ExecutionContext
 import com.gpsdavida.app.domain.model.Flexibility
 import com.gpsdavida.app.domain.model.NextActionContext
 import com.gpsdavida.app.domain.model.NextActionDecision
+import com.gpsdavida.app.domain.model.NextActionReason
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalTime
@@ -17,12 +18,8 @@ import javax.inject.Inject
 
 /**
  * Chooses the best executable activity without knowing where it came from.
- *
- * The use case deliberately stops at decision-making. Replanning and automatic
- * rescheduling belong to later slices of the GPS engine.
  */
 class ChooseNextActivity @Inject constructor() {
-    /** Backwards-compatible entry point for callers that only need a recommendation. */
     operator fun invoke(
         activities: List<ActivityInstance>,
         now: Instant,
@@ -60,7 +57,33 @@ class ChooseNextActivity @Inject constructor() {
             current = current,
             next = next,
             travelDurationToNext = travelDurationTo(next, current, context),
+            currentReasons = current?.let { reasonsFor(it, context, isCurrent = true) }.orEmpty(),
+            nextReasons = next?.let { reasonsFor(it, context, isCurrent = false) }.orEmpty(),
         )
+    }
+
+    private fun reasonsFor(
+        activity: ActivityInstance,
+        context: NextActionContext,
+        isCurrent: Boolean,
+    ): List<NextActionReason> = buildList {
+        if (isCurrent) add(NextActionReason.CURRENTLY_ACTIVE)
+        if (activity.planned.start <= context.now) add(NextActionReason.DUE_NOW)
+        if (activity.flexibility == Flexibility.FIXED) add(NextActionReason.FIXED_COMMITMENT)
+        if (isAvailable(activity, context)) add(NextActionReason.AVAILABLE_IN_WINDOW)
+        if (activity.contexts.isEmpty() || context.currentContext == null || context.currentContext in activity.contexts) {
+            add(NextActionReason.CONTEXT_MATCH)
+        }
+        if (activity.energy == null || context.currentEnergy == null || activity.energy == context.currentEnergy) {
+            add(NextActionReason.ENERGY_MATCH)
+        }
+        if (dependenciesSatisfied(activity, listOf(activity), emptyList())) {
+            add(NextActionReason.DEPENDENCIES_SATISFIED)
+        }
+        if (activity.flexibility != Flexibility.FIXED) add(NextActionReason.FLEXIBLE_SLOT)
+        if (travelDurationTo(activity, null, context).isZero() || travelAndBufferFitBeforeStart(activity, null, context)) {
+            add(NextActionReason.TRAVEL_FITS)
+        }
     }
 
     private fun matchesContext(
@@ -158,10 +181,6 @@ class ChooseNextActivity @Inject constructor() {
     private fun urgency(activity: ActivityInstance, now: Instant): Int =
         if (activity.planned.start <= now) 0 else 1
 
-    /**
-     * Energy is a preference, not a hard constraint. A mandatory activity can
-     * still win when it requires more energy than the user currently has.
-     */
     private fun energyPenalty(activityEnergy: Energy?, currentEnergy: Energy?): Int {
         if (currentEnergy == null || activityEnergy == null) return 0
 
