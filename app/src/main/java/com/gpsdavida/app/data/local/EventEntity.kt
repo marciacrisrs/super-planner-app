@@ -10,5 +10,8 @@ data class EventEntity(
     val startEpochMilli: Long,
     val endEpochMilli: Long,
     val recurrenceDays: String,
+    val recurrenceInterval: Int = 1,
+    val recurrenceUnit: String? = null,
+    val recurrenceEndEpochDay: Long? = null,
     val priority: String,
 )
