@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Tune
@@ -64,7 +63,7 @@ fun GpsNavHost() {
             composable(GpsRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }, { navController.navigate(GpsRoutes.taskEditor(it)) }, { navController.navigate(GpsRoutes.habitEditor(it)) }, { navController.navigate(GpsRoutes.AVAILABILITY) }, { navController.navigate(GpsRoutes.WEEK) }) }
             composable(GpsRoutes.WEEK) { WeekScreen { date -> navController.navigate(GpsRoutes.weekDay(date)) } }
             composable(GpsRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry -> WeekDayScreen(LocalDate.parse(entry.arguments?.getString("date"))) }
-            composable(GpsRoutes.PLANNING) { PlanningScreen() }
+            composable(GpsRoutes.PLANNING) { PlanningScreen(onOpenHorizons = { navController.navigate(GpsRoutes.HORIZONS) }, onOpenReview = { navController.navigate(GpsRoutes.REVIEW) }) }
             composable(GpsRoutes.HORIZONS) { HorizonsScreen() }
             composable(GpsRoutes.REVIEW) { WeeklyReviewScreen() }
             composable(GpsRoutes.AVAILABILITY) { AvailabilityScreen() }
