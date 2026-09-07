@@ -5,7 +5,7 @@ Data: 2026-09-07
 
 ## Decisão
 
-O Super Planner usa quatro conceitos distintos:
+O **Super Planner** usa quatro conceitos distintos:
 
 | Conceito | Responsabilidade |
 |---|---|
