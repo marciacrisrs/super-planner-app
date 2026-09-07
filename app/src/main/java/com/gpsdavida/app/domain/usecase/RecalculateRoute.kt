@@ -1,9 +1,11 @@
 package com.gpsdavida.app.domain.usecase
 
 import com.gpsdavida.app.domain.model.ActivityInstance
+import com.gpsdavida.app.domain.model.ActivityStatus
 import com.gpsdavida.app.domain.model.Availability
 import com.gpsdavida.app.domain.model.Dependency
 import com.gpsdavida.app.domain.model.DailySchedule
+import com.gpsdavida.app.domain.model.Flexibility
 import com.gpsdavida.app.domain.model.TravelTime
 import java.time.Duration
 import java.time.Instant
@@ -42,7 +44,7 @@ class RecalculateRoute @Inject constructor(
 
         val relevant = now?.let { current ->
             activities.map { activity ->
-                if (activity.status.name == "PENDING" && activity.planned.end <= current && activity.flexibility.name != "FIXED") {
+                if (activity.status == ActivityStatus.PENDING && activity.planned.end <= current && activity.flexibility != Flexibility.FIXED) {
                     activity.copy(planned = activity.planned.copy(start = current, end = current.plus(activity.plannedDuration)))
                 } else {
                     activity
