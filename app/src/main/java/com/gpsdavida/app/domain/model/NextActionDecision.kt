@@ -8,9 +8,14 @@ data class NextActionDecision(
     val current: ActivityInstance?,
     val next: ActivityInstance?,
     val travelDurationToNext: Duration = Duration.ZERO,
+    val currentReasons: List<NextActionReason> = emptyList(),
+    val nextReasons: List<NextActionReason> = emptyList(),
 ) {
     val recommended: ActivityInstance?
         get() = current ?: next
+
+    val recommendedReasons: List<NextActionReason>
+        get() = if (current != null) currentReasons else nextReasons
 }
 
 data class NextActionContext(
