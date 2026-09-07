@@ -24,6 +24,7 @@ fun HabitEntity.toDomain(): Habit =
             }
         },
         priority = Priority.valueOf(priority),
+        goalId = goalId?.let(::com.gpsdavida.app.domain.model.GoalId),
     )
 
 fun Habit.toEntity(): HabitEntity =
@@ -35,6 +36,7 @@ fun Habit.toEntity(): HabitEntity =
         windowStartMinute = window?.start?.toSecondOfDay()?.div(60),
         windowEndMinute = window?.end?.toSecondOfDay()?.div(60),
         priority = priority.name,
+        goalId = goalId?.value,
     )
 
 internal fun String.toDaySet(): Set<DayOfWeek> =
