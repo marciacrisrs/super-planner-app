@@ -5,6 +5,7 @@ object GpsRoutes {
     const val MEU_DIA = "meu_dia"
     const val WEEK = "week"
     const val WEEK_DAY = "week_day/{date}"
+    const val PLANNING = "planning"
     const val EVENTS = "events"
     const val TASKS = "tasks"
     const val HABITS = "habits"
