@@ -38,7 +38,7 @@ import com.gpsdavida.app.ui.horizontes.HorizonsScreen
 import com.gpsdavida.app.ui.horizontes.WeeklyReviewScreen
 import com.gpsdavida.app.ui.meudia.MeuDiaScreen
 import com.gpsdavida.app.ui.planejamento.PlanningScreen
-import com.gpsdavida.app.ui.planos.PlansScreen
+import com.gpsdavida.app.ui.planos.AdvancedPlansScreen
 import com.gpsdavida.app.ui.routines.RoutineFormScreen
 import com.gpsdavida.app.ui.routines.RoutinesListScreen
 import com.gpsdavida.app.ui.semana.WeekDayScreen
@@ -73,7 +73,7 @@ fun GpsNavHost() {
             composable(GpsRoutes.FINANCE) { FinanceScreen() }
             composable(GpsRoutes.LIFE_AREAS) { LifeAreaScreen() }
             composable(GpsRoutes.DAY_CHECKPOINT) { DailyCheckpointScreen() }
-            composable(GpsRoutes.PLANS) { PlansScreen() }
+            composable(GpsRoutes.PLANS) { AdvancedPlansScreen() }
             composable(GpsRoutes.AVAILABILITY) { AvailabilityScreen() }
             composable(GpsRoutes.EVENTS) { EventsListScreen({ navController.navigate(GpsRoutes.eventEditor()) }, { navController.navigate(GpsRoutes.eventEditor(it)) }) }
             composable(GpsRoutes.TASKS) { TasksListScreen({ navController.navigate(GpsRoutes.taskEditor()) }, { navController.navigate(GpsRoutes.taskEditor(it)) }) }
