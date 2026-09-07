@@ -9,10 +9,13 @@ import com.gpsdavida.app.domain.model.InboxItemId
 import com.gpsdavida.app.domain.model.InboxStatus
 import com.gpsdavida.app.domain.model.Project
 import com.gpsdavida.app.domain.model.ProjectId
+import com.gpsdavida.app.domain.model.ProjectStep
+import com.gpsdavida.app.domain.model.ProjectStepId
 import com.gpsdavida.app.domain.port.GoalRepository
 import com.gpsdavida.app.domain.port.InboxRepository
 import com.gpsdavida.app.domain.port.ProjectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Duration
 import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,11 +30,7 @@ class PlanningViewModel @Inject constructor(
     private val projects: ProjectRepository,
     private val inbox: InboxRepository,
 ) : ViewModel() {
-    data class State(
-        val goals: List<Goal> = emptyList(),
-        val projects: List<Project> = emptyList(),
-        val inbox: List<InboxItem> = emptyList(),
-    )
+    data class State(val goals: List<Goal> = emptyList(), val projects: List<Project> = emptyList(), val inbox: List<InboxItem> = emptyList())
 
     val state: StateFlow<State> = combine(goals.observeAll(), projects.observeAll(), inbox.observeAll()) { g, p, i -> State(g, p, i) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), State())
@@ -48,13 +47,19 @@ class PlanningViewModel @Inject constructor(
         viewModelScope.launch { projects.save(Project(ProjectId(UUID.randomUUID().toString()), title.trim(), goalId?.let(::GoalId))) }
     }
 
+    fun addProjectStep(project: Project, title: String, minutes: Long) {
+        if (title.isBlank() || minutes <= 0) return
+        viewModelScope.launch {
+            val step = ProjectStep(ProjectStepId(UUID.randomUUID().toString()), title.trim(), Duration.ofMinutes(minutes), project.steps.size)
+            projects.save(project.copy(steps = project.steps + step))
+        }
+    }
+
     fun deleteProject(id: String) = viewModelScope.launch { projects.delete(ProjectId(id)) }
 
     fun capture(text: String) {
         if (text.isBlank()) return
-        viewModelScope.launch {
-            inbox.save(InboxItem(InboxItemId(UUID.randomUUID().toString()), text.trim(), createdAt = System.currentTimeMillis()))
-        }
+        viewModelScope.launch { inbox.save(InboxItem(InboxItemId(UUID.randomUUID().toString()), text.trim(), createdAt = System.currentTimeMillis())) }
     }
 
     fun setInboxStatus(item: InboxItem, status: InboxStatus) = viewModelScope.launch { inbox.save(item.copy(status = status)) }
