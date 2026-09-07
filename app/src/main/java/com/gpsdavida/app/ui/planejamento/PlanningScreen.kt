@@ -34,7 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gpsdavida.app.domain.model.InboxStatus
 import com.gpsdavida.app.domain.model.Project
-import com.gpsdavida.app.ui.lazer.LeisureScreen
+import com.gpsdavida.app.ui.lazer.LeisureScreenV2
 import com.gpsdavida.app.ui.notas.NotesScreenV2
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +52,7 @@ fun PlanningScreen(
     var showLeisure by remember { mutableStateOf(false) }
     var showNotes by remember { mutableStateOf(false) }
     if (showBackup) { com.gpsdavida.app.ui.backup.BackupScreen(); return }
-    if (showLeisure) { LeisureScreen(); return }
+    if (showLeisure) { LeisureScreenV2(); return }
     if (showNotes) { NotesScreenV2(); return }
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -73,9 +73,7 @@ fun PlanningScreen(
                 TextButton(onClick = { showBackup = true }) { Text("Backup") }
             })
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") }
-        },
+        floatingActionButton = { FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") } },
     ) { padding ->
         Column(Modifier.padding(padding)) {
             TabRow(selectedTabIndex = tab) {
