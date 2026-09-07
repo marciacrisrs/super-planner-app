@@ -96,7 +96,6 @@ class ObserveWeeklyPlanning @Inject constructor(
                     title = source.title,
                     kind = instance.kind(),
                     instance = instance,
-                    goalId = source.goalId(),
                 )
             }
             val dayExecutions = executionList.filter { execution ->
@@ -116,13 +115,6 @@ class ObserveWeeklyPlanning @Inject constructor(
             )
         }
         return WeeklyPlanning(startDate, startDate.plusDays(6), days)
-    }
-
-    private fun com.gpsdavida.app.domain.model.DailyActivity.goalId() = when (val source = instance.source) {
-        is ActivitySource.FromEvent -> null
-        is ActivitySource.FromTask -> null
-        is ActivitySource.FromHabit -> null
-        is ActivitySource.FromRoutineStep -> null
     }
 
     private fun com.gpsdavida.app.domain.model.ActivityInstance.kind() = when (source) {
