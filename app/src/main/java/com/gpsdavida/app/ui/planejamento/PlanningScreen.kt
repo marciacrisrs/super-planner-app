@@ -46,6 +46,11 @@ fun PlanningScreen(
     onOpenPlans: () -> Unit,
     viewModel: PlanningViewModel = hiltViewModel(),
 ) {
+    var showBackup by remember { mutableStateOf(false) }
+    if (showBackup) {
+        com.gpsdavida.app.ui.backup.BackupScreen()
+        return
+    }
     val state by viewModel.state.collectAsStateWithLifecycle()
     var tab by remember { mutableIntStateOf(0) }
     var addDialog by remember { mutableStateOf<String?>(null) }
@@ -59,6 +64,7 @@ fun PlanningScreen(
                 TextButton(onClick = onOpenLifeAreas) { Text("Áreas") }
                 TextButton(onClick = onOpenDayCheckpoint) { Text("Hoje") }
                 TextButton(onClick = onOpenPlans) { Text("Planos") }
+                TextButton(onClick = { showBackup = true }) { Text("Backup") }
             })
         },
         floatingActionButton = {
