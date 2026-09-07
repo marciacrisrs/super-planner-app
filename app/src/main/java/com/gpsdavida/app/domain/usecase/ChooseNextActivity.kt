@@ -66,19 +66,11 @@ class ChooseNextActivity @Inject constructor() {
         if (activity.planned.start <= context.now) add(NextActionReason.DUE_NOW)
         if (activity.flexibility == Flexibility.FIXED) add(NextActionReason.FIXED_COMMITMENT)
         if (isAvailable(activity, context)) add(NextActionReason.AVAILABLE_IN_WINDOW)
-        if (activity.contexts.isEmpty() || context.currentContext == null || context.currentContext in activity.contexts) {
-            add(NextActionReason.CONTEXT_MATCH)
-        }
-        if (activity.energy == null || context.currentEnergy == null || activity.energy == context.currentEnergy) {
-            add(NextActionReason.ENERGY_MATCH)
-        }
-        if (dependenciesSatisfied(activity, activities, context.dependencies)) {
-            add(NextActionReason.DEPENDENCIES_SATISFIED)
-        }
+        if (activity.contexts.isEmpty() || context.currentContext == null || context.currentContext in activity.contexts) add(NextActionReason.CONTEXT_MATCH)
+        if (activity.energy == null || context.currentEnergy == null || activity.energy == context.currentEnergy) add(NextActionReason.ENERGY_MATCH)
+        if (dependenciesSatisfied(activity, activities, context.dependencies)) add(NextActionReason.DEPENDENCIES_SATISFIED)
         if (activity.flexibility != Flexibility.FIXED) add(NextActionReason.FLEXIBLE_SLOT)
-        if (travelDurationTo(activity, null, context).isZero() || travelAndBufferFitBeforeStart(activity, null, context)) {
-            add(NextActionReason.TRAVEL_FITS)
-        }
+        if (travelDurationTo(activity, null, context).isZero() || travelAndBufferFitBeforeStart(activity, null, context)) add(NextActionReason.TRAVEL_FITS)
     }
 
     private fun matchesContext(activity: ActivityInstance, currentContext: ExecutionContext?): Boolean =
@@ -97,31 +89,18 @@ class ChooseNextActivity @Inject constructor() {
         return freeWindows.isEmpty() || freeWindows.any { it.start <= start.toLocalTime() && end.toLocalTime() <= it.end }
     }
 
-    private fun dependenciesSatisfied(
-        activity: ActivityInstance,
-        activities: List<ActivityInstance>,
-        dependencies: List<Dependency>,
-    ): Boolean = dependencies.filter { it.successor == activity.source }.all { dependency ->
-        activities.any { it.source == dependency.predecessor && it.status == ActivityStatus.DONE }
-    }
+    private fun dependenciesSatisfied(activity: ActivityInstance, activities: List<ActivityInstance>, dependencies: List<Dependency>): Boolean =
+        dependencies.filter { it.successor == activity.source }.all { dependency ->
+            activities.any { it.source == dependency.predecessor && it.status == ActivityStatus.DONE }
+        }
 
-    private fun travelAndBufferFitBeforeStart(
-        activity: ActivityInstance,
-        current: ActivityInstance?,
-        context: NextActionContext,
-    ): Boolean {
+    private fun travelAndBufferFitBeforeStart(activity: ActivityInstance, current: ActivityInstance?, context: NextActionContext): Boolean {
         if (activity.id == current?.id || activity.planned.start <= context.now) return true
         val departure = current?.planned?.end ?: context.now
-        return departure
-            .plus(travelDurationTo(activity, current, context))
-            .plus(current?.bufferAfter ?: context.defaultBuffer) <= activity.planned.start
+        return departure.plus(travelDurationTo(activity, current, context)).plus(current?.bufferAfter ?: context.defaultBuffer) <= activity.planned.start
     }
 
-    private fun travelDurationTo(
-        target: ActivityInstance?,
-        current: ActivityInstance?,
-        context: NextActionContext,
-    ): Duration {
+    private fun travelDurationTo(target: ActivityInstance?, current: ActivityInstance?, context: NextActionContext): Duration {
         val targetLocation = target?.location?.id ?: return Duration.ZERO
         val origin = current?.location?.id ?: context.currentLocation ?: return Duration.ZERO
         if (origin == targetLocation) return Duration.ZERO
