@@ -1,16 +1,6 @@
 package com.gpsdavida.app.di
 
-import com.gpsdavida.app.data.RoomActivityExecutionRepository
-import com.gpsdavida.app.data.RoomAvailabilityRepository
-import com.gpsdavida.app.data.RoomEventRepository
-import com.gpsdavida.app.data.RoomGoalRepository
-import com.gpsdavida.app.data.RoomHabitRepository
-import com.gpsdavida.app.data.RoomInboxRepository
-import com.gpsdavida.app.data.RoomMilestoneRepository
-import com.gpsdavida.app.data.RoomProjectRepository
-import com.gpsdavida.app.data.RoomRoutineRepository
-import com.gpsdavida.app.data.RoomTaskRepository
-import com.gpsdavida.app.data.RoomFinanceRepository
+import com.gpsdavida.app.data.*
 import com.gpsdavida.app.domain.port.*
 import dagger.Binds
 import dagger.Module
@@ -32,4 +22,5 @@ abstract class RepositoryModule {
     @Binds @Singleton abstract fun bindInboxRepository(impl: RoomInboxRepository): InboxRepository
     @Binds @Singleton abstract fun bindMilestoneRepository(impl: RoomMilestoneRepository): MilestoneRepository
     @Binds @Singleton abstract fun bindFinanceRepository(impl: RoomFinanceRepository): FinanceRepository
+    @Binds @Singleton abstract fun bindLifeAreaRepository(impl: RoomLifeAreaRepository): LifeAreaRepository
 }
