@@ -15,7 +15,6 @@ data class WeeklyActivity(
     val title: String,
     val kind: WeeklyActivityKind,
     val instance: ActivityInstance,
-    val goalId: GoalId? = null,
 )
 
 data class WeeklyDaySummary(
