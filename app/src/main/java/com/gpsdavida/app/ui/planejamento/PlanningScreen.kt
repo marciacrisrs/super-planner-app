@@ -34,6 +34,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gpsdavida.app.domain.model.InboxStatus
 import com.gpsdavida.app.domain.model.Project
+import com.gpsdavida.app.ui.lazer.LeisureScreen
+import com.gpsdavida.app.ui.notas.NotesScreenV2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,10 +49,12 @@ fun PlanningScreen(
     viewModel: PlanningViewModel = hiltViewModel(),
 ) {
     var showBackup by remember { mutableStateOf(false) }
-    if (showBackup) {
-        com.gpsdavida.app.ui.backup.BackupScreen()
-        return
-    }
+    var showLeisure by remember { mutableStateOf(false) }
+    var showNotes by remember { mutableStateOf(false) }
+    if (showBackup) { com.gpsdavida.app.ui.backup.BackupScreen(); return }
+    if (showLeisure) { LeisureScreen(); return }
+    if (showNotes) { NotesScreenV2(); return }
+
     val state by viewModel.state.collectAsStateWithLifecycle()
     var tab by remember { mutableIntStateOf(0) }
     var addDialog by remember { mutableStateOf<String?>(null) }
@@ -64,13 +68,13 @@ fun PlanningScreen(
                 TextButton(onClick = onOpenLifeAreas) { Text("Áreas") }
                 TextButton(onClick = onOpenDayCheckpoint) { Text("Hoje") }
                 TextButton(onClick = onOpenPlans) { Text("Planos") }
+                TextButton(onClick = { showLeisure = true }) { Text("Lazer") }
+                TextButton(onClick = { showNotes = true }) { Text("Notas") }
                 TextButton(onClick = { showBackup = true }) { Text("Backup") }
             })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) {
-                Icon(Icons.Filled.Add, "Adicionar")
-            }
+            FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") }
         },
     ) { padding ->
         Column(Modifier.padding(padding)) {
@@ -81,83 +85,20 @@ fun PlanningScreen(
             }
             LazyColumn(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 when (tab) {
-                    0 -> items(state.goals) { goal ->
-                        Card(Modifier.fillMaxWidth()) {
-                            Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(goal.title)
-                                TextButton({ viewModel.deleteGoal(goal.id.value) }) { Text("Excluir") }
-                            }
-                        }
-                    }
-                    1 -> items(state.projects) { project ->
-                        Card(Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(project.title)
-                                Text("${project.steps.size} etapas")
-                                project.steps.forEach { Text("• ${it.title} — ${it.plannedDuration.toMinutes()} min") }
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    TextButton({ projectForStep = project }) { Text("Adicionar etapa") }
-                                    TextButton({ viewModel.deleteProject(project.id.value) }) { Text("Excluir") }
-                                }
-                            }
-                        }
-                    }
-                    else -> items(state.inbox.filter { it.status != InboxStatus.DISCARDED }) { item ->
-                        Card(Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(item.text)
-                                Text(item.status.name.lowercase().replace('_', ' '))
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    TextButton({ viewModel.setInboxStatus(item, InboxStatus.SOMEDAY) }) { Text("Someday") }
-                                    TextButton({ viewModel.setInboxStatus(item, InboxStatus.WAITING) }) { Text("Aguardando") }
-                                    TextButton({ viewModel.setInboxStatus(item, InboxStatus.PROCESSED) }) { Text("Processado") }
-                                }
-                                TextButton({ viewModel.deleteInbox(item.id.value) }) { Text("Excluir") }
-                            }
-                        }
-                    }
+                    0 -> items(state.goals) { goal -> Card(Modifier.fillMaxWidth()) { Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(goal.title); TextButton({ viewModel.deleteGoal(goal.id.value) }) { Text("Excluir") } } } }
+                    1 -> items(state.projects) { project -> Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(project.title); Text("${project.steps.size} etapas"); project.steps.forEach { Text("• ${it.title} — ${it.plannedDuration.toMinutes()} min") }; Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { TextButton({ projectForStep = project }) { Text("Adicionar etapa") }; TextButton({ viewModel.deleteProject(project.id.value) }) { Text("Excluir") } } } } }
+                    else -> items(state.inbox.filter { it.status != InboxStatus.DISCARDED }) { item -> Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(item.text); Text(item.status.name.lowercase().replace('_', ' ')); Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { TextButton({ viewModel.setInboxStatus(item, InboxStatus.SOMEDAY) }) { Text("Someday") }; TextButton({ viewModel.setInboxStatus(item, InboxStatus.WAITING) }) { Text("Aguardando") }; TextButton({ viewModel.setInboxStatus(item, InboxStatus.PROCESSED) }) { Text("Processado") } }; TextButton({ viewModel.deleteInbox(item.id.value) }) { Text("Excluir") } } } }
                 }
             }
         }
     }
     addDialog?.let { type ->
         var text by remember(type) { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { addDialog = null },
-            title = { Text(when (type) { "goal" -> "Nova meta"; "project" -> "Novo projeto"; else -> "Capturar ideia" }) },
-            text = { OutlinedTextField(text, { text = it }, Modifier.fillMaxWidth(), singleLine = true) },
-            confirmButton = {
-                Button({
-                    when (type) {
-                        "goal" -> viewModel.createGoal(text)
-                        "project" -> viewModel.createProject(text, null)
-                        else -> viewModel.capture(text)
-                    }
-                    addDialog = null
-                }) { Text("Salvar") }
-            },
-            dismissButton = { TextButton({ addDialog = null }) { Text("Cancelar") } },
-        )
+        AlertDialog(onDismissRequest = { addDialog = null }, title = { Text(when (type) { "goal" -> "Nova meta"; "project" -> "Novo projeto"; else -> "Capturar ideia" }) }, text = { OutlinedTextField(text, { text = it }, Modifier.fillMaxWidth(), singleLine = true) }, confirmButton = { Button({ when (type) { "goal" -> viewModel.createGoal(text); "project" -> viewModel.createProject(text, null); else -> viewModel.capture(text) }; addDialog = null }) { Text("Salvar") } }, dismissButton = { TextButton({ addDialog = null }) { Text("Cancelar") } })
     }
     projectForStep?.let { project ->
         var title by remember(project.id) { mutableStateOf("") }
         var minutes by remember(project.id) { mutableStateOf("30") }
-        AlertDialog(
-            onDismissRequest = { projectForStep = null },
-            title = { Text("Nova etapa") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(title, { title = it }, label = { Text("Etapa") })
-                    OutlinedTextField(minutes, { minutes = it.filter(Char::isDigit) }, label = { Text("Minutos") })
-                }
-            },
-            confirmButton = {
-                Button({
-                    viewModel.addProjectStep(project, title, minutes.toLongOrNull() ?: 30)
-                    projectForStep = null
-                }) { Text("Salvar") }
-            },
-            dismissButton = { TextButton({ projectForStep = null }) { Text("Cancelar") } },
-        )
+        AlertDialog(onDismissRequest = { projectForStep = null }, title = { Text("Nova etapa") }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { OutlinedTextField(title, { title = it }, label = { Text("Etapa") }); OutlinedTextField(minutes, { minutes = it.filter(Char::isDigit) }, label = { Text("Minutos") }) } }, confirmButton = { Button({ viewModel.addProjectStep(project, title, minutes.toLongOrNull() ?: 30); projectForStep = null }) { Text("Salvar") } }, dismissButton = { TextButton({ projectForStep = null }) { Text("Cancelar") } })
     }
 }
