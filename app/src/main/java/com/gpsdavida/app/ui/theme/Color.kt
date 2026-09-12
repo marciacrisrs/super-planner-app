@@ -3,35 +3,37 @@ package com.gpsdavida.app.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Official visual palette for GPS da Vida.
+ * Official visual palette for Super Planner.
  *
- * The palette intentionally feels like a personal editorial planner:
- * warm neutrals as the canvas, terracotta as the navigation/action accent,
- * dusty rose for warmth, and restrained sage/blue-gray for secondary context.
+ * The reference is an editorial personal planner: warm cream as the canvas,
+ * dusty rose and terracotta for warmth and action, and restrained sage,
+ * blue-gray and lavender for secondary context.
  */
 object GpsDaVidaColors {
-    val Canvas = Color(0xFFFBF7F4)
-    val Surface = Color(0xFFFFFDFC)
-    val SurfaceWarm = Color(0xFFF7EEEA)
+    val Canvas = Color(0xFFFCF6F2)
+    val Surface = Color(0xFFFFFBF8)
+    val SurfaceWarm = Color(0xFFFFF3EE)
 
-    val Ink = Color(0xFF2E2927)
+    val Ink = Color(0xFF2E2E2E)
     val InkSoft = Color(0xFF625A56)
-    val Outline = Color(0xFFD9CDC7)
+    val Outline = Color(0xFFE5D8D1)
 
-    val Terracotta = Color(0xFFB9655F)
-    val TerracottaDark = Color(0xFF8F4945)
-    val TerracottaSoft = Color(0xFFE9C5C0)
+    val Terracotta = Color(0xFFC56245)
+    val TerracottaDark = Color(0xFFA64D36)
+    val TerracottaSoft = Color(0xFFF5CFC5)
 
-    val Rose = Color(0xFFD88E95)
-    val RoseSoft = Color(0xFFF1D8DA)
+    val Rose = Color(0xFFE69A8F)
+    val RoseSoft = Color(0xFFFAD8D0)
 
-    val Sage = Color(0xFFA7B3A4)
-    val SageSoft = Color(0xFFDCE4D9)
+    val Sage = Color(0xFFA7B89F)
+    val SageSoft = Color(0xFFDCE7D9)
 
-    val BlueGray = Color(0xFF8C9AA7)
-    val BlueGraySoft = Color(0xFFDCE2E7)
+    val BlueGray = Color(0xFF8DA1B8)
+    val BlueGraySoft = Color(0xFFDCE5EE)
 
-    val Success = Color(0xFF6F8A72)
+    val Lavender = Color(0xFFDCCEF0)
+
+    val Success = Color(0xFF5F896B)
     val Warning = Color(0xFFB17B4A)
     val Error = Color(0xFFAA5550)
 }
