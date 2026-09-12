@@ -8,3 +8,5 @@ App Android offline-first para planejar a vida e transformar Programações em u
 - Entrega: [WORKFLOW](docs/WORKFLOW.md)
 
 Abrir a pasta no Android Studio, sincronizar o Gradle e rodar no emulador. O package Android é `com.superplanner.app`.
+
+<!-- build-fix trigger -->
