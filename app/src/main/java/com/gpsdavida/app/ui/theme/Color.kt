@@ -2,14 +2,8 @@ package com.gpsdavida.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Official visual palette for Super Planner.
- *
- * The reference is an editorial personal planner: warm cream as the canvas,
- * dusty rose and terracotta for warmth and action, and restrained sage,
- * blue-gray and lavender for secondary context.
- */
-object GpsDaVidaColors {
+/** Official visual palette for Super Planner. */
+object SuperPlannerColors {
     val Canvas = Color(0xFFFCF6F2)
     val Surface = Color(0xFFFFFBF8)
     val SurfaceWarm = Color(0xFFFFF3EE)
