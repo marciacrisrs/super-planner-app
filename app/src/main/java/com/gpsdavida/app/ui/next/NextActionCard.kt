@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -70,7 +68,7 @@ private fun ReadyContent(
     onSwap: () -> Unit,
     oneTapComplete: Boolean,
 ) {
-    Column(modifier = Modifier.padding(28.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         NextLabel()
         Text(model.title, style = MaterialTheme.typography.headlineMedium, color = GpsDaVidaColors.Ink)
         MetadataRow(model)
@@ -81,7 +79,7 @@ private fun ReadyContent(
                 color = GpsDaVidaColors.InkSoft,
             )
         }
-        Spacer(modifier = Modifier.size(2.dp))
+        Spacer(modifier = Modifier.size(1.dp))
         SuperPlannerPrimaryButton(
             text = stringResource(if (oneTapComplete || model.state == NextActionState.InProgress) R.string.next_action_complete else R.string.next_action_start),
             onClick = if (oneTapComplete || model.state == NextActionState.InProgress) onComplete else onStart,
@@ -109,14 +107,14 @@ private fun MetadataRow(model: NextActionUiModel) {
 @Composable
 private fun NextLabel() {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(Icons.Filled.Star, contentDescription = null, tint = GpsDaVidaColors.Terracotta, modifier = Modifier.size(18.dp))
+        Text("♡", style = MaterialTheme.typography.titleMedium, color = GpsDaVidaColors.Terracotta)
         Text(stringResource(R.string.next_action_label), style = MaterialTheme.typography.labelLarge, color = GpsDaVidaColors.TerracottaDark)
     }
 }
 
 @Composable
 private fun EmptyContent() {
-    Column(modifier = Modifier.padding(28.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Icon(Icons.Filled.Check, contentDescription = null, tint = GpsDaVidaColors.Sage, modifier = Modifier.size(28.dp))
         Text(stringResource(R.string.next_action_empty_title), style = MaterialTheme.typography.headlineSmall)
         Text(stringResource(R.string.next_action_empty_body), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -125,8 +123,8 @@ private fun EmptyContent() {
 
 @Composable
 private fun CompletedContent(title: String) {
-    Row(modifier = Modifier.padding(28.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        Icon(Icons.Filled.Check, contentDescription = null, tint = GpsDaVidaColors.Success, modifier = Modifier.size(44.dp).clip(CircleShape))
+    Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Icon(Icons.Filled.Check, contentDescription = null, tint = GpsDaVidaColors.Success, modifier = Modifier.size(44.dp))
         Column {
             Text(stringResource(R.string.next_action_completed_label), style = MaterialTheme.typography.labelLarge, color = GpsDaVidaColors.Success)
             Text(title, style = MaterialTheme.typography.titleLarge)
