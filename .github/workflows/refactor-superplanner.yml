@@ -1,0 +1,73 @@
+name: Refactor Super Planner
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: ${{ !contains(github.event.head_commit.message, '[superplanner-refactor]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rename legacy identifiers and packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r -d '' file; do
+            sed -i \
+              -e 's/com\.gpsdavida\.app/com.superplanner.app/g' \
+              -e 's/GpsDaVidaApp/SuperPlannerApp/g' \
+              -e 's/GpsDatabase/SuperPlannerDatabase/g' \
+              -e 's/GpsNavHost/SuperPlannerNavHost/g' \
+              -e 's/GpsRoutes/SuperPlannerRoutes/g' \
+              -e 's/GpsDaVidaTheme/SuperPlannerTheme/g' \
+              -e 's/GpsDaVidaLightColors/SuperPlannerLightColors/g' \
+              -e 's/GpsDaVidaColors/SuperPlannerColors/g' \
+              -e 's/GpsDaVidaTypography/SuperPlannerTypography/g' \
+              -e 's/GpsDaVidaShapes/SuperPlannerShapes/g' \
+              -e 's/GpsDaVidaSpacing/SuperPlannerSpacing/g' \
+              -e 's/Theme\.GpsDaVida/Theme.SuperPlanner/g' \
+              -e 's/GpsDaVida/SuperPlanner/g' \
+              -e 's/gps-da-vida-app/super-planner-app/g' \
+              "$file"
+          done < <(find app .cursor README.md settings.gradle.kts app/build.gradle.kts -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' -o -name '*.md' -o -name '*.pro' \) -print0)
+
+          for pair in \
+            'app/src/main/java/com/gpsdavida/app/GpsDaVidaApp.kt app/src/main/java/com/gpsdavida/app/SuperPlannerApp.kt' \
+            'app/src/main/java/com/gpsdavida/app/data/local/GpsDatabase.kt app/src/main/java/com/gpsdavida/app/data/local/SuperPlannerDatabase.kt' \
+            'app/src/main/java/com/gpsdavida/app/ui/navigation/GpsNavHost.kt app/src/main/java/com/gpsdavida/app/ui/navigation/SuperPlannerNavHost.kt' \
+            'app/src/main/java/com/gpsdavida/app/ui/navigation/GpsRoutes.kt app/src/main/java/com/gpsdavida/app/ui/navigation/SuperPlannerRoutes.kt' \
+            'app/src/main/java/com/gpsdavida/app/ui/theme/GpsDaVidaTheme.kt app/src/main/java/com/gpsdavida/app/ui/theme/SuperPlannerTheme.kt'; do
+            set -- $pair
+            if [ -f "$1" ]; then git mv "$1" "$2"; fi
+          done
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          if git diff --quiet; then
+            echo 'No refactor changes needed.'
+            exit 0
+          fi
+
+          git add -A
+          git commit -m 'refactor: complete Super Planner migration [superplanner-refactor]'
+          git push origin HEAD:main
+
+      - name: Remove temporary workflow
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          git rm .github/workflows/refactor-superplanner.yml || true
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: remove temporary refactor workflow [superplanner-refactor]' || true
+          git push origin HEAD:main || true
