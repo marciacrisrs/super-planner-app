@@ -36,23 +36,23 @@ class ObserveWeeklyPlanning @Inject constructor(
     operator fun invoke(
         startDate: LocalDate,
         zoneId: ZoneId = clock.zone,
-    ): Flow<WeeklyPlanning> = combine(
+    ): Flow<WeeklyPlanning> = combine(listOf(
         events.observeAll(),
         tasks.observeAll(),
         habits.observeAll(),
         routines.observeAll(),
         executions.observeAll(),
         availability.observeAll(),
-    ) { eventList, taskList, habitList, routineList, executionList, availabilityList ->
+    )) { values ->
         buildWeeklyPlanning(
             startDate = startDate,
             zoneId = zoneId,
-            eventList = eventList,
-            taskList = taskList,
-            habitList = habitList,
-            routineList = routineList,
-            executionList = executionList,
-            availabilityList = availabilityList,
+            eventList = values[0] as List<com.superplanner.app.domain.model.Event>,
+            taskList = values[1] as List<com.superplanner.app.domain.model.Task>,
+            habitList = values[2] as List<com.superplanner.app.domain.model.Habit>,
+            routineList = values[3] as List<com.superplanner.app.domain.model.Routine>,
+            executionList = values[4] as List<ActivityExecution>,
+            availabilityList = values[5] as List<Availability>,
         )
     }
 
