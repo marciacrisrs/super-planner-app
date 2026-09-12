@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WeekDayViewModel @Inject constructor(
-    observeWeeklyPlanning: ObserveWeeklyPlanning,
+    private val observeWeeklyPlanning: ObserveWeeklyPlanning,
     private val clock: Clock,
 ) : ViewModel() {
     fun observeDay(date: LocalDate): StateFlow<WeeklyDaySummary?> =

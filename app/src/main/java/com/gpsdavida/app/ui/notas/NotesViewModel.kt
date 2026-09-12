@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -22,9 +23,7 @@ class NotesViewModel @Inject constructor(
     private val targetId = MutableStateFlow("geral")
 
     val notes: StateFlow<List<ContextNote>> = combine(targetType, targetId) { type, id -> type to id }
-        .let { contexts ->
-            kotlinx.coroutines.flow.flatMapLatest(contexts) { (type, id) -> repository.observeNotes(type, id) }
-        }
+        .flatMapLatest { (type, id) -> repository.observeNotes(type, id) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun setContext(type: String, id: String) {

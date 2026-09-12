@@ -3,6 +3,7 @@ package com.superplanner.app.data.mapper
 import com.superplanner.app.data.local.HabitEntity
 import com.superplanner.app.domain.model.Habit
 import com.superplanner.app.domain.model.HabitId
+import com.superplanner.app.domain.model.GoalId
 import com.superplanner.app.domain.model.LocalTimeWindow
 import com.superplanner.app.domain.model.Priority
 import java.time.DayOfWeek
@@ -24,7 +25,7 @@ fun HabitEntity.toDomain(): Habit =
             }
         },
         priority = Priority.valueOf(priority),
-        goalId = goalId?.let(::com.superplanner.app.domain.model.GoalId),
+        goalId = goalId?.let(::GoalId),
     )
 
 fun Habit.toEntity(): HabitEntity =

@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,10 +61,10 @@ fun WeekScreen(
             }
             Row {
                 IconButton(onClick = viewModel::previousWeek) {
-                    Icon(Icons.Filled.ChevronLeft, contentDescription = "Semana anterior")
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Semana anterior")
                 }
                 IconButton(onClick = viewModel::nextWeek) {
-                    Icon(Icons.Filled.ChevronRight, contentDescription = "Próxima semana")
+                    Icon(Icons.Filled.ArrowForward, contentDescription = "Próxima semana")
                 }
             }
         }

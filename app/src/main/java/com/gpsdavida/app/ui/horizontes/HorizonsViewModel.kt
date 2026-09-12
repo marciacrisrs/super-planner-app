@@ -46,13 +46,21 @@ class HorizonsViewModel @Inject constructor(
     fun deleteMilestone(id: String) { viewModelScope.launch { milestoneRepository.delete(id) } }
     private fun summarize(month: YearMonth, events: List<Event>, tasks: List<Task>, habits: List<Habit>, routines: List<Routine>): MonthSummary {
         val zone = clock.zone; val start = month.atDay(1); val end = month.atEndOfMonth()
-        val eventItems = events.filter { event -> (start..end).any { event.occursOn(it, zone) } }
+        val eventItems = events.filter { event -> datesBetween(start, end).any { event.occursOn(it, zone) } }
         val taskItems = tasks.filter { task -> task.due?.atZone(zone)?.toLocalDate()?.let { it in start..end } == true || task.completedAt?.atZone(zone)?.toLocalDate()?.let { it in start..end } == true }
-        val habitItems = habits.filter { habit -> (start..end).any(habit::occursOn) }
-        val routineItems = routines.filter { routine -> (start..end).any { routine.daysOfWeek.isEmpty() || it.dayOfWeek in routine.daysOfWeek } }
+        val habitItems = habits.filter { habit -> datesBetween(start, end).any(habit::occursOn) }
+        val routineItems = routines.filter { routine -> datesBetween(start, end).any { routine.daysOfWeek.isEmpty() || it.dayOfWeek in routine.daysOfWeek } }
         val count = eventItems.size + taskItems.size + habitItems.size + routineItems.size
         val minutes = eventItems.sumOf { java.time.Duration.between(it.range.start, it.range.end).toMinutes() } + taskItems.sumOf { it.plannedDuration.toMinutes() } + habitItems.sumOf { it.plannedDuration.toMinutes() * daysActive(it.daysOfWeek, start, end) } + routineItems.sumOf { it.steps.sumOf { s -> s.plannedDuration.toMinutes() } * daysActive(it.daysOfWeek, start, end) }
         return MonthSummary(month, count, minutes, taskItems.count(Task::isDone))
     }
-    private fun daysActive(days: Set<java.time.DayOfWeek>, start: LocalDate, end: LocalDate): Long = if (days.isEmpty()) java.time.temporal.ChronoUnit.DAYS.between(start, end) + 1 else (start..end).count { it.dayOfWeek in days }.toLong()
+    private fun datesBetween(start: LocalDate, end: LocalDate): Sequence<LocalDate> = sequence {
+        var date = start
+        while (!date.isAfter(end)) {
+            yield(date)
+            date = date.plusDays(1)
+        }
+    }
+
+    private fun daysActive(days: Set<java.time.DayOfWeek>, start: LocalDate, end: LocalDate): Long = if (days.isEmpty()) java.time.temporal.ChronoUnit.DAYS.between(start, end) + 1 else datesBetween(start, end).count { it.dayOfWeek in days }.toLong()
 }

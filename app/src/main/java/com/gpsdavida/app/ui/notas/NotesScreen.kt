@@ -1,3 +1,4 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.superplanner.app.ui.notas
 
 import androidx.compose.foundation.layout.Arrangement

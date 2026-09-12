@@ -117,7 +117,6 @@ fun HomeScreen(
                         when (reason) {
                             com.superplanner.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
                             com.superplanner.app.domain.model.NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
-                            com.superplanner.app.domain.model.NextActionReason.HIGHER_PRIORITY -> stringResource(R.string.reason_higher_priority)
                             com.superplanner.app.domain.model.NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
                             com.superplanner.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
                             com.superplanner.app.domain.model.NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
