@@ -51,6 +51,10 @@ jobs:
                   helper='    private fun datesBetween(start: LocalDate, end: LocalDate): Sequence<LocalDate> = sequence {\n        var date = start\n        while (!date.isAfter(end)) {\n            yield(date)\n            date = date.plusDays(1)\n        }\n    }\n'
                   if marker in s and 'private fun datesBetween' not in s:
                       s=s.replace(marker, helper+'\n'+marker)
+              if p.name in {'BackupScreen.kt','LifeAreaScreen.kt','LeisureScreenV2.kt','NotesScreen.kt','OnboardingScreen.kt','PlansScreen.kt'}:
+                  annotation='@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)\n'
+                  if not s.startswith('@file:OptIn('):
+                      s=annotation+s
               p.write_text(s)
           PY
           python3 - <<'PY'
@@ -62,21 +66,6 @@ jobs:
               new='''    ): Flow<WeeklyPlanning> = combine(listOf(\n        events.observeAll(),\n        tasks.observeAll(),\n        habits.observeAll(),\n        routines.observeAll(),\n        executions.observeAll(),\n        availability.observeAll(),\n    )) { values ->\n        buildWeeklyPlanning(\n            startDate = startDate,\n            zoneId = zoneId,\n            eventList = values[0] as List<com.superplanner.app.domain.model.Event>,\n            taskList = values[1] as List<com.superplanner.app.domain.model.Task>,\n            habitList = values[2] as List<com.superplanner.app.domain.model.Habit>,\n            routineList = values[3] as List<com.superplanner.app.domain.model.Routine>,\n            executionList = values[4] as List<ActivityExecution>,\n            availabilityList = values[5] as List<Availability>,\n        )\n    }'''
               if old in s:
                   s=s.replace(old,new)
-          p.write_text(s)
-          p=Path('app/src/main/java/com/gpsdavida/app/ui/contexto/LifeAreaVisuals.kt')
-          s=p.read_text()
-          for name in ['AccountBalance','Book','BusinessCenter','SelfImprovement','Spa','Weekend']:
-              s=s.replace(f'Icons.Filled.{name}', 'Icons.Filled.Home')
-          import re
-          s=re.sub(r'import androidx\.compose\.material\.icons\.filled\.(AccountBalance|Book|BusinessCenter|SelfImprovement|Spa|Weekend)\n','',s)
-          if 'import androidx.compose.material.icons.filled.Home' not in s:
-              s=s.replace('import androidx.compose.material.icons.Icons\n','import androidx.compose.material.icons.Icons\nimport androidx.compose.material.icons.filled.Home\n')
-          p.write_text(s)
-          p=Path('app/src/main/java/com/gpsdavida/app/ui/navigation/SuperPlannerNavHost.kt')
-          s=p.read_text().replace('Icons.Filled.Tune','Icons.Filled.Settings')
-          p.write_text(s)
-          p=Path('app/src/main/java/com/gpsdavida/app/ui/semana/WeekScreen.kt')
-          s=p.read_text().replace('Icons.Filled.ChevronLeft','Icons.Filled.ArrowBack').replace('Icons.Filled.ChevronRight','Icons.Filled.ArrowForward')
           p.write_text(s)
           PY
       - name: Validate
