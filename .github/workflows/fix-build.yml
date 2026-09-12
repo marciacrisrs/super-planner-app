@@ -49,17 +49,19 @@ jobs:
                   s=s.replace('(start..end).count { it.dayOfWeek in days }', 'datesBetween(start, end).count { it.dayOfWeek in days }')
                   marker='    private fun daysActive('
                   helper='    private fun datesBetween(start: LocalDate, end: LocalDate): Sequence<LocalDate> = sequence {\n        var date = start\n        while (!date.isAfter(end)) {\n            yield(date)\n            date = date.plusDays(1)\n        }\n    }\n'
-                  s=s.replace(marker, helper+'\n'+marker)
+                  if marker in s and 'private fun datesBetween' not in s:
+                      s=s.replace(marker, helper+'\n'+marker)
               p.write_text(s)
           PY
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/java/com/gpsdavida/app/domain/usecase/ObserveWeeklyPlanning.kt')
           s=p.read_text()
-          old='''    ): Flow<WeeklyPlanning> = combine(\n        events.observeAll(),\n        tasks.observeAll(),\n        habits.observeAll(),\n        routines.observeAll(),\n        executions.observeAll(),\n        availability.observeAll(),\n    ) { eventList, taskList, habitList, routineList, executionList, availabilityList ->\n        buildWeeklyPlanning(\n            startDate = startDate,\n            zoneId = zoneId,\n            eventList = eventList,\n            taskList = taskList,\n            habitList = habitList,\n            routineList = routineList,\n            executionList = executionList,\n            availabilityList = availabilityList,\n        )\n    }'''
-          new='''    ): Flow<WeeklyPlanning> = combine(listOf(\n        events.observeAll(),\n        tasks.observeAll(),\n        habits.observeAll(),\n        routines.observeAll(),\n        executions.observeAll(),\n        availability.observeAll(),\n    )) { values ->\n        buildWeeklyPlanning(\n            startDate = startDate,\n            zoneId = zoneId,\n            eventList = values[0] as List<com.superplanner.app.domain.model.Event>,\n            taskList = values[1] as List<com.superplanner.app.domain.model.Task>,\n            habitList = values[2] as List<com.superplanner.app.domain.model.Habit>,\n            routineList = values[3] as List<com.superplanner.app.domain.model.Routine>,\n            executionList = values[4] as List<ActivityExecution>,\n            availabilityList = values[5] as List<Availability>,\n        )\n    }'''
-          if old not in s: raise SystemExit('ObserveWeeklyPlanning block not found')
-          s=s.replace(old,new)
+          if 'combine(listOf(' not in s:
+              old='''    ): Flow<WeeklyPlanning> = combine(\n        events.observeAll(),\n        tasks.observeAll(),\n        habits.observeAll(),\n        routines.observeAll(),\n        executions.observeAll(),\n        availability.observeAll(),\n    ) { eventList, taskList, habitList, routineList, executionList, availabilityList ->\n        buildWeeklyPlanning(\n            startDate = startDate,\n            zoneId = zoneId,\n            eventList = eventList,\n            taskList = taskList,\n            habitList = habitList,\n            routineList = routineList,\n            executionList = executionList,\n            availabilityList = availabilityList,\n        )\n    }'''
+              new='''    ): Flow<WeeklyPlanning> = combine(listOf(\n        events.observeAll(),\n        tasks.observeAll(),\n        habits.observeAll(),\n        routines.observeAll(),\n        executions.observeAll(),\n        availability.observeAll(),\n    )) { values ->\n        buildWeeklyPlanning(\n            startDate = startDate,\n            zoneId = zoneId,\n            eventList = values[0] as List<com.superplanner.app.domain.model.Event>,\n            taskList = values[1] as List<com.superplanner.app.domain.model.Task>,\n            habitList = values[2] as List<com.superplanner.app.domain.model.Habit>,\n            routineList = values[3] as List<com.superplanner.app.domain.model.Routine>,\n            executionList = values[4] as List<ActivityExecution>,\n            availabilityList = values[5] as List<Availability>,\n        )\n    }'''
+              if old in s:
+                  s=s.replace(old,new)
           p.write_text(s)
           p=Path('app/src/main/java/com/gpsdavida/app/ui/contexto/LifeAreaVisuals.kt')
           s=p.read_text()
