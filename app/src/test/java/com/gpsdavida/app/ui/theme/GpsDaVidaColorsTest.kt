@@ -7,20 +7,20 @@ import org.junit.Test
 class SuperPlannerColorsTest {
     @Test
     fun officialPaletteKeepsWarmPlannerCanvas() {
-        assertEquals(Color(0xFFFBF7F4), SuperPlannerColors.Canvas)
-        assertEquals(Color(0xFFFFFDFC), SuperPlannerColors.Surface)
+        assertEquals(Color(0xFFFCF6F2), SuperPlannerColors.Canvas)
+        assertEquals(Color(0xFFFFFBF8), SuperPlannerColors.Surface)
     }
 
     @Test
     fun officialPaletteKeepsTerracottaAsPrimaryAccent() {
-        assertEquals(Color(0xFFB9655F), SuperPlannerColors.Terracotta)
-        assertEquals(Color(0xFFE9C5C0), SuperPlannerColors.TerracottaSoft)
+        assertEquals(Color(0xFFC56245), SuperPlannerColors.Terracotta)
+        assertEquals(Color(0xFFF5CFC5), SuperPlannerColors.TerracottaSoft)
     }
 
     @Test
     fun officialPaletteContainsSecondaryOrganicAccents() {
-        assertEquals(Color(0xFFD88E95), SuperPlannerColors.Rose)
-        assertEquals(Color(0xFFA7B3A4), SuperPlannerColors.Sage)
-        assertEquals(Color(0xFF8C9AA7), SuperPlannerColors.BlueGray)
+        assertEquals(Color(0xFFE69A8F), SuperPlannerColors.Rose)
+        assertEquals(Color(0xFFA7B89F), SuperPlannerColors.Sage)
+        assertEquals(Color(0xFF8DA1B8), SuperPlannerColors.BlueGray)
     }
 }
