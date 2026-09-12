@@ -61,10 +61,6 @@ jobs:
           if old not in s: raise SystemExit('ObserveWeeklyPlanning block not found')
           s=s.replace(old,new)
           p.write_text(s)
-          
-          p=Path('app/src/main/java/com/gpsdavida/app/domain/usecase/ChooseNextActivity.kt')
-          p.unlink()
-          
           p=Path('app/src/main/java/com/gpsdavida/app/ui/contexto/LifeAreaVisuals.kt')
           s=p.read_text()
           for name in ['AccountBalance','Book','BusinessCenter','SelfImprovement','Spa','Weekend']:
@@ -74,11 +70,9 @@ jobs:
           if 'import androidx.compose.material.icons.filled.Home' not in s:
               s=s.replace('import androidx.compose.material.icons.Icons\n','import androidx.compose.material.icons.Icons\nimport androidx.compose.material.icons.filled.Home\n')
           p.write_text(s)
-          
           p=Path('app/src/main/java/com/gpsdavida/app/ui/navigation/SuperPlannerNavHost.kt')
           s=p.read_text().replace('Icons.Filled.Tune','Icons.Filled.Settings')
           p.write_text(s)
-          
           p=Path('app/src/main/java/com/gpsdavida/app/ui/semana/WeekScreen.kt')
           s=p.read_text().replace('Icons.Filled.ChevronLeft','Icons.Filled.ArrowBack').replace('Icons.Filled.ChevronRight','Icons.Filled.ArrowForward')
           p.write_text(s)
