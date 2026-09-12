@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,7 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,31 +59,27 @@ fun HomeScreen(
             .padding(horizontal = 20.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        "$greeting, Márcia! ☀️",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = GpsDaVidaColors.Ink,
-                    )
-                    Text(
-                        state.currentDate.format(dateFormatter).replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = GpsDaVidaColors.InkSoft,
-                    )
-                }
-                Text("♡", style = MaterialTheme.typography.headlineMedium, color = GpsDaVidaColors.Terracotta)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    "$greeting, Márcia! ☀️",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = GpsDaVidaColors.Ink,
+                )
+                Text(
+                    state.currentDate.format(dateFormatter).replaceFirstChar { it.uppercase() },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = GpsDaVidaColors.InkSoft,
+                )
             }
+            Text("♡", style = MaterialTheme.typography.headlineMedium, color = GpsDaVidaColors.Terracotta)
         }
 
-        SuperPlannerCard(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        SuperPlannerCard(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -117,19 +112,19 @@ fun HomeScreen(
                     title = state.title,
                     durationMinutes = state.durationMinutes,
                     scheduledTime = state.scheduledTime,
-                    priorityLabel = state.priority?.let { androidx.compose.runtime.Composable { } ; null },
+                    priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
                     reasonLabels = state.reasons.map { reason ->
                         when (reason) {
-                            com.gpsdavida.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> "Já está acontecendo"
-                            com.gpsdavida.app.domain.model.NextActionReason.DUE_NOW -> "Já pode ser feita"
-                            com.gpsdavida.app.domain.model.NextActionReason.HIGHER_PRIORITY -> "Prioridade mais alta"
-                            com.gpsdavida.app.domain.model.NextActionReason.FIXED_COMMITMENT -> "Compromisso fixo"
-                            com.gpsdavida.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> "Cabe na janela disponível"
-                            com.gpsdavida.app.domain.model.NextActionReason.ENERGY_MATCH -> "Combina com sua energia"
-                            com.gpsdavida.app.domain.model.NextActionReason.CONTEXT_MATCH -> "Combina com seu contexto"
-                            com.gpsdavida.app.domain.model.NextActionReason.DEPENDENCIES_SATISFIED -> "Dependências atendidas"
-                            com.gpsdavida.app.domain.model.NextActionReason.FLEXIBLE_SLOT -> "Tem horário flexível"
-                            com.gpsdavida.app.domain.model.NextActionReason.TRAVEL_FITS -> "Deslocamento é viável"
+                            com.gpsdavida.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
+                            com.gpsdavida.app.domain.model.NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
+                            com.gpsdavida.app.domain.model.NextActionReason.HIGHER_PRIORITY -> stringResource(R.string.reason_higher_priority)
+                            com.gpsdavida.app.domain.model.NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
+                            com.gpsdavida.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
+                            com.gpsdavida.app.domain.model.NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
+                            com.gpsdavida.app.domain.model.NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
+                            com.gpsdavida.app.domain.model.NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
+                            com.gpsdavida.app.domain.model.NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
+                            com.gpsdavida.app.domain.model.NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
                         }
                     },
                     state = state.state,
