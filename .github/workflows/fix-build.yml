@@ -51,6 +51,20 @@ jobs:
                   helper='    private fun datesBetween(start: LocalDate, end: LocalDate): Sequence<LocalDate> = sequence {\n        var date = start\n        while (!date.isAfter(end)) {\n            yield(date)\n            date = date.plusDays(1)\n        }\n    }\n'
                   if marker in s and 'private fun datesBetween' not in s:
                       s=s.replace(marker, helper+'\n'+marker)
+              if p.name=='LifeAreaVisuals.kt':
+                  s=s.replace('import androidx.compose.material.icons.filled.AccountBalance\n', '')
+                  s=s.replace('import androidx.compose.material.icons.filled.Book\n', '')
+                  s=s.replace('import androidx.compose.material.icons.filled.BusinessCenter\n', '')
+                  s=s.replace('import androidx.compose.material.icons.filled.SelfImprovement\n', '')
+                  s=s.replace('import androidx.compose.material.icons.filled.Spa\n', '')
+                  s=s.replace('import androidx.compose.material.icons.filled.Weekend\n', '')
+                  s=s.replace('import androidx.compose.material.icons.filled.Favorite\n', 'import androidx.compose.material.icons.filled.Favorite\nimport androidx.compose.material.icons.filled.Settings\n')
+                  s=s.replace('Icons.Filled.BusinessCenter', 'Icons.Filled.Settings')
+                  s=s.replace('Icons.Filled.Book', 'Icons.Filled.Home')
+                  s=s.replace('Icons.Filled.AccountBalance', 'Icons.Filled.Settings')
+                  s=s.replace('Icons.Filled.Spa', 'Icons.Filled.Favorite')
+                  s=s.replace('Icons.Filled.Weekend', 'Icons.Filled.Home')
+                  s=s.replace('Icons.Filled.SelfImprovement', 'Icons.Filled.Favorite')
               if p.name in {'BackupScreen.kt','LifeAreaScreen.kt','LeisureScreenV2.kt','NotesScreen.kt','OnboardingScreen.kt','PlansScreen.kt'}:
                   annotation='@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)\n'
                   if not s.startswith('@file:OptIn('):
