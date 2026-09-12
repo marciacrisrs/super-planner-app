@@ -1,9 +1,9 @@
-package com.gpsdavida.app.data.mapper
+package com.superplanner.app.data.mapper
 
-import com.gpsdavida.app.data.local.TaskEntity
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
+import com.superplanner.app.data.local.TaskEntity
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
 import java.time.Duration
 import java.time.Instant
 

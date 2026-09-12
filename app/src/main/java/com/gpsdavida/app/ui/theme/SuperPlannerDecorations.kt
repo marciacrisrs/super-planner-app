@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.theme
+package com.superplanner.app.ui.theme
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -32,11 +32,11 @@ fun SuperPlannerEditorialAccent(
         }
         drawPath(
             path = path,
-            color = GpsDaVidaColors.Terracotta.copy(alpha = 0.22f),
+            color = SuperPlannerColors.Terracotta.copy(alpha = 0.22f),
             style = Stroke(width = stroke),
         )
         drawCircle(
-            color = GpsDaVidaColors.Sage.copy(alpha = 0.28f),
+            color = SuperPlannerColors.Sage.copy(alpha = 0.28f),
             radius = size.minDimension * 0.06f,
             center = Offset(size.width * 0.78f, size.height * 0.22f),
         )
@@ -57,7 +57,7 @@ fun SuperPlannerOrganicAccent(
                 bottom = size.height * 0.86f,
             )
             drawArc(
-                color = GpsDaVidaColors.RoseSoft.copy(alpha = 0.65f),
+                color = SuperPlannerColors.RoseSoft.copy(alpha = 0.65f),
                 startAngle = 200f,
                 sweepAngle = 120f,
                 useCenter = false,

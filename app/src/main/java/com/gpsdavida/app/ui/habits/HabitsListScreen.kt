@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.habits
+package com.superplanner.app.ui.habits
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,10 +22,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.Habit
-import com.gpsdavida.app.domain.model.HabitDay
-import com.gpsdavida.app.ui.tasks.labelRes
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.Habit
+import com.superplanner.app.domain.model.HabitDay
+import com.superplanner.app.ui.tasks.labelRes
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)

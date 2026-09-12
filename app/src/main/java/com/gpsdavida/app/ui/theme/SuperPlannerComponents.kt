@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.theme
+package com.superplanner.app.ui.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +36,7 @@ fun SuperPlannerCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = GpsDaVidaColors.Surface),
+        colors = CardDefaults.cardColors(containerColor = SuperPlannerColors.Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         content = content,
     )
@@ -56,9 +56,9 @@ fun SuperPlannerSectionHeader(
         verticalAlignment = Alignment.Top,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, style = MaterialTheme.typography.titleLarge, color = GpsDaVidaColors.Ink)
+            Text(title, style = MaterialTheme.typography.titleLarge, color = SuperPlannerColors.Ink)
             supportingText?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = GpsDaVidaColors.InkSoft)
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
             }
         }
         if (actionLabel != null && onAction != null) {
@@ -78,8 +78,8 @@ fun SuperPlannerPrimaryButton(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = GpsDaVidaColors.Terracotta,
-            contentColor = GpsDaVidaColors.Surface,
+            containerColor = SuperPlannerColors.Terracotta,
+            contentColor = SuperPlannerColors.Surface,
         ),
     ) {
         Text(text, style = MaterialTheme.typography.labelLarge)
@@ -102,15 +102,15 @@ fun SuperPlannerSecondaryActions(
             onClick = onSecondary,
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = GpsDaVidaColors.InkSoft),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = SuperPlannerColors.InkSoft),
         ) { Text(secondaryText, style = MaterialTheme.typography.labelMedium) }
         Button(
             onClick = onPrimary,
             modifier = Modifier.weight(1.35f),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = GpsDaVidaColors.Terracotta,
-                contentColor = GpsDaVidaColors.Surface,
+                containerColor = SuperPlannerColors.Terracotta,
+                contentColor = SuperPlannerColors.Surface,
             ),
         ) { Text(primaryText, style = MaterialTheme.typography.labelLarge) }
     }
@@ -145,9 +145,9 @@ fun SuperPlannerTimeline(
     Column(modifier = modifier.fillMaxWidth()) {
         items.forEachIndexed { index, item ->
             val accent = when (item.state) {
-                SuperPlannerTimelineState.CURRENT -> GpsDaVidaColors.Terracotta
-                SuperPlannerTimelineState.COMPLETED -> GpsDaVidaColors.Sage
-                SuperPlannerTimelineState.UPCOMING -> GpsDaVidaColors.BlueGray
+                SuperPlannerTimelineState.CURRENT -> SuperPlannerColors.Terracotta
+                SuperPlannerTimelineState.COMPLETED -> SuperPlannerColors.Sage
+                SuperPlannerTimelineState.UPCOMING -> SuperPlannerColors.BlueGray
             }
             val alpha = if (item.state == SuperPlannerTimelineState.COMPLETED) 0.62f else 1f
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
@@ -155,7 +155,7 @@ fun SuperPlannerTimeline(
                     item.time,
                     modifier = Modifier.width(52.dp),
                     style = MaterialTheme.typography.labelMedium,
-                    color = GpsDaVidaColors.InkSoft.copy(alpha = alpha),
+                    color = SuperPlannerColors.InkSoft.copy(alpha = alpha),
                 )
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(20.dp)) {
                     Spacer(
@@ -170,7 +170,7 @@ fun SuperPlannerTimeline(
                                 .padding(top = 4.dp)
                                 .width(1.dp)
                                 .height(48.dp)
-                                .background(GpsDaVidaColors.Outline),
+                                .background(SuperPlannerColors.Outline),
                         )
                     }
                 }
@@ -183,10 +183,10 @@ fun SuperPlannerTimeline(
                     Text(
                         item.title,
                         style = if (item.state == SuperPlannerTimelineState.CURRENT) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
-                        color = GpsDaVidaColors.Ink.copy(alpha = alpha),
+                        color = SuperPlannerColors.Ink.copy(alpha = alpha),
                     )
                     item.supportingText?.let {
-                        Text(it, style = MaterialTheme.typography.bodySmall, color = GpsDaVidaColors.InkSoft.copy(alpha = alpha))
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft.copy(alpha = alpha))
                     }
                 }
             }

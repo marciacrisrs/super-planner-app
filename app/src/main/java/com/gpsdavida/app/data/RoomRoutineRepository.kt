@@ -1,12 +1,12 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.RoutineDao
-import com.gpsdavida.app.data.mapper.toDomain
-import com.gpsdavida.app.data.mapper.toEntity
-import com.gpsdavida.app.data.mapper.toStepEntities
-import com.gpsdavida.app.domain.model.Routine
-import com.gpsdavida.app.domain.model.RoutineId
-import com.gpsdavida.app.domain.port.RoutineRepository
+import com.superplanner.app.data.local.RoutineDao
+import com.superplanner.app.data.mapper.toDomain
+import com.superplanner.app.data.mapper.toEntity
+import com.superplanner.app.data.mapper.toStepEntities
+import com.superplanner.app.domain.model.Routine
+import com.superplanner.app.domain.model.RoutineId
+import com.superplanner.app.domain.port.RoutineRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

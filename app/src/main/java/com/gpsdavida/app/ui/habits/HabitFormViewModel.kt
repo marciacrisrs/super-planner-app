@@ -1,16 +1,16 @@
-package com.gpsdavida.app.ui.habits
+package com.superplanner.app.ui.habits
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Habit
-import com.gpsdavida.app.domain.model.HabitId
-import com.gpsdavida.app.domain.model.LocalTimeWindow
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.usecase.DeleteHabit
-import com.gpsdavida.app.domain.usecase.GetHabit
-import com.gpsdavida.app.domain.usecase.SaveHabit
-import com.gpsdavida.app.ui.navigation.GpsRoutes
+import com.superplanner.app.domain.model.Habit
+import com.superplanner.app.domain.model.HabitId
+import com.superplanner.app.domain.model.LocalTimeWindow
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.usecase.DeleteHabit
+import com.superplanner.app.domain.usecase.GetHabit
+import com.superplanner.app.domain.usecase.SaveHabit
+import com.superplanner.app.ui.navigation.SuperPlannerRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.DayOfWeek
 import java.time.Duration
@@ -48,14 +48,14 @@ class HabitFormViewModel @Inject constructor(
 
     private val habitIdArg: String = checkNotNull(savedStateHandle["habitId"])
     private val habitId: HabitId =
-        if (habitIdArg == GpsRoutes.NEW_HABIT_ID) HabitId(UUID.randomUUID().toString())
+        if (habitIdArg == SuperPlannerRoutes.NEW_HABIT_ID) HabitId(UUID.randomUUID().toString())
         else HabitId(habitIdArg)
 
     private val _state = MutableStateFlow(HabitFormUiState())
     val state: StateFlow<HabitFormUiState> = _state.asStateFlow()
 
     init {
-        if (habitIdArg != GpsRoutes.NEW_HABIT_ID) {
+        if (habitIdArg != SuperPlannerRoutes.NEW_HABIT_ID) {
             viewModelScope.launch {
                 val existing = getHabit(habitId) ?: return@launch
                 _state.value = HabitFormUiState(

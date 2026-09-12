@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.horizontes
+package com.superplanner.app.ui.horizontes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,8 +18,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.WeeklyDaySummary
-import com.gpsdavida.app.domain.usecase.ObserveWeeklyPlanning
+import com.superplanner.app.domain.model.WeeklyDaySummary
+import com.superplanner.app.domain.usecase.ObserveWeeklyPlanning
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 /** Structured reasons that can be surfaced by the Super Planner when choosing an action. */
 enum class NextActionReason {

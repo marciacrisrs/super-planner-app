@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.semana
+package com.superplanner.app.ui.semana
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,11 +23,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.WeeklyDaySummary
-import com.gpsdavida.app.ui.theme.GpsDaVidaColors
-import com.gpsdavida.app.ui.theme.SuperPlannerCard
-import com.gpsdavida.app.ui.theme.SuperPlannerMetadata
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.WeeklyDaySummary
+import com.superplanner.app.ui.theme.SuperPlannerColors
+import com.superplanner.app.ui.theme.SuperPlannerCard
+import com.superplanner.app.ui.theme.SuperPlannerMetadata
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -52,11 +52,11 @@ fun WeekScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Semana", style = MaterialTheme.typography.headlineSmall, color = GpsDaVidaColors.Ink)
+                Text("Semana", style = MaterialTheme.typography.headlineSmall, color = SuperPlannerColors.Ink)
                 Text(
                     "${state.startDate.format(formatter)} — ${state.endDate.format(formatter)}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GpsDaVidaColors.InkSoft,
+                    color = SuperPlannerColors.InkSoft,
                 )
             }
             Row {
@@ -100,12 +100,12 @@ private fun WeeklyDayCard(
                     Text(
                         day.date.format(dayFormatter).replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.titleLarge,
-                        color = GpsDaVidaColors.Ink,
+                        color = SuperPlannerColors.Ink,
                     )
                     Text(
                         day.date.format(DateTimeFormatter.ofPattern("d MMM", Locale("pt", "BR"))),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = GpsDaVidaColors.InkSoft,
+                        color = SuperPlannerColors.InkSoft,
                     )
                 }
                 TextButton(onClick = { onOpenDay(day.date.toString()) }) {
@@ -115,9 +115,9 @@ private fun WeeklyDayCard(
 
             SuperPlannerMetadata(
                 items = listOf(
-                    "${day.plannedCount} atividades" to GpsDaVidaColors.InkSoft,
-                    "${day.plannedDuration.toMinutes()} min" to GpsDaVidaColors.InkSoft,
-                    "${(day.completionRatio * 100).toInt()}%" to GpsDaVidaColors.Terracotta,
+                    "${day.plannedCount} atividades" to SuperPlannerColors.InkSoft,
+                    "${day.plannedDuration.toMinutes()} min" to SuperPlannerColors.InkSoft,
+                    "${(day.completionRatio * 100).toInt()}%" to SuperPlannerColors.Terracotta,
                 ),
             )
 
@@ -125,21 +125,21 @@ private fun WeeklyDayCard(
                 Text(
                     stringResource(R.string.week_empty_day),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GpsDaVidaColors.InkSoft,
+                    color = SuperPlannerColors.InkSoft,
                 )
             } else {
                 day.activities.take(4).forEach { activity ->
                     Text(
                         "• ${activity.title}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = GpsDaVidaColors.Ink,
+                        color = SuperPlannerColors.Ink,
                     )
                 }
                 if (day.activities.size > 4) {
                     Text(
                         "+ ${day.activities.size - 4} atividades",
                         style = MaterialTheme.typography.bodySmall,
-                        color = GpsDaVidaColors.InkSoft,
+                        color = SuperPlannerColors.InkSoft,
                     )
                 }
             }

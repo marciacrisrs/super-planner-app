@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.widget
+package com.superplanner.app.ui.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -7,8 +7,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import com.gpsdavida.app.R
-import com.gpsdavida.app.ui.MainActivity
+import com.superplanner.app.R
+import com.superplanner.app.ui.MainActivity
 
 class AgoraWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(

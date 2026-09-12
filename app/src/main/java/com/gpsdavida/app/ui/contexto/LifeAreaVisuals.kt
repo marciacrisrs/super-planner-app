@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.contexto
+package com.superplanner.app.ui.contexto
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance

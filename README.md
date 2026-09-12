@@ -7,4 +7,4 @@ App Android offline-first para planejar a vida e transformar Programações em u
 - Plano → Programação → Rota → Execução: [ADR 003](docs/adr/003-plano-programacao-rota-execucao.md)
 - Entrega: [WORKFLOW](docs/WORKFLOW.md)
 
-Abrir a pasta no Android Studio, sincronizar o Gradle e rodar no emulador. O package Android legado permanece `com.gpsdavida.app` por compatibilidade interna.
+Abrir a pasta no Android Studio, sincronizar o Gradle e rodar no emulador. O package Android legado permanece `com.superplanner.app` por compatibilidade interna.

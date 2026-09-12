@@ -1,9 +1,9 @@
-package com.gpsdavida.app.ui.events
+package com.superplanner.app.ui.events
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Event
-import com.gpsdavida.app.domain.usecase.ObserveEvents
+import com.superplanner.app.domain.model.Event
+import com.superplanner.app.domain.usecase.ObserveEvents
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted

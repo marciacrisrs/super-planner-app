@@ -1,11 +1,11 @@
-package com.gpsdavida.app.data.mapper
+package com.superplanner.app.data.mapper
 
-import com.gpsdavida.app.data.local.ActivityExecutionEntity
-import com.gpsdavida.app.domain.model.ActivityExecution
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityInstanceId
-import com.gpsdavida.app.domain.model.ActivityStatus
-import com.gpsdavida.app.domain.model.TimeRange
+import com.superplanner.app.data.local.ActivityExecutionEntity
+import com.superplanner.app.domain.model.ActivityExecution
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.TimeRange
 import java.time.Instant
 
 fun ActivityInstance.toExecutionEntity(): ActivityExecutionEntity = ActivityExecutionEntity(

@@ -1,11 +1,11 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.TaskDao
-import com.gpsdavida.app.data.mapper.toDomain
-import com.gpsdavida.app.data.mapper.toEntity
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.port.TaskRepository
+import com.superplanner.app.data.local.TaskDao
+import com.superplanner.app.data.mapper.toDomain
+import com.superplanner.app.data.mapper.toEntity
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.port.TaskRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

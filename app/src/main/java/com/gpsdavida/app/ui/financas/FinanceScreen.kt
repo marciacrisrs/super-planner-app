@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.financas
+package com.superplanner.app.ui.financas
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.domain.model.FinancialGoalType
+import com.superplanner.app.domain.model.FinancialGoalType
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)

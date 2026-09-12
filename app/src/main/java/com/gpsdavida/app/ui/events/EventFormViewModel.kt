@@ -1,16 +1,16 @@
-package com.gpsdavida.app.ui.events
+package com.superplanner.app.ui.events
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Event
-import com.gpsdavida.app.domain.model.EventId
-import com.gpsdavida.app.domain.model.RecurrenceUnit
-import com.gpsdavida.app.domain.model.TimeRange
-import com.gpsdavida.app.domain.usecase.DeleteEvent
-import com.gpsdavida.app.domain.usecase.GetEvent
-import com.gpsdavida.app.domain.usecase.SaveEvent
-import com.gpsdavida.app.ui.navigation.GpsRoutes
+import com.superplanner.app.domain.model.Event
+import com.superplanner.app.domain.model.EventId
+import com.superplanner.app.domain.model.RecurrenceUnit
+import com.superplanner.app.domain.model.TimeRange
+import com.superplanner.app.domain.usecase.DeleteEvent
+import com.superplanner.app.domain.usecase.GetEvent
+import com.superplanner.app.domain.usecase.SaveEvent
+import com.superplanner.app.ui.navigation.SuperPlannerRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.DayOfWeek
@@ -50,12 +50,12 @@ class EventFormViewModel @Inject constructor(
     private val deleteEvent: DeleteEvent,
 ) : ViewModel() {
     private val eventIdArg: String = checkNotNull(savedStateHandle["eventId"])
-    private val eventId: EventId = if (eventIdArg == GpsRoutes.NEW_EVENT_ID) EventId(UUID.randomUUID().toString()) else EventId(eventIdArg)
+    private val eventId: EventId = if (eventIdArg == SuperPlannerRoutes.NEW_EVENT_ID) EventId(UUID.randomUUID().toString()) else EventId(eventIdArg)
     private val _state = MutableStateFlow(defaultState())
     val state: StateFlow<EventFormUiState> = _state.asStateFlow()
 
     init {
-        if (eventIdArg != GpsRoutes.NEW_EVENT_ID) {
+        if (eventIdArg != SuperPlannerRoutes.NEW_EVENT_ID) {
             viewModelScope.launch {
                 val existing = getEvent(eventId) ?: return@launch
                 _state.value = EventFormUiState(

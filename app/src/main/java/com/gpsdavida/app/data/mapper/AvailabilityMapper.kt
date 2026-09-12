@@ -1,10 +1,10 @@
-package com.gpsdavida.app.data.mapper
+package com.superplanner.app.data.mapper
 
-import com.gpsdavida.app.data.local.AvailabilityEntity
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.AvailabilityId
-import com.gpsdavida.app.domain.model.AvailabilityKind
-import com.gpsdavida.app.domain.model.LocalTimeWindow
+import com.superplanner.app.data.local.AvailabilityEntity
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.AvailabilityId
+import com.superplanner.app.domain.model.AvailabilityKind
+import com.superplanner.app.domain.model.LocalTimeWindow
 import java.time.DayOfWeek
 import java.time.LocalTime
 

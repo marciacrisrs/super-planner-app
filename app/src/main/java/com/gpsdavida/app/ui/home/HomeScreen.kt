@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.home
+package com.superplanner.app.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,17 +22,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.ui.agora.AgoraViewModel
-import com.gpsdavida.app.ui.next.NextActionCard
-import com.gpsdavida.app.ui.next.NextActionUiModel
-import com.gpsdavida.app.ui.tasks.labelRes
-import com.gpsdavida.app.ui.theme.GpsDaVidaColors
-import com.gpsdavida.app.ui.theme.SuperPlannerCard
-import com.gpsdavida.app.ui.theme.SuperPlannerSectionHeader
-import com.gpsdavida.app.ui.theme.SuperPlannerTimeline
-import com.gpsdavida.app.ui.theme.SuperPlannerTimelineItem
-import com.gpsdavida.app.ui.theme.SuperPlannerTimelineState
+import com.superplanner.app.R
+import com.superplanner.app.ui.agora.AgoraViewModel
+import com.superplanner.app.ui.next.NextActionCard
+import com.superplanner.app.ui.next.NextActionUiModel
+import com.superplanner.app.ui.tasks.labelRes
+import com.superplanner.app.ui.theme.SuperPlannerColors
+import com.superplanner.app.ui.theme.SuperPlannerCard
+import com.superplanner.app.ui.theme.SuperPlannerSectionHeader
+import com.superplanner.app.ui.theme.SuperPlannerTimeline
+import com.superplanner.app.ui.theme.SuperPlannerTimelineItem
+import com.superplanner.app.ui.theme.SuperPlannerTimelineState
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -54,7 +54,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(GpsDaVidaColors.Canvas)
+            .background(SuperPlannerColors.Canvas)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -68,15 +68,15 @@ fun HomeScreen(
                 Text(
                     "$greeting, Márcia! ☀️",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = GpsDaVidaColors.Ink,
+                    color = SuperPlannerColors.Ink,
                 )
                 Text(
                     state.currentDate.format(dateFormatter).replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GpsDaVidaColors.InkSoft,
+                    color = SuperPlannerColors.InkSoft,
                 )
             }
-            Text("♡", style = MaterialTheme.typography.headlineMedium, color = GpsDaVidaColors.Terracotta)
+            Text("♡", style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Terracotta)
         }
 
         SuperPlannerCard(modifier = Modifier.fillMaxWidth()) {
@@ -86,20 +86,20 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Seu dia", style = MaterialTheme.typography.titleLarge, color = GpsDaVidaColors.Ink)
+                    Text("Seu dia", style = MaterialTheme.typography.titleLarge, color = SuperPlannerColors.Ink)
                     Text(
                         "Um passo de cada vez. O Super Planner organiza o próximo.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = GpsDaVidaColors.InkSoft,
+                        color = SuperPlannerColors.InkSoft,
                     )
                 }
                 Box(
                     modifier = Modifier
                         .size(54.dp)
-                        .background(GpsDaVidaColors.RoseSoft, CircleShape),
+                        .background(SuperPlannerColors.RoseSoft, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("✦", color = GpsDaVidaColors.Terracotta, style = MaterialTheme.typography.titleLarge)
+                    Text("✦", color = SuperPlannerColors.Terracotta, style = MaterialTheme.typography.titleLarge)
                 }
             }
         }
@@ -115,16 +115,16 @@ fun HomeScreen(
                     priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
                     reasonLabels = state.reasons.map { reason ->
                         when (reason) {
-                            com.gpsdavida.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
-                            com.gpsdavida.app.domain.model.NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
-                            com.gpsdavida.app.domain.model.NextActionReason.HIGHER_PRIORITY -> stringResource(R.string.reason_higher_priority)
-                            com.gpsdavida.app.domain.model.NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
-                            com.gpsdavida.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
-                            com.gpsdavida.app.domain.model.NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
-                            com.gpsdavida.app.domain.model.NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
-                            com.gpsdavida.app.domain.model.NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
-                            com.gpsdavida.app.domain.model.NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
-                            com.gpsdavida.app.domain.model.NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
+                            com.superplanner.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
+                            com.superplanner.app.domain.model.NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
+                            com.superplanner.app.domain.model.NextActionReason.HIGHER_PRIORITY -> stringResource(R.string.reason_higher_priority)
+                            com.superplanner.app.domain.model.NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
+                            com.superplanner.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
+                            com.superplanner.app.domain.model.NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
+                            com.superplanner.app.domain.model.NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
+                            com.superplanner.app.domain.model.NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
+                            com.superplanner.app.domain.model.NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
+                            com.superplanner.app.domain.model.NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
                         }
                     },
                     state = state.state,

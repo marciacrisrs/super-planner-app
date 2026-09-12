@@ -1,8 +1,8 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.ActivityExecution
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivityExecution
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
 import kotlinx.coroutines.flow.Flow
 
 interface ActivityExecutionRepository {

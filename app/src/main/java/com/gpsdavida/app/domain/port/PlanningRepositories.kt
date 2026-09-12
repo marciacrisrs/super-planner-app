@@ -1,13 +1,13 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Dependency
-import com.gpsdavida.app.domain.model.DependencyId
-import com.gpsdavida.app.domain.model.Goal
-import com.gpsdavida.app.domain.model.GoalId
-import com.gpsdavida.app.domain.model.InboxItem
-import com.gpsdavida.app.domain.model.InboxItemId
-import com.gpsdavida.app.domain.model.Project
-import com.gpsdavida.app.domain.model.ProjectId
+import com.superplanner.app.domain.model.Dependency
+import com.superplanner.app.domain.model.DependencyId
+import com.superplanner.app.domain.model.Goal
+import com.superplanner.app.domain.model.GoalId
+import com.superplanner.app.domain.model.InboxItem
+import com.superplanner.app.domain.model.InboxItemId
+import com.superplanner.app.domain.model.Project
+import com.superplanner.app.domain.model.ProjectId
 import kotlinx.coroutines.flow.Flow
 
 interface GoalRepository {

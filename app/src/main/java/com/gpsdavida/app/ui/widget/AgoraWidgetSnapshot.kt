@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.widget
+package com.superplanner.app.ui.widget
 
 import android.content.Context
 

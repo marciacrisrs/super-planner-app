@@ -1,19 +1,19 @@
-package com.gpsdavida.app.ui.lazer
+package com.superplanner.app.ui.lazer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.data.RoomLeisureRepository
-import com.gpsdavida.app.domain.model.Habit
-import com.gpsdavida.app.domain.model.HabitId
-import com.gpsdavida.app.domain.model.LeisureItem
-import com.gpsdavida.app.domain.model.LeisureKind
-import com.gpsdavida.app.domain.model.LeisureStatus
-import com.gpsdavida.app.domain.model.LocalTimeWindow
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.port.HabitRepository
-import com.gpsdavida.app.domain.port.TaskRepository
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
+import com.superplanner.app.data.RoomLeisureRepository
+import com.superplanner.app.domain.model.Habit
+import com.superplanner.app.domain.model.HabitId
+import com.superplanner.app.domain.model.LeisureItem
+import com.superplanner.app.domain.model.LeisureKind
+import com.superplanner.app.domain.model.LeisureStatus
+import com.superplanner.app.domain.model.LocalTimeWindow
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.port.HabitRepository
+import com.superplanner.app.domain.port.TaskRepository
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Duration
 import java.time.LocalTime
@@ -68,7 +68,7 @@ class LeisureViewModel @Inject constructor(
         viewModelScope.launch {
             val clamped = sessions.coerceAtMost(7)
             val days = java.time.DayOfWeek.values().take(clamped).toSet()
-            leisure.saveReadingGoal(com.gpsdavida.app.domain.model.ReadingGoal("reading", minutesPerSession = minutes, sessionsPerWeek = clamped))
+            leisure.saveReadingGoal(com.superplanner.app.domain.model.ReadingGoal("reading", minutesPerSession = minutes, sessionsPerWeek = clamped))
             habits.save(
                 Habit(
                     id = HabitId("reading-reading"),

@@ -1,9 +1,9 @@
-package com.gpsdavida.app.ui.semana
+package com.superplanner.app.ui.semana
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.WeeklyDaySummary
-import com.gpsdavida.app.domain.usecase.ObserveWeeklyPlanning
+import com.superplanner.app.domain.model.WeeklyDaySummary
+import com.superplanner.app.domain.usecase.ObserveWeeklyPlanning
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.LocalDate

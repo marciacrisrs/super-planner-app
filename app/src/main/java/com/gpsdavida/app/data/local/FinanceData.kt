@@ -1,16 +1,16 @@
-package com.gpsdavida.app.data.local
+package com.superplanner.app.data.local
 
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.gpsdavida.app.domain.model.Account
-import com.gpsdavida.app.domain.model.Budget
-import com.gpsdavida.app.domain.model.FinancialGoal
-import com.gpsdavida.app.domain.model.FinancialGoalType
-import com.gpsdavida.app.domain.model.Payable
-import com.gpsdavida.app.domain.model.RecurrenceUnit
-import com.gpsdavida.app.domain.model.Transaction
-import com.gpsdavida.app.domain.model.TransactionType
+import com.superplanner.app.domain.model.Account
+import com.superplanner.app.domain.model.Budget
+import com.superplanner.app.domain.model.FinancialGoal
+import com.superplanner.app.domain.model.FinancialGoalType
+import com.superplanner.app.domain.model.Payable
+import com.superplanner.app.domain.model.RecurrenceUnit
+import com.superplanner.app.domain.model.Transaction
+import com.superplanner.app.domain.model.TransactionType
 import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "finance_accounts")

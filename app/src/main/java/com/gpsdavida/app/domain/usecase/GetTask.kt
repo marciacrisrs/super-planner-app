@@ -1,8 +1,8 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.port.TaskRepository
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.port.TaskRepository
 import javax.inject.Inject
 
 class GetTask @Inject constructor(

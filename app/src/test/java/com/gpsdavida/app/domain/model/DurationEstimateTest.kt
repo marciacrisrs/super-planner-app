@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

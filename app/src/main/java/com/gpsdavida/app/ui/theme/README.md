@@ -7,7 +7,7 @@ The theme package is the single source of truth for the Super Planner visual lan
 - `Color.kt`: semantic palette
 - `Type.kt`: typography
 - `Shape.kt`: shapes and spacing
-- `GpsDaVidaTheme.kt`: Material 3 theme composition
+- `SuperPlannerTheme.kt`: Material 3 theme composition
 - `SuperPlannerComponents.kt`: reusable cards, actions, section headers, progress and timeline
 - `SuperPlannerEmptyState.kt`: empty states and the planner icon vocabulary
 - `SuperPlannerLogo.kt`: product mark

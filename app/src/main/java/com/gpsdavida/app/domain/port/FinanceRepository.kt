@@ -1,10 +1,10 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Account
-import com.gpsdavida.app.domain.model.Budget
-import com.gpsdavida.app.domain.model.FinancialGoal
-import com.gpsdavida.app.domain.model.Payable
-import com.gpsdavida.app.domain.model.Transaction
+import com.superplanner.app.domain.model.Account
+import com.superplanner.app.domain.model.Budget
+import com.superplanner.app.domain.model.FinancialGoal
+import com.superplanner.app.domain.model.Payable
+import com.superplanner.app.domain.model.Transaction
 import kotlinx.coroutines.flow.Flow
 
 interface FinanceRepository {

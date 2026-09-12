@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.planos
+package com.superplanner.app.ui.planos
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts

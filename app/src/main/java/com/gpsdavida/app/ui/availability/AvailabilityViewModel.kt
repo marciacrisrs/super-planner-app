@@ -1,12 +1,12 @@
-package com.gpsdavida.app.ui.availability
+package com.superplanner.app.ui.availability
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.AvailabilityId
-import com.gpsdavida.app.domain.model.AvailabilityKind
-import com.gpsdavida.app.domain.model.LocalTimeWindow
-import com.gpsdavida.app.domain.port.AvailabilityRepository
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.AvailabilityId
+import com.superplanner.app.domain.model.AvailabilityKind
+import com.superplanner.app.domain.model.LocalTimeWindow
+import com.superplanner.app.domain.port.AvailabilityRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.DayOfWeek
 import java.time.LocalTime

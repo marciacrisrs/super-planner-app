@@ -1,4 +1,4 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
 import android.content.Context
 import android.net.Uri

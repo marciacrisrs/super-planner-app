@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 import java.time.Duration
 import java.time.Instant

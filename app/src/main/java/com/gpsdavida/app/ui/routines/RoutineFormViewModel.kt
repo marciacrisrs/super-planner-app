@@ -1,17 +1,17 @@
-package com.gpsdavida.app.ui.routines
+package com.superplanner.app.ui.routines
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.Routine
-import com.gpsdavida.app.domain.model.RoutineId
-import com.gpsdavida.app.domain.model.RoutineStep
-import com.gpsdavida.app.domain.model.RoutineStepId
-import com.gpsdavida.app.domain.usecase.DeleteRoutine
-import com.gpsdavida.app.domain.usecase.GetRoutine
-import com.gpsdavida.app.domain.usecase.SaveRoutine
-import com.gpsdavida.app.ui.navigation.GpsRoutes
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.Routine
+import com.superplanner.app.domain.model.RoutineId
+import com.superplanner.app.domain.model.RoutineStep
+import com.superplanner.app.domain.model.RoutineStepId
+import com.superplanner.app.domain.usecase.DeleteRoutine
+import com.superplanner.app.domain.usecase.GetRoutine
+import com.superplanner.app.domain.usecase.SaveRoutine
+import com.superplanner.app.ui.navigation.SuperPlannerRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.DayOfWeek
 import java.time.Duration
@@ -52,12 +52,12 @@ class RoutineFormViewModel @Inject constructor(
     private val deleteRoutine: DeleteRoutine,
 ) : ViewModel() {
     private val routineIdArg: String = checkNotNull(savedStateHandle["routineId"])
-    private val routineId = if (routineIdArg == GpsRoutes.NEW_ROUTINE_ID) RoutineId(UUID.randomUUID().toString()) else RoutineId(routineIdArg)
+    private val routineId = if (routineIdArg == SuperPlannerRoutes.NEW_ROUTINE_ID) RoutineId(UUID.randomUUID().toString()) else RoutineId(routineIdArg)
     private val _state = MutableStateFlow(RoutineFormUiState())
     val state: StateFlow<RoutineFormUiState> = _state.asStateFlow()
 
     init {
-        if (routineIdArg != GpsRoutes.NEW_ROUTINE_ID) {
+        if (routineIdArg != SuperPlannerRoutes.NEW_ROUTINE_ID) {
             viewModelScope.launch {
                 val existing = getRoutine(routineId) ?: return@launch
                 _state.value = RoutineFormUiState(

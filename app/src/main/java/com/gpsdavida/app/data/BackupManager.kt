@@ -1,15 +1,15 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
 import android.content.Context
 import android.net.Uri
-import com.gpsdavida.app.data.local.GpsDatabase
+import com.superplanner.app.data.local.SuperPlannerDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import javax.inject.Inject
 
 class BackupManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val database: GpsDatabase,
+    private val database: SuperPlannerDatabase,
 ) {
     fun exportTo(uri: Uri) {
         checkpoint()

@@ -1,6 +1,6 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Plan
+import com.superplanner.app.domain.model.Plan
 import kotlinx.coroutines.flow.Flow
 
 interface PlanRepository {

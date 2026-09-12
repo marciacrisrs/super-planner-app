@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.meudia
+package com.superplanner.app.ui.meudia
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,10 +22,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.ui.events.EventRow
-import com.gpsdavida.app.ui.habits.HabitDayRow
-import com.gpsdavida.app.ui.tasks.TaskRow
+import com.superplanner.app.R
+import com.superplanner.app.ui.events.EventRow
+import com.superplanner.app.ui.habits.HabitDayRow
+import com.superplanner.app.ui.tasks.TaskRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

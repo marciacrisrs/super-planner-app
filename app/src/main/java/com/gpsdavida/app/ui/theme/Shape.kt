@@ -1,11 +1,11 @@
-package com.gpsdavida.app.ui.theme
+package com.superplanner.app.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
 /** Rounded geometry used to make screens feel like pages and cards in a planner. */
-val GpsDaVidaShapes = Shapes(
+val SuperPlannerShapes = Shapes(
     extraSmall = RoundedCornerShape(10.dp),
     small = RoundedCornerShape(14.dp),
     medium = RoundedCornerShape(20.dp),
@@ -13,7 +13,7 @@ val GpsDaVidaShapes = Shapes(
     extraLarge = RoundedCornerShape(32.dp),
 )
 
-object GpsDaVidaSpacing {
+object SuperPlannerSpacing {
     val Xs = 4.dp
     val Sm = 8.dp
     val Md = 12.dp

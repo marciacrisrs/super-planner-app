@@ -1,12 +1,12 @@
-package com.gpsdavida.app.ui.agora
+package com.superplanner.app.ui.agora
 
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityStatus
-import com.gpsdavida.app.domain.model.DailyActivity
-import com.gpsdavida.app.domain.model.NextActionDecision
-import com.gpsdavida.app.domain.model.NextActionReason
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.ui.next.NextActionState
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.DailyActivity
+import com.superplanner.app.domain.model.NextActionDecision
+import com.superplanner.app.domain.model.NextActionReason
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.ui.next.NextActionState
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime

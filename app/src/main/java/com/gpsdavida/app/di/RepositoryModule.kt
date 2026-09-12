@@ -1,7 +1,7 @@
-package com.gpsdavida.app.di
+package com.superplanner.app.di
 
-import com.gpsdavida.app.data.*
-import com.gpsdavida.app.domain.port.*
+import com.superplanner.app.data.*
+import com.superplanner.app.domain.port.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

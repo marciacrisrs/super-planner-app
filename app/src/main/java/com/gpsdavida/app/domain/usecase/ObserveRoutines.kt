@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.Routine
-import com.gpsdavida.app.domain.port.RoutineRepository
+import com.superplanner.app.domain.model.Routine
+import com.superplanner.app.domain.port.RoutineRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

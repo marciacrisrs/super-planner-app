@@ -1,13 +1,13 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.AccountEntity
-import com.gpsdavida.app.data.local.BudgetEntity
-import com.gpsdavida.app.data.local.FinanceDao
-import com.gpsdavida.app.data.local.FinancialGoalEntity
-import com.gpsdavida.app.data.local.PayableEntity
-import com.gpsdavida.app.data.local.TransactionEntity
-import com.gpsdavida.app.domain.model.*
-import com.gpsdavida.app.domain.port.FinanceRepository
+import com.superplanner.app.data.local.AccountEntity
+import com.superplanner.app.data.local.BudgetEntity
+import com.superplanner.app.data.local.FinanceDao
+import com.superplanner.app.data.local.FinancialGoalEntity
+import com.superplanner.app.data.local.PayableEntity
+import com.superplanner.app.data.local.TransactionEntity
+import com.superplanner.app.domain.model.*
+import com.superplanner.app.domain.port.FinanceRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

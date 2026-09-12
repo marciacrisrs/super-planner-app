@@ -1,12 +1,12 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityStatus
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.Dependency
-import com.gpsdavida.app.domain.model.DailySchedule
-import com.gpsdavida.app.domain.model.Flexibility
-import com.gpsdavida.app.domain.model.TravelTime
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.Dependency
+import com.superplanner.app.domain.model.DailySchedule
+import com.superplanner.app.domain.model.Flexibility
+import com.superplanner.app.domain.model.TravelTime
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate

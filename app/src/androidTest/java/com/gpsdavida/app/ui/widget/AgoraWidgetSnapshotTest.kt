@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.widget
+package com.superplanner.app.ui.widget
 
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals

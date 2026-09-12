@@ -1,8 +1,8 @@
-package com.gpsdavida.app.di
+package com.superplanner.app.di
 
 import android.content.Context
 import androidx.room.Room
-import com.gpsdavida.app.data.local.*
+import com.superplanner.app.data.local.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,25 +15,25 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): GpsDatabase =
-        Room.databaseBuilder(context, GpsDatabase::class.java, "gps-da-vida.db")
+    fun provideDatabase(@ApplicationContext context: Context): SuperPlannerDatabase =
+        Room.databaseBuilder(context, SuperPlannerDatabase::class.java, "gps-da-vida.db")
             .fallbackToDestructiveMigration(true)
             .build()
 
-    @Provides fun provideAppMetaDao(database: GpsDatabase): AppMetaDao = database.appMetaDao()
-    @Provides fun provideEventDao(database: GpsDatabase): EventDao = database.eventDao()
-    @Provides fun provideTaskDao(database: GpsDatabase): TaskDao = database.taskDao()
-    @Provides fun provideHabitDao(database: GpsDatabase): HabitDao = database.habitDao()
-    @Provides fun provideHabitCompletionDao(database: GpsDatabase): HabitCompletionDao = database.habitCompletionDao()
-    @Provides fun provideRoutineDao(database: GpsDatabase): RoutineDao = database.routineDao()
-    @Provides fun provideAvailabilityDao(database: GpsDatabase): AvailabilityDao = database.availabilityDao()
-    @Provides fun provideActivityExecutionDao(database: GpsDatabase): ActivityExecutionDao = database.activityExecutionDao()
-    @Provides fun provideGoalDao(database: GpsDatabase): GoalDao = database.goalDao()
-    @Provides fun provideProjectDao(database: GpsDatabase): ProjectDao = database.projectDao()
-    @Provides fun provideInboxItemDao(database: GpsDatabase): InboxItemDao = database.inboxItemDao()
-    @Provides fun provideMilestoneDao(database: GpsDatabase): MilestoneDao = database.milestoneDao()
-    @Provides fun provideFinanceDao(database: GpsDatabase): FinanceDao = database.financeDao()
-    @Provides fun provideLifeAreaDao(database: GpsDatabase): LifeAreaDao = database.lifeAreaDao()
-    @Provides fun providePlanDao(database: GpsDatabase): PlanDao = database.planDao()
-    @Provides fun provideLeisureDao(database: GpsDatabase): LeisureDao = database.leisureDao()
+    @Provides fun provideAppMetaDao(database: SuperPlannerDatabase): AppMetaDao = database.appMetaDao()
+    @Provides fun provideEventDao(database: SuperPlannerDatabase): EventDao = database.eventDao()
+    @Provides fun provideTaskDao(database: SuperPlannerDatabase): TaskDao = database.taskDao()
+    @Provides fun provideHabitDao(database: SuperPlannerDatabase): HabitDao = database.habitDao()
+    @Provides fun provideHabitCompletionDao(database: SuperPlannerDatabase): HabitCompletionDao = database.habitCompletionDao()
+    @Provides fun provideRoutineDao(database: SuperPlannerDatabase): RoutineDao = database.routineDao()
+    @Provides fun provideAvailabilityDao(database: SuperPlannerDatabase): AvailabilityDao = database.availabilityDao()
+    @Provides fun provideActivityExecutionDao(database: SuperPlannerDatabase): ActivityExecutionDao = database.activityExecutionDao()
+    @Provides fun provideGoalDao(database: SuperPlannerDatabase): GoalDao = database.goalDao()
+    @Provides fun provideProjectDao(database: SuperPlannerDatabase): ProjectDao = database.projectDao()
+    @Provides fun provideInboxItemDao(database: SuperPlannerDatabase): InboxItemDao = database.inboxItemDao()
+    @Provides fun provideMilestoneDao(database: SuperPlannerDatabase): MilestoneDao = database.milestoneDao()
+    @Provides fun provideFinanceDao(database: SuperPlannerDatabase): FinanceDao = database.financeDao()
+    @Provides fun provideLifeAreaDao(database: SuperPlannerDatabase): LifeAreaDao = database.lifeAreaDao()
+    @Provides fun providePlanDao(database: SuperPlannerDatabase): PlanDao = database.planDao()
+    @Provides fun provideLeisureDao(database: SuperPlannerDatabase): LeisureDao = database.leisureDao()
 }

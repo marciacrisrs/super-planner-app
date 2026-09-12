@@ -1,11 +1,11 @@
-package com.gpsdavida.app.data.mapper
+package com.superplanner.app.data.mapper
 
-import com.gpsdavida.app.data.local.EventEntity
-import com.gpsdavida.app.domain.model.Event
-import com.gpsdavida.app.domain.model.EventId
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.RecurrenceUnit
-import com.gpsdavida.app.domain.model.TimeRange
+import com.superplanner.app.data.local.EventEntity
+import com.superplanner.app.domain.model.Event
+import com.superplanner.app.domain.model.EventId
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.RecurrenceUnit
+import com.superplanner.app.domain.model.TimeRange
 import java.time.Instant
 import java.time.LocalDate
 

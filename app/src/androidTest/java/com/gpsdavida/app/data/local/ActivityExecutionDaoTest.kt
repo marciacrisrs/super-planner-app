@@ -1,9 +1,9 @@
-package com.gpsdavida.app.data.local
+package com.superplanner.app.data.local
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.gpsdavida.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.ActivityStatus
 import java.time.Instant
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -15,13 +15,13 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ActivityExecutionDaoTest {
-    private lateinit var database: GpsDatabase
+    private lateinit var database: SuperPlannerDatabase
 
     @Before
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            GpsDatabase::class.java,
+            SuperPlannerDatabase::class.java,
         ).allowMainThreadQueries().build()
     }
 

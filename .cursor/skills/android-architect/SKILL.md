@@ -18,7 +18,7 @@ Follow [docs/adr/001-arquitetura-inicial.md](../../../docs/adr/001-arquitetura-i
 - Hilt, Navigation Compose, injectable `Clock`
 - Planning engine isolated so future AI can assist without rewriting UI
 - Code/packages in English; UI copy in Portuguese
-- Namespace: `com.gpsdavida.app`; one `:app` module
+- Namespace: `com.superplanner.app`; one `:app` module
 
 ## Next work
 

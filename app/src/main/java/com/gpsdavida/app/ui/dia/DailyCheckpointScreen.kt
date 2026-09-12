@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.dia
+package com.superplanner.app.ui.dia
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement

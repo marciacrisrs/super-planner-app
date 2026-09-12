@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 import java.time.Clock
 import java.time.DayOfWeek

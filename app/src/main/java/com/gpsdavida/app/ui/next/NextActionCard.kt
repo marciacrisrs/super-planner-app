@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.next
+package com.superplanner.app.ui.next
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,12 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.gpsdavida.app.R
-import com.gpsdavida.app.ui.theme.GpsDaVidaColors
-import com.gpsdavida.app.ui.theme.SuperPlannerCard
-import com.gpsdavida.app.ui.theme.SuperPlannerMetadata
-import com.gpsdavida.app.ui.theme.SuperPlannerPrimaryButton
-import com.gpsdavida.app.ui.theme.SuperPlannerSecondaryActions
+import com.superplanner.app.R
+import com.superplanner.app.ui.theme.SuperPlannerColors
+import com.superplanner.app.ui.theme.SuperPlannerCard
+import com.superplanner.app.ui.theme.SuperPlannerMetadata
+import com.superplanner.app.ui.theme.SuperPlannerPrimaryButton
+import com.superplanner.app.ui.theme.SuperPlannerSecondaryActions
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -70,13 +70,13 @@ private fun ReadyContent(
 ) {
     Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         NextLabel()
-        Text(model.title, style = MaterialTheme.typography.headlineMedium, color = GpsDaVidaColors.Ink)
+        Text(model.title, style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Ink)
         MetadataRow(model)
         if (model.reasonLabels.isNotEmpty()) {
             Text(
                 text = model.reasonLabels.take(3).joinToString(" · "),
                 style = MaterialTheme.typography.bodySmall,
-                color = GpsDaVidaColors.InkSoft,
+                color = SuperPlannerColors.InkSoft,
             )
         }
         Spacer(modifier = Modifier.size(1.dp))
@@ -96,10 +96,10 @@ private fun ReadyContent(
 @Composable
 private fun MetadataRow(model: NextActionUiModel) {
     val items = buildList {
-        model.scheduledTime?.let { add(it.format(DateTimeFormatter.ofPattern("HH:mm")) to GpsDaVidaColors.TerracottaDark) }
-        model.durationMinutes?.let { add(stringResource(R.string.next_action_duration, it) to GpsDaVidaColors.Warning) }
-        model.priorityLabel?.let { add(it to GpsDaVidaColors.Rose) }
-        model.contextLabel?.let { add(it to GpsDaVidaColors.Sage) }
+        model.scheduledTime?.let { add(it.format(DateTimeFormatter.ofPattern("HH:mm")) to SuperPlannerColors.TerracottaDark) }
+        model.durationMinutes?.let { add(stringResource(R.string.next_action_duration, it) to SuperPlannerColors.Warning) }
+        model.priorityLabel?.let { add(it to SuperPlannerColors.Rose) }
+        model.contextLabel?.let { add(it to SuperPlannerColors.Sage) }
     }
     SuperPlannerMetadata(items)
 }
@@ -107,15 +107,15 @@ private fun MetadataRow(model: NextActionUiModel) {
 @Composable
 private fun NextLabel() {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("♡", style = MaterialTheme.typography.titleMedium, color = GpsDaVidaColors.Terracotta)
-        Text(stringResource(R.string.next_action_label), style = MaterialTheme.typography.labelLarge, color = GpsDaVidaColors.TerracottaDark)
+        Text("♡", style = MaterialTheme.typography.titleMedium, color = SuperPlannerColors.Terracotta)
+        Text(stringResource(R.string.next_action_label), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
     }
 }
 
 @Composable
 private fun EmptyContent() {
     Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Icon(Icons.Filled.Check, contentDescription = null, tint = GpsDaVidaColors.Sage, modifier = Modifier.size(28.dp))
+        Icon(Icons.Filled.Check, contentDescription = null, tint = SuperPlannerColors.Sage, modifier = Modifier.size(28.dp))
         Text(stringResource(R.string.next_action_empty_title), style = MaterialTheme.typography.headlineSmall)
         Text(stringResource(R.string.next_action_empty_body), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
@@ -124,9 +124,9 @@ private fun EmptyContent() {
 @Composable
 private fun CompletedContent(title: String) {
     Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        Icon(Icons.Filled.Check, contentDescription = null, tint = GpsDaVidaColors.Success, modifier = Modifier.size(44.dp))
+        Icon(Icons.Filled.Check, contentDescription = null, tint = SuperPlannerColors.Success, modifier = Modifier.size(44.dp))
         Column {
-            Text(stringResource(R.string.next_action_completed_label), style = MaterialTheme.typography.labelLarge, color = GpsDaVidaColors.Success)
+            Text(stringResource(R.string.next_action_completed_label), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.Success)
             Text(title, style = MaterialTheme.typography.titleLarge)
         }
     }

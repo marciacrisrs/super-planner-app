@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.backup
+package com.superplanner.app.ui.backup
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult

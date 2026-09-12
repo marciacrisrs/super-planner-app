@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.planejamento
+package com.superplanner.app.ui.planejamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,10 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.domain.model.InboxStatus
-import com.gpsdavida.app.domain.model.Project
-import com.gpsdavida.app.ui.lazer.LeisureScreenV2
-import com.gpsdavida.app.ui.notas.NotesScreenV2
+import com.superplanner.app.domain.model.InboxStatus
+import com.superplanner.app.domain.model.Project
+import com.superplanner.app.ui.lazer.LeisureScreenV2
+import com.superplanner.app.ui.notas.NotesScreenV2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +51,7 @@ fun PlanningScreen(
     var showBackup by remember { mutableStateOf(false) }
     var showLeisure by remember { mutableStateOf(false) }
     var showNotes by remember { mutableStateOf(false) }
-    if (showBackup) { com.gpsdavida.app.ui.backup.BackupScreen(); return }
+    if (showBackup) { com.superplanner.app.ui.backup.BackupScreen(); return }
     if (showLeisure) { LeisureScreenV2(); return }
     if (showNotes) { NotesScreenV2(); return }
 

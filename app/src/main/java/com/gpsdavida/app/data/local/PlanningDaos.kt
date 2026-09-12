@@ -1,4 +1,4 @@
-package com.gpsdavida.app.data.local
+package com.superplanner.app.data.local
 
 import androidx.room.Dao
 import androidx.room.Delete

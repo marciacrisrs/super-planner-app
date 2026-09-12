@@ -1,14 +1,14 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.ActivityExecution
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityInstanceId
-import com.gpsdavida.app.domain.model.ActivitySource
-import com.gpsdavida.app.domain.model.ActivityStatus
-import com.gpsdavida.app.domain.model.Flexibility
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.model.TimeRange
-import com.gpsdavida.app.domain.port.ActivityExecutionRepository
+import com.superplanner.app.domain.model.ActivityExecution
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.Flexibility
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.model.TimeRange
+import com.superplanner.app.domain.port.ActivityExecutionRepository
 import java.time.Duration
 import java.time.Instant
 import kotlinx.coroutines.test.runTest

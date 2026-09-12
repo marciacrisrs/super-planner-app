@@ -1,11 +1,11 @@
-package com.gpsdavida.app.ui.next
+package com.superplanner.app.ui.next
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.gpsdavida.app.ui.theme.GpsDaVidaTheme
+import com.superplanner.app.ui.theme.SuperPlannerTheme
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -21,7 +21,7 @@ class NextActionCardTest {
         var started = false
 
         composeRule.setContent {
-            GpsDaVidaTheme {
+            SuperPlannerTheme {
                 NextActionCard(
                     model = NextActionUiModel(
                         title = "Estudar francês",
@@ -42,7 +42,7 @@ class NextActionCardTest {
     @Test
     fun emptyState_explainsThatThereIsNoNextAction() {
         composeRule.setContent {
-            GpsDaVidaTheme {
+            SuperPlannerTheme {
                 NextActionCard(
                     model = NextActionUiModel(
                         title = "",

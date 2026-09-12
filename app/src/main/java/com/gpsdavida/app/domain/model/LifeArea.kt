@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 data class LifeArea(
     val id: String,

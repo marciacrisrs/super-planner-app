@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.tasks
+package com.superplanner.app.ui.tasks
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,9 +22,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.Task
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.Task
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale

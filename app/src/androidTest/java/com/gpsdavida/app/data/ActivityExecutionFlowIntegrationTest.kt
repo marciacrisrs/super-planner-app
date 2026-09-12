@@ -1,20 +1,20 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.gpsdavida.app.data.local.GpsDatabase
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityInstanceId
-import com.gpsdavida.app.domain.model.ActivitySource
-import com.gpsdavida.app.domain.model.ActivityStatus
-import com.gpsdavida.app.domain.model.Flexibility
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.model.TimeRange
-import com.gpsdavida.app.domain.usecase.ApplyPersistedExecutions
-import com.gpsdavida.app.domain.usecase.DeferActivityInstance
-import com.gpsdavida.app.domain.usecase.RecordActivityExecution
-import com.gpsdavida.app.domain.usecase.SkipActivityInstance
+import com.superplanner.app.data.local.SuperPlannerDatabase
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.Flexibility
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.model.TimeRange
+import com.superplanner.app.domain.usecase.ApplyPersistedExecutions
+import com.superplanner.app.domain.usecase.DeferActivityInstance
+import com.superplanner.app.domain.usecase.RecordActivityExecution
+import com.superplanner.app.domain.usecase.SkipActivityInstance
 import java.time.Instant
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -27,13 +27,13 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ActivityExecutionFlowIntegrationTest {
-    private lateinit var database: GpsDatabase
+    private lateinit var database: SuperPlannerDatabase
 
     @Before
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            GpsDatabase::class.java,
+            SuperPlannerDatabase::class.java,
         ).allowMainThreadQueries().build()
     }
 

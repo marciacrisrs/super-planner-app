@@ -1,8 +1,8 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.TimeRange
-import com.gpsdavida.app.domain.port.ActivityExecutionRepository
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.TimeRange
+import com.superplanner.app.domain.port.ActivityExecutionRepository
 import java.time.Instant
 import javax.inject.Inject
 

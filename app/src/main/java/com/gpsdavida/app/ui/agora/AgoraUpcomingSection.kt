@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.agora
+package com.superplanner.app.ui.agora
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,9 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.gpsdavida.app.R
-import com.gpsdavida.app.ui.theme.GpsDaVidaColors
-import com.gpsdavida.app.ui.theme.SuperPlannerCard
+import com.superplanner.app.R
+import com.superplanner.app.ui.theme.SuperPlannerColors
+import com.superplanner.app.ui.theme.SuperPlannerCard
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -42,7 +42,7 @@ private fun SectionLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
-        color = GpsDaVidaColors.InkSoft,
+        color = SuperPlannerColors.InkSoft,
         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
     )
 }
@@ -64,19 +64,19 @@ private fun UpcomingRow(
             Text(
                 text = item.title,
                 style = if (emphasized) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
-                color = GpsDaVidaColors.Ink,
+                color = SuperPlannerColors.Ink,
                 modifier = Modifier.weight(1f),
             )
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = item.scheduledTime.format(timeFmt),
                     style = MaterialTheme.typography.labelLarge,
-                    color = GpsDaVidaColors.TerracottaDark,
+                    color = SuperPlannerColors.TerracottaDark,
                 )
                 Text(
                     text = stringResource(R.string.next_action_duration, item.durationMinutes),
                     style = MaterialTheme.typography.labelMedium,
-                    color = GpsDaVidaColors.InkSoft,
+                    color = SuperPlannerColors.InkSoft,
                 )
             }
         }

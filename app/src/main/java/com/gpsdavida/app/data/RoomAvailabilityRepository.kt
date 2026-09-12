@@ -1,11 +1,11 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.AvailabilityDao
-import com.gpsdavida.app.data.mapper.toDomain
-import com.gpsdavida.app.data.mapper.toEntity
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.AvailabilityId
-import com.gpsdavida.app.domain.port.AvailabilityRepository
+import com.superplanner.app.data.local.AvailabilityDao
+import com.superplanner.app.data.mapper.toDomain
+import com.superplanner.app.data.mapper.toEntity
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.AvailabilityId
+import com.superplanner.app.domain.port.AvailabilityRepository
 import java.time.DayOfWeek
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow

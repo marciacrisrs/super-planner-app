@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 import java.time.LocalDate
 
@@ -28,7 +28,7 @@ data class Payable(
     val dueDate: LocalDate,
     val amountCents: Long,
     val recurrenceInterval: Int = 1,
-    val recurrenceUnit: com.gpsdavida.app.domain.model.RecurrenceUnit? = null,
+    val recurrenceUnit: com.superplanner.app.domain.model.RecurrenceUnit? = null,
     val paid: Boolean = false,
 )
 

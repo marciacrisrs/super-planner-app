@@ -1,6 +1,6 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.LifeArea
+import com.superplanner.app.domain.model.LifeArea
 import kotlinx.coroutines.flow.Flow
 
 interface LifeAreaRepository {

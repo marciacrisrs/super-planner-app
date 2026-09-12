@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {

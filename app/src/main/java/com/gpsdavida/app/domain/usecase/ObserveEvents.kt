@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.Event
-import com.gpsdavida.app.domain.port.EventRepository
+import com.superplanner.app.domain.model.Event
+import com.superplanner.app.domain.port.EventRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

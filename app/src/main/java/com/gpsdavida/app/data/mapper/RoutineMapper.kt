@@ -1,12 +1,12 @@
-package com.gpsdavida.app.data.mapper
+package com.superplanner.app.data.mapper
 
-import com.gpsdavida.app.data.local.RoutineEntity
-import com.gpsdavida.app.data.local.RoutineStepEntity
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.Routine
-import com.gpsdavida.app.domain.model.RoutineId
-import com.gpsdavida.app.domain.model.RoutineStep
-import com.gpsdavida.app.domain.model.RoutineStepId
+import com.superplanner.app.data.local.RoutineEntity
+import com.superplanner.app.data.local.RoutineStepEntity
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.Routine
+import com.superplanner.app.domain.model.RoutineId
+import com.superplanner.app.domain.model.RoutineStep
+import com.superplanner.app.domain.model.RoutineStepId
 import java.time.DayOfWeek
 import java.time.LocalTime
 

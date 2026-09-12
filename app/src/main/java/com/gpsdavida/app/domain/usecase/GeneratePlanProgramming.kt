@@ -1,14 +1,14 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.data.RoomPlanRepository
-import com.gpsdavida.app.domain.model.Event
-import com.gpsdavida.app.domain.model.EventId
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.model.Plan
-import com.gpsdavida.app.domain.port.EventRepository
-import com.gpsdavida.app.domain.port.TaskRepository
+import com.superplanner.app.data.RoomPlanRepository
+import com.superplanner.app.domain.model.Event
+import com.superplanner.app.domain.model.EventId
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.model.Plan
+import com.superplanner.app.domain.port.EventRepository
+import com.superplanner.app.domain.port.TaskRepository
 import java.time.Duration
 import java.time.ZoneId
 import java.util.UUID
@@ -34,7 +34,7 @@ class GeneratePlanProgramming @Inject constructor(
                     Event(
                         id = EventId("plan-${plan.id}-${item.id}"),
                         title = item.title,
-                        range = com.gpsdavida.app.domain.model.TimeRange(start, start.plus(Duration.ofMinutes(item.durationMinutes.toLong()))),
+                        range = com.superplanner.app.domain.model.TimeRange(start, start.plus(Duration.ofMinutes(item.durationMinutes.toLong()))),
                         recurrenceDays = item.daysOfWeek,
                         priority = Priority.IMPORTANT,
                     ),

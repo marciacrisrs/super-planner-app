@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 enum class LeisureKind { SERIES, BOOK }
 enum class LeisureStatus { WANT, NEXT, ACTIVE, PAUSED, COMPLETED }

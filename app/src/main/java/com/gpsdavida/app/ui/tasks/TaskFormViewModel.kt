@@ -1,16 +1,16 @@
-package com.gpsdavida.app.ui.tasks
+package com.superplanner.app.ui.tasks
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.usecase.CompleteTask
-import com.gpsdavida.app.domain.usecase.DeleteTask
-import com.gpsdavida.app.domain.usecase.GetTask
-import com.gpsdavida.app.domain.usecase.SaveTask
-import com.gpsdavida.app.ui.navigation.GpsRoutes
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.usecase.CompleteTask
+import com.superplanner.app.domain.usecase.DeleteTask
+import com.superplanner.app.domain.usecase.GetTask
+import com.superplanner.app.domain.usecase.SaveTask
+import com.superplanner.app.ui.navigation.SuperPlannerRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import java.time.Duration
@@ -51,14 +51,14 @@ class TaskFormViewModel @Inject constructor(
 
     private val taskIdArg: String = checkNotNull(savedStateHandle["taskId"])
     private val taskId: TaskId =
-        if (taskIdArg == GpsRoutes.NEW_TASK_ID) TaskId(UUID.randomUUID().toString())
+        if (taskIdArg == SuperPlannerRoutes.NEW_TASK_ID) TaskId(UUID.randomUUID().toString())
         else TaskId(taskIdArg)
 
     private val _state = MutableStateFlow(TaskFormUiState())
     val state: StateFlow<TaskFormUiState> = _state.asStateFlow()
 
     init {
-        if (taskIdArg != GpsRoutes.NEW_TASK_ID) {
+        if (taskIdArg != SuperPlannerRoutes.NEW_TASK_ID) {
             viewModelScope.launch {
                 val existing = getTask(taskId) ?: return@launch
                 _state.value = TaskFormUiState(
@@ -130,7 +130,7 @@ class TaskFormViewModel @Inject constructor(
 
     fun setDone(done: Boolean) {
         _state.update { it.copy(done = done) }
-        if (taskIdArg != GpsRoutes.NEW_TASK_ID) {
+        if (taskIdArg != SuperPlannerRoutes.NEW_TASK_ID) {
             viewModelScope.launch { completeTask(taskId, done) }
         }
     }

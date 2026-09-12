@@ -1,9 +1,9 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.LifeAreaDao
-import com.gpsdavida.app.data.local.LifeAreaEntity
-import com.gpsdavida.app.domain.model.LifeArea
-import com.gpsdavida.app.domain.port.LifeAreaRepository
+import com.superplanner.app.data.local.LifeAreaDao
+import com.superplanner.app.data.local.LifeAreaEntity
+import com.superplanner.app.domain.model.LifeArea
+import com.superplanner.app.domain.port.LifeAreaRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 @JvmInline value class EventId(val value: String)
 @JvmInline value class TaskId(val value: String)

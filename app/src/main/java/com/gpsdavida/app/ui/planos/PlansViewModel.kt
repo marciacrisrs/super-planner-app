@@ -1,10 +1,10 @@
-package com.gpsdavida.app.ui.planos
+package com.superplanner.app.ui.planos
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.data.RoomPlanRepository
-import com.gpsdavida.app.domain.model.Plan
-import com.gpsdavida.app.domain.model.PlanStatus
+import com.superplanner.app.data.RoomPlanRepository
+import com.superplanner.app.domain.model.Plan
+import com.superplanner.app.domain.model.PlanStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject

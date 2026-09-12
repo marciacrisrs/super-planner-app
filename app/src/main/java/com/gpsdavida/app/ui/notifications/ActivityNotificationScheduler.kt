@@ -1,13 +1,13 @@
-package com.gpsdavida.app.ui.notifications
+package com.superplanner.app.ui.notifications
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.gpsdavida.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstance
 
 object ActivityNotificationScheduler {
-    private const val ACTION = "com.gpsdavida.app.NOTIFY_ACTIVITY"
+    private const val ACTION = "com.superplanner.app.NOTIFY_ACTIVITY"
     private const val EXTRA_TITLE = "title"
 
     fun schedule(context: Context, activity: ActivityInstance) {

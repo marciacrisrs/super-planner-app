@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.notifications
+package com.superplanner.app.ui.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -6,7 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.gpsdavida.app.R
+import com.superplanner.app.R
 
 class ActivityNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {

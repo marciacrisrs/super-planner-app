@@ -1,19 +1,19 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.ActivityExecution
-import com.gpsdavida.app.domain.model.ActivityStatus
-import com.gpsdavida.app.domain.model.ActivitySource
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.WeeklyActivity
-import com.gpsdavida.app.domain.model.WeeklyActivityKind
-import com.gpsdavida.app.domain.model.WeeklyDaySummary
-import com.gpsdavida.app.domain.model.WeeklyPlanning
-import com.gpsdavida.app.domain.port.ActivityExecutionRepository
-import com.gpsdavida.app.domain.port.AvailabilityRepository
-import com.gpsdavida.app.domain.port.EventRepository
-import com.gpsdavida.app.domain.port.HabitRepository
-import com.gpsdavida.app.domain.port.RoutineRepository
-import com.gpsdavida.app.domain.port.TaskRepository
+import com.superplanner.app.domain.model.ActivityExecution
+import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.WeeklyActivity
+import com.superplanner.app.domain.model.WeeklyActivityKind
+import com.superplanner.app.domain.model.WeeklyDaySummary
+import com.superplanner.app.domain.model.WeeklyPlanning
+import com.superplanner.app.domain.port.ActivityExecutionRepository
+import com.superplanner.app.domain.port.AvailabilityRepository
+import com.superplanner.app.domain.port.EventRepository
+import com.superplanner.app.domain.port.HabitRepository
+import com.superplanner.app.domain.port.RoutineRepository
+import com.superplanner.app.domain.port.TaskRepository
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
@@ -59,10 +59,10 @@ class ObserveWeeklyPlanning @Inject constructor(
     private fun buildWeeklyPlanning(
         startDate: LocalDate,
         zoneId: ZoneId,
-        eventList: List<com.gpsdavida.app.domain.model.Event>,
-        taskList: List<com.gpsdavida.app.domain.model.Task>,
-        habitList: List<com.gpsdavida.app.domain.model.Habit>,
-        routineList: List<com.gpsdavida.app.domain.model.Routine>,
+        eventList: List<com.superplanner.app.domain.model.Event>,
+        taskList: List<com.superplanner.app.domain.model.Task>,
+        habitList: List<com.superplanner.app.domain.model.Habit>,
+        routineList: List<com.superplanner.app.domain.model.Routine>,
         executionList: List<ActivityExecution>,
         availabilityList: List<Availability>,
     ): WeeklyPlanning {
@@ -72,7 +72,7 @@ class ObserveWeeklyPlanning @Inject constructor(
                 events = eventList,
                 tasks = taskList,
                 habits = habitList.map { habit ->
-                    com.gpsdavida.app.domain.model.HabitDay(
+                    com.superplanner.app.domain.model.HabitDay(
                         habit = habit,
                         date = date,
                         completedAt = null,
@@ -117,7 +117,7 @@ class ObserveWeeklyPlanning @Inject constructor(
         return WeeklyPlanning(startDate, startDate.plusDays(6), days)
     }
 
-    private fun com.gpsdavida.app.domain.model.ActivityInstance.kind() = when (source) {
+    private fun com.superplanner.app.domain.model.ActivityInstance.kind() = when (source) {
         is ActivitySource.FromEvent -> WeeklyActivityKind.EVENT
         is ActivitySource.FromTask -> WeeklyActivityKind.TASK
         is ActivitySource.FromHabit -> WeeklyActivityKind.HABIT

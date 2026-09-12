@@ -1,9 +1,9 @@
-package com.gpsdavida.app.ui.habits
+package com.superplanner.app.ui.habits
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Habit
-import com.gpsdavida.app.domain.usecase.ObserveHabits
+import com.superplanner.app.domain.model.Habit
+import com.superplanner.app.domain.usecase.ObserveHabits
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted

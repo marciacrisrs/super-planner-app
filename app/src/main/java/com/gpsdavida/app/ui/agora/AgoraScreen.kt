@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.agora
+package com.superplanner.app.ui.agora
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,13 +18,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.ui.next.NextActionCard
-import com.gpsdavida.app.ui.next.NextActionUiModel
-import com.gpsdavida.app.ui.tasks.labelRes
-import com.gpsdavida.app.ui.theme.GpsDaVidaColors
-import com.gpsdavida.app.ui.widget.AgoraWidgetProvider
-import com.gpsdavida.app.ui.widget.AgoraWidgetSnapshot
+import com.superplanner.app.R
+import com.superplanner.app.ui.next.NextActionCard
+import com.superplanner.app.ui.next.NextActionUiModel
+import com.superplanner.app.ui.tasks.labelRes
+import com.superplanner.app.ui.theme.SuperPlannerColors
+import com.superplanner.app.ui.widget.AgoraWidgetProvider
+import com.superplanner.app.ui.widget.AgoraWidgetSnapshot
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -62,17 +62,17 @@ fun AgoraScreen(
             Text(
                 text = stringResource(R.string.nav_agora),
                 style = MaterialTheme.typography.labelLarge,
-                color = GpsDaVidaColors.TerracottaDark,
+                color = SuperPlannerColors.TerracottaDark,
             )
             Text(
                 text = state.currentTime.format(timeFmt),
                 style = MaterialTheme.typography.displaySmall,
-                color = GpsDaVidaColors.Ink,
+                color = SuperPlannerColors.Ink,
             )
             Text(
                 text = state.currentDate.format(dateFmt),
                 style = MaterialTheme.typography.bodyMedium,
-                color = GpsDaVidaColors.InkSoft,
+                color = SuperPlannerColors.InkSoft,
             )
         }
 

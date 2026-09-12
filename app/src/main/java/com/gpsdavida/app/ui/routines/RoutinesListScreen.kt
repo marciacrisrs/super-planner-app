@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.routines
+package com.superplanner.app.ui.routines
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,8 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.Routine
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.Routine
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

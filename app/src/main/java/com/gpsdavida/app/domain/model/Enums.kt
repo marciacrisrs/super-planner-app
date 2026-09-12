@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 enum class Priority(val weight: Int) {
     REQUIRED(0),

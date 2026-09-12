@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.theme
+package com.superplanner.app.ui.theme
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule

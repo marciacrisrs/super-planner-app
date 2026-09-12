@@ -1,9 +1,9 @@
-package com.gpsdavida.app.ui.backup
+package com.superplanner.app.ui.backup
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.data.BackupManager
+import com.superplanner.app.data.BackupManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers

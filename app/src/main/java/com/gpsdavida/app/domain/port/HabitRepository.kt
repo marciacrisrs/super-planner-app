@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Habit
-import com.gpsdavida.app.domain.model.HabitId
+import com.superplanner.app.domain.model.Habit
+import com.superplanner.app.domain.model.HabitId
 import java.time.Instant
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow

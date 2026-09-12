@@ -1,14 +1,14 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.PlanDao
-import com.gpsdavida.app.data.local.PlanEntity
-import com.gpsdavida.app.data.local.PlanItemEntity
-import com.gpsdavida.app.domain.model.Plan
-import com.gpsdavida.app.domain.model.PlanItem
-import com.gpsdavida.app.domain.model.PlanStatus
-import com.gpsdavida.app.domain.model.PlanType
-import com.gpsdavida.app.domain.model.RecurrenceRule
-import com.gpsdavida.app.domain.port.PlanRepository
+import com.superplanner.app.data.local.PlanDao
+import com.superplanner.app.data.local.PlanEntity
+import com.superplanner.app.data.local.PlanItemEntity
+import com.superplanner.app.domain.model.Plan
+import com.superplanner.app.domain.model.PlanItem
+import com.superplanner.app.domain.model.PlanStatus
+import com.superplanner.app.domain.model.PlanType
+import com.superplanner.app.domain.model.RecurrenceRule
+import com.superplanner.app.domain.port.PlanRepository
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject

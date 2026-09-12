@@ -1,14 +1,14 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.ContextNoteEntity
-import com.gpsdavida.app.data.local.LeisureDao
-import com.gpsdavida.app.data.local.LeisureItemEntity
-import com.gpsdavida.app.data.local.ReadingGoalEntity
-import com.gpsdavida.app.domain.model.ContextNote
-import com.gpsdavida.app.domain.model.LeisureItem
-import com.gpsdavida.app.domain.model.LeisureKind
-import com.gpsdavida.app.domain.model.LeisureStatus
-import com.gpsdavida.app.domain.model.ReadingGoal
+import com.superplanner.app.data.local.ContextNoteEntity
+import com.superplanner.app.data.local.LeisureDao
+import com.superplanner.app.data.local.LeisureItemEntity
+import com.superplanner.app.data.local.ReadingGoalEntity
+import com.superplanner.app.domain.model.ContextNote
+import com.superplanner.app.domain.model.LeisureItem
+import com.superplanner.app.domain.model.LeisureKind
+import com.superplanner.app.domain.model.LeisureStatus
+import com.superplanner.app.domain.model.ReadingGoal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

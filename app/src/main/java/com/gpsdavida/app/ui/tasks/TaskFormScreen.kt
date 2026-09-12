@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.tasks
+package com.superplanner.app.ui.tasks
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,8 +40,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.Priority
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.Priority
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

@@ -1,9 +1,9 @@
-package com.gpsdavida.app.ui.notas
+package com.superplanner.app.ui.notas
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.data.RoomLeisureRepository
-import com.gpsdavida.app.domain.model.ContextNote
+import com.superplanner.app.data.RoomLeisureRepository
+import com.superplanner.app.domain.model.ContextNote
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject

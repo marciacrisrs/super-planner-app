@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.events
+package com.superplanner.app.ui.events
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.Event
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.Event
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale

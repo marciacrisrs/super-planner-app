@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Event
-import com.gpsdavida.app.domain.model.EventId
+import com.superplanner.app.domain.model.Event
+import com.superplanner.app.domain.model.EventId
 import kotlinx.coroutines.flow.Flow
 
 interface EventRepository {

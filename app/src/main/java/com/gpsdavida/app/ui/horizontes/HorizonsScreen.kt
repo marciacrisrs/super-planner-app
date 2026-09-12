@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.horizontes
+package com.superplanner.app.ui.horizontes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

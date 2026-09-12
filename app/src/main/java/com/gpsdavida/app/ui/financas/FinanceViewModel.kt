@@ -1,9 +1,9 @@
-package com.gpsdavida.app.ui.financas
+package com.superplanner.app.ui.financas
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.*
-import com.gpsdavida.app.domain.port.FinanceRepository
+import com.superplanner.app.domain.model.*
+import com.superplanner.app.domain.port.FinanceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.util.UUID

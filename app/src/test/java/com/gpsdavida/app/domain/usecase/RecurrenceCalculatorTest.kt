@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.RecurrenceRule
-import com.gpsdavida.app.domain.model.RecurrenceUnit
+import com.superplanner.app.domain.model.RecurrenceRule
+import com.superplanner.app.domain.model.RecurrenceUnit
 import java.time.DayOfWeek
 import java.time.LocalDate
 import org.junit.Assert.assertEquals

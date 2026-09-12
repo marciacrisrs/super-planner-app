@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Routine
-import com.gpsdavida.app.domain.model.RoutineId
+import com.superplanner.app.domain.model.Routine
+import com.superplanner.app.domain.model.RoutineId
 import kotlinx.coroutines.flow.Flow
 
 interface RoutineRepository {

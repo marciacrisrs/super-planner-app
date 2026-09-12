@@ -1,7 +1,7 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
 import android.content.Context
-import com.gpsdavida.app.domain.model.Plan
+import com.superplanner.app.domain.model.Plan
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
 import javax.inject.Inject

@@ -1,9 +1,9 @@
-package com.gpsdavida.app.domain
+package com.superplanner.app.domain
 
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.usecase.PrioritizeActivities
-import com.gpsdavida.app.domain.usecase.isMandatory
-import com.gpsdavida.app.domain.usecase.weight
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.usecase.PrioritizeActivities
+import com.superplanner.app.domain.usecase.isMandatory
+import com.superplanner.app.domain.usecase.weight
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

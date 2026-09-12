@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.ActivitySource
-import com.gpsdavida.app.domain.model.Dependency
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.Dependency
 
 class DependencyGraph(private val dependencies: List<Dependency>) {
     fun isBlocked(activity: ActivitySource, completed: Set<ActivitySource>): Boolean =

@@ -1,16 +1,16 @@
-package com.gpsdavida.app.ui.agora
+package com.superplanner.app.ui.agora
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.NextActionContext
-import com.gpsdavida.app.domain.usecase.ChooseNextActivity
-import com.gpsdavida.app.domain.usecase.CompleteActivityInstance
-import com.gpsdavida.app.domain.usecase.DeferActivityInstance
-import com.gpsdavida.app.domain.usecase.ObserveExecutableDay
-import com.gpsdavida.app.domain.usecase.RecalculateRoute
-import com.gpsdavida.app.domain.usecase.SkipActivityInstance
-import com.gpsdavida.app.ui.notifications.ActivityNotificationScheduler
+import com.superplanner.app.domain.model.NextActionContext
+import com.superplanner.app.domain.usecase.ChooseNextActivity
+import com.superplanner.app.domain.usecase.CompleteActivityInstance
+import com.superplanner.app.domain.usecase.DeferActivityInstance
+import com.superplanner.app.domain.usecase.ObserveExecutableDay
+import com.superplanner.app.domain.usecase.RecalculateRoute
+import com.superplanner.app.domain.usecase.SkipActivityInstance
+import com.superplanner.app.ui.notifications.ActivityNotificationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import javax.inject.Inject

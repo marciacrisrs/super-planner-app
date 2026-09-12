@@ -1,8 +1,8 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.AvailabilityKind
-import com.gpsdavida.app.domain.model.LocalTimeWindow
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.AvailabilityKind
+import com.superplanner.app.domain.model.LocalTimeWindow
 import java.time.LocalTime
 import javax.inject.Inject
 

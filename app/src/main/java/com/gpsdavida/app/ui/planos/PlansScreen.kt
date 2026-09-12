@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.planos
+package com.superplanner.app.ui.planos
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,8 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.domain.model.Plan
-import com.gpsdavida.app.domain.model.PlanStatus
+import com.superplanner.app.domain.model.Plan
+import com.superplanner.app.domain.model.PlanStatus
 
 @Composable
 fun PlansScreen(viewModel: PlansViewModel = hiltViewModel()) {

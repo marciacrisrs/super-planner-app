@@ -1,14 +1,14 @@
-package com.gpsdavida.app.domain
+package com.superplanner.app.domain
 
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityInstanceId
-import com.gpsdavida.app.domain.model.ActivitySource
-import com.gpsdavida.app.domain.model.ActivityStatus
-import com.gpsdavida.app.domain.model.Flexibility
-import com.gpsdavida.app.domain.model.Priority
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.model.TimeRange
-import com.gpsdavida.app.domain.usecase.ChooseNextActivity
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.Flexibility
+import com.superplanner.app.domain.model.Priority
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.model.TimeRange
+import com.superplanner.app.domain.usecase.ChooseNextActivity
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

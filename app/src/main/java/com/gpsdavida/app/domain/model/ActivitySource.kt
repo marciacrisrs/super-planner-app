@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.model
+package com.superplanner.app.domain.model
 
 sealed interface ActivitySource {
     data class FromEvent(val id: EventId) : ActivitySource

@@ -1,4 +1,4 @@
-package com.gpsdavida.app.di
+package com.superplanner.app.di
 
 import dagger.Module
 import dagger.Provides

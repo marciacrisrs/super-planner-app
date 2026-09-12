@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.notas
+package com.superplanner.app.ui.notas
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

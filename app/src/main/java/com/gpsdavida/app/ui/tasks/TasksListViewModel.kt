@@ -1,11 +1,11 @@
-package com.gpsdavida.app.ui.tasks
+package com.superplanner.app.ui.tasks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.Task
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.usecase.CompleteTask
-import com.gpsdavida.app.domain.usecase.ObserveTasks
+import com.superplanner.app.domain.model.Task
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.usecase.CompleteTask
+import com.superplanner.app.domain.usecase.ObserveTasks
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted

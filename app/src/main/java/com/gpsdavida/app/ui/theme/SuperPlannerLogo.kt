@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.theme
+package com.superplanner.app.ui.theme
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.gpsdavida.app.R
+import com.superplanner.app.R
 
 @Composable
 fun SuperPlannerLogo(

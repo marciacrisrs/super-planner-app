@@ -1,8 +1,8 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
-import com.gpsdavida.app.domain.model.DailyActivity
-import com.gpsdavida.app.domain.port.ActivityExecutionRepository
-import com.gpsdavida.app.domain.port.AvailabilityRepository
+import com.superplanner.app.domain.model.DailyActivity
+import com.superplanner.app.domain.port.ActivityExecutionRepository
+import com.superplanner.app.domain.port.AvailabilityRepository
 import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject

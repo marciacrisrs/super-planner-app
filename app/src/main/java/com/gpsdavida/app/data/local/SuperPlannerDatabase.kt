@@ -1,4 +1,4 @@
-package com.gpsdavida.app.data.local
+package com.superplanner.app.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -17,7 +17,7 @@ import androidx.room.RoomDatabase
     version = 14,
     exportSchema = false,
 )
-abstract class GpsDatabase : RoomDatabase() {
+abstract class SuperPlannerDatabase : RoomDatabase() {
     abstract fun appMetaDao(): AppMetaDao
     abstract fun eventDao(): EventDao
     abstract fun taskDao(): TaskDao

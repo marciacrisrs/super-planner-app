@@ -1,10 +1,10 @@
-package com.gpsdavida.app.domain
+package com.superplanner.app.domain
 
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.AvailabilityId
-import com.gpsdavida.app.domain.model.AvailabilityKind
-import com.gpsdavida.app.domain.model.LocalTimeWindow
-import com.gpsdavida.app.domain.usecase.ResolveAvailableWindows
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.AvailabilityId
+import com.superplanner.app.domain.model.AvailabilityKind
+import com.superplanner.app.domain.model.LocalTimeWindow
+import com.superplanner.app.domain.usecase.ResolveAvailableWindows
 import java.time.DayOfWeek
 import java.time.LocalTime
 import org.junit.Assert.assertEquals

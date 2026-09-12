@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gpsdavida.app"
+    namespace = "com.superplanner.app"
     compileSdk = 36
 
     defaultConfig {

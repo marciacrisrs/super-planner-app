@@ -1,10 +1,10 @@
-package com.gpsdavida.app.data.mapper
+package com.superplanner.app.data.mapper
 
-import com.gpsdavida.app.data.local.HabitEntity
-import com.gpsdavida.app.domain.model.Habit
-import com.gpsdavida.app.domain.model.HabitId
-import com.gpsdavida.app.domain.model.LocalTimeWindow
-import com.gpsdavida.app.domain.model.Priority
+import com.superplanner.app.data.local.HabitEntity
+import com.superplanner.app.domain.model.Habit
+import com.superplanner.app.domain.model.HabitId
+import com.superplanner.app.domain.model.LocalTimeWindow
+import com.superplanner.app.domain.model.Priority
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalTime
@@ -24,7 +24,7 @@ fun HabitEntity.toDomain(): Habit =
             }
         },
         priority = Priority.valueOf(priority),
-        goalId = goalId?.let(::com.gpsdavida.app.domain.model.GoalId),
+        goalId = goalId?.let(::com.superplanner.app.domain.model.GoalId),
     )
 
 fun Habit.toEntity(): HabitEntity =

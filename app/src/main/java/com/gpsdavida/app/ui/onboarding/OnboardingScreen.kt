@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.onboarding
+package com.superplanner.app.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

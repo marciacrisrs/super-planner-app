@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.semana
+package com.superplanner.app.ui.semana
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,10 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.domain.model.WeeklyDaySummary
-import com.gpsdavida.app.ui.theme.GpsDaVidaColors
-import com.gpsdavida.app.ui.theme.SuperPlannerCard
-import com.gpsdavida.app.ui.theme.SuperPlannerMetadata
+import com.superplanner.app.domain.model.WeeklyDaySummary
+import com.superplanner.app.ui.theme.SuperPlannerColors
+import com.superplanner.app.ui.theme.SuperPlannerCard
+import com.superplanner.app.ui.theme.SuperPlannerMetadata
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -38,11 +38,11 @@ fun WeekDayScreen(
         Text(
             text = date.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("pt", "BR"))).replaceFirstChar { it.uppercase() },
             style = MaterialTheme.typography.headlineSmall,
-            color = GpsDaVidaColors.Ink,
+            color = SuperPlannerColors.Ink,
         )
         state?.let { summary ->
             DaySummary(summary)
-        } ?: Text("Carregando…", color = GpsDaVidaColors.InkSoft)
+        } ?: Text("Carregando…", color = SuperPlannerColors.InkSoft)
     }
 }
 
@@ -56,25 +56,25 @@ private fun DaySummary(summary: WeeklyDaySummary) {
             item {
                 SuperPlannerMetadata(
                     items = listOf(
-                        "${summary.plannedCount} atividades" to GpsDaVidaColors.InkSoft,
-                        "${summary.plannedDuration.toMinutes()} min" to GpsDaVidaColors.InkSoft,
-                        "${(summary.completionRatio * 100).toInt()}%" to GpsDaVidaColors.Terracotta,
+                        "${summary.plannedCount} atividades" to SuperPlannerColors.InkSoft,
+                        "${summary.plannedDuration.toMinutes()} min" to SuperPlannerColors.InkSoft,
+                        "${(summary.completionRatio * 100).toInt()}%" to SuperPlannerColors.Terracotta,
                     ),
                 )
             }
             items(summary.activities) { activity ->
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(activity.title, style = MaterialTheme.typography.bodyLarge, color = GpsDaVidaColors.Ink)
+                    Text(activity.title, style = MaterialTheme.typography.bodyLarge, color = SuperPlannerColors.Ink)
                     Text(
                         "${activity.instance.planned.start.atZone(java.time.ZoneId.systemDefault()).toLocalTime()} · ${activity.instance.plannedDuration.toMinutes()} min",
                         style = MaterialTheme.typography.bodySmall,
-                        color = GpsDaVidaColors.InkSoft,
+                        color = SuperPlannerColors.InkSoft,
                     )
                 }
             }
             if (summary.activities.isEmpty()) {
                 item {
-                    Text("Nada planejado para este dia.", color = GpsDaVidaColors.InkSoft)
+                    Text("Nada planejado para este dia.", color = SuperPlannerColors.InkSoft)
                 }
             }
         }

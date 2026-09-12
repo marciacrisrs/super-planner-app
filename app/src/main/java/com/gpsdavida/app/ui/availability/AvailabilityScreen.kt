@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.availability
+package com.superplanner.app.ui.availability
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,8 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.AvailabilityKind
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.AvailabilityKind
 import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
 

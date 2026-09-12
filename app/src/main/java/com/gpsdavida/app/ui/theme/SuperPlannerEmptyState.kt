@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.theme
+package com.superplanner.app.ui.theme
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -46,7 +46,7 @@ fun SuperPlannerIcon(
         modifier = modifier.semantics { this.contentDescription = contentDescription },
     ) {
         val stroke = size.minDimension * 0.09f
-        val color = GpsDaVidaColors.Terracotta
+        val color = SuperPlannerColors.Terracotta
         val center = Offset(size.width / 2f, size.height / 2f)
         val radius = size.minDimension * 0.34f
 
@@ -111,7 +111,7 @@ fun SuperPlannerEmptyState(
         Row(
             modifier = Modifier
                 .size(56.dp)
-                .background(GpsDaVidaColors.RoseSoft, CircleShape),
+                .background(SuperPlannerColors.RoseSoft, CircleShape),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -124,12 +124,12 @@ fun SuperPlannerEmptyState(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = GpsDaVidaColors.Ink,
+            color = SuperPlannerColors.Ink,
         )
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
-            color = GpsDaVidaColors.InkSoft,
+            color = SuperPlannerColors.InkSoft,
         )
         if (actionLabel != null && onAction != null) {
             Button(

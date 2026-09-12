@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.events
+package com.superplanner.app.ui.events
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,8 +40,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gpsdavida.app.R
-import com.gpsdavida.app.domain.model.RecurrenceUnit
+import com.superplanner.app.R
+import com.superplanner.app.domain.model.RecurrenceUnit
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate

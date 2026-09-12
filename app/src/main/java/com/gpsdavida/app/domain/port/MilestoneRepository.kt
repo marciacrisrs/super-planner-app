@@ -1,6 +1,6 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Milestone
+import com.superplanner.app.domain.model.Milestone
 import kotlinx.coroutines.flow.Flow
 
 interface MilestoneRepository {

@@ -1,4 +1,4 @@
-package com.gpsdavida.app.ui.contexto
+package com.superplanner.app.ui.contexto
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -30,8 +30,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.gpsdavida.app.domain.model.LifeArea
-import com.gpsdavida.app.domain.port.LifeAreaRepository
+import com.superplanner.app.domain.model.LifeArea
+import com.superplanner.app.domain.port.LifeAreaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
 import javax.inject.Inject

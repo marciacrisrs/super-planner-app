@@ -1,13 +1,13 @@
-package com.gpsdavida.app.data
+package com.superplanner.app.data
 
-import com.gpsdavida.app.data.local.HabitCompletionDao
-import com.gpsdavida.app.data.local.HabitCompletionEntity
-import com.gpsdavida.app.data.local.HabitDao
-import com.gpsdavida.app.data.mapper.toDomain
-import com.gpsdavida.app.data.mapper.toEntity
-import com.gpsdavida.app.domain.model.Habit
-import com.gpsdavida.app.domain.model.HabitId
-import com.gpsdavida.app.domain.port.HabitRepository
+import com.superplanner.app.data.local.HabitCompletionDao
+import com.superplanner.app.data.local.HabitCompletionEntity
+import com.superplanner.app.data.local.HabitDao
+import com.superplanner.app.data.mapper.toDomain
+import com.superplanner.app.data.mapper.toEntity
+import com.superplanner.app.domain.model.Habit
+import com.superplanner.app.domain.model.HabitId
+import com.superplanner.app.domain.port.HabitRepository
 import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject

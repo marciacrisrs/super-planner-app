@@ -1,7 +1,7 @@
-package com.gpsdavida.app.domain.port
+package com.superplanner.app.domain.port
 
-import com.gpsdavida.app.domain.model.Availability
-import com.gpsdavida.app.domain.model.AvailabilityId
+import com.superplanner.app.domain.model.Availability
+import com.superplanner.app.domain.model.AvailabilityId
 import java.time.DayOfWeek
 import kotlinx.coroutines.flow.Flow
 
