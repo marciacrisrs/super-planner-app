@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-/** Reusable visual primitives for the Super Planner editorial language. */
+/** Reusable primitives for the Super Planner editorial language. */
 @Composable
 fun SuperPlannerCard(
     modifier: Modifier = Modifier,
@@ -35,8 +35,8 @@ fun SuperPlannerCard(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = GpsDaVidaColors.SurfaceWarm),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = GpsDaVidaColors.Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         content = content,
     )
@@ -96,7 +96,7 @@ fun SuperPlannerSecondaryActions(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         OutlinedButton(
             onClick = onSecondary,
