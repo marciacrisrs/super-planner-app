@@ -1,15 +1,17 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.superplanner.app.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.CheckCircleOutline
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,14 +39,15 @@ import com.superplanner.app.ui.home.HomeScreen
 import com.superplanner.app.ui.horizontes.HorizonsScreen
 import com.superplanner.app.ui.horizontes.WeeklyReviewScreen
 import com.superplanner.app.ui.meudia.MeuDiaScreen
-import com.superplanner.app.ui.planejamento.PlanningScreen
 import com.superplanner.app.ui.planos.AdvancedPlansScreen
+import com.superplanner.app.ui.planejamento.PlanningScreen
 import com.superplanner.app.ui.routines.RoutineFormScreen
 import com.superplanner.app.ui.routines.RoutinesListScreen
 import com.superplanner.app.ui.semana.WeekDayScreen
 import com.superplanner.app.ui.semana.WeekScreen
 import com.superplanner.app.ui.tasks.TaskFormScreen
 import com.superplanner.app.ui.tasks.TasksListScreen
+import com.superplanner.app.ui.theme.SuperPlannerColors
 import java.time.LocalDate
 
 @Composable
@@ -52,16 +55,57 @@ fun SuperPlannerNavHost() {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
-    val showBar = currentRoute in setOf(SuperPlannerRoutes.AGORA, SuperPlannerRoutes.MEU_DIA, SuperPlannerRoutes.PLANNING, SuperPlannerRoutes.EVENTS, SuperPlannerRoutes.TASKS)
-    Scaffold(bottomBar = {
-        if (showBar) NavigationBar {
-            NavigationBarItem(currentRoute == SuperPlannerRoutes.AGORA, { navController.navigateToTab(SuperPlannerRoutes.AGORA) }, { Icon(Icons.Filled.Home, null) }, label = { Text(stringResource(R.string.nav_agora)) })
-            NavigationBarItem(currentRoute == SuperPlannerRoutes.MEU_DIA, { navController.navigateToTab(SuperPlannerRoutes.MEU_DIA) }, { Icon(Icons.Filled.DateRange, null) }, label = { Text(stringResource(R.string.nav_meu_dia)) })
-            NavigationBarItem(currentRoute == SuperPlannerRoutes.PLANNING, { navController.navigateToTab(SuperPlannerRoutes.PLANNING) }, { Icon(Icons.Filled.Settings, null) }, label = { Text("Planejar") })
-            NavigationBarItem(currentRoute == SuperPlannerRoutes.EVENTS, { navController.navigateToTab(SuperPlannerRoutes.EVENTS) }, { Icon(Icons.Filled.List, null) }, label = { Text(stringResource(R.string.nav_eventos)) })
-            NavigationBarItem(currentRoute == SuperPlannerRoutes.TASKS, { navController.navigateToTab(SuperPlannerRoutes.TASKS) }, { Icon(Icons.Filled.Check, null) }, label = { Text(stringResource(R.string.nav_tarefas)) })
-        }
-    }) { padding ->
+    val showBar = currentRoute in setOf(
+        SuperPlannerRoutes.AGORA,
+        SuperPlannerRoutes.MEU_DIA,
+        SuperPlannerRoutes.PLANNING,
+        SuperPlannerRoutes.EVENTS,
+        SuperPlannerRoutes.TASKS,
+    )
+
+    Scaffold(
+        bottomBar = {
+            if (showBar) NavigationBar(
+                containerColor = SuperPlannerColors.Surface.copy(alpha = 0.96f),
+            ) {
+                NavigationBarItem(
+                    selected = currentRoute == SuperPlannerRoutes.AGORA,
+                    onClick = { navController.navigateToTab(SuperPlannerRoutes.AGORA) },
+                    icon = { Icon(Icons.Outlined.Home, null) },
+                    label = { Text(stringResource(R.string.nav_agora)) },
+                    colors = navColors(),
+                )
+                NavigationBarItem(
+                    selected = currentRoute == SuperPlannerRoutes.MEU_DIA,
+                    onClick = { navController.navigateToTab(SuperPlannerRoutes.MEU_DIA) },
+                    icon = { Icon(Icons.Outlined.CalendarToday, null) },
+                    label = { Text(stringResource(R.string.nav_meu_dia)) },
+                    colors = navColors(),
+                )
+                NavigationBarItem(
+                    selected = currentRoute == SuperPlannerRoutes.PLANNING,
+                    onClick = { navController.navigateToTab(SuperPlannerRoutes.PLANNING) },
+                    icon = { Icon(Icons.Outlined.FavoriteBorder, null) },
+                    label = { Text("Planejar") },
+                    colors = navColors(),
+                )
+                NavigationBarItem(
+                    selected = currentRoute == SuperPlannerRoutes.EVENTS,
+                    onClick = { navController.navigateToTab(SuperPlannerRoutes.EVENTS) },
+                    icon = { Icon(Icons.Outlined.Menu, null) },
+                    label = { Text(stringResource(R.string.nav_eventos)) },
+                    colors = navColors(),
+                )
+                NavigationBarItem(
+                    selected = currentRoute == SuperPlannerRoutes.TASKS,
+                    onClick = { navController.navigateToTab(SuperPlannerRoutes.TASKS) },
+                    icon = { Icon(Icons.Outlined.CheckCircleOutline, null) },
+                    label = { Text(stringResource(R.string.nav_tarefas)) },
+                    colors = navColors(),
+                )
+            }
+        },
+    ) { padding ->
         NavHost(navController, SuperPlannerRoutes.AGORA, Modifier.padding(padding)) {
             composable(SuperPlannerRoutes.AGORA) { HomeScreen() }
             composable(SuperPlannerRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(SuperPlannerRoutes.eventEditor()) }, { navController.navigate(SuperPlannerRoutes.eventEditor(it)) }, { navController.navigate(SuperPlannerRoutes.taskEditor(it)) }, { navController.navigate(SuperPlannerRoutes.habitEditor(it)) }, { navController.navigate(SuperPlannerRoutes.AVAILABILITY) }, { navController.navigate(SuperPlannerRoutes.WEEK) }) }
@@ -87,4 +131,19 @@ fun SuperPlannerNavHost() {
     }
 }
 
-private fun NavHostController.navigateToTab(route: String) { navigate(route) { popUpTo(graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } }
+@Composable
+private fun navColors() = NavigationBarItemDefaults.colors(
+    selectedIconColor = SuperPlannerColors.TerracottaDark,
+    selectedTextColor = SuperPlannerColors.TerracottaDark,
+    indicatorColor = SuperPlannerColors.TerracottaSoft,
+    unselectedIconColor = SuperPlannerColors.InkSoft,
+    unselectedTextColor = SuperPlannerColors.InkSoft,
+)
+
+private fun NavHostController.navigateToTab(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
