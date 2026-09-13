@@ -1,43 +1,55 @@
 package com.superplanner.app.ui.planejamento
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Backup
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.CheckCircleOutline
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.Flag
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Loop
+import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material.icons.outlined.Paid
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.domain.model.InboxStatus
 import com.superplanner.app.domain.model.Project
-import com.superplanner.app.ui.lazer.LeisureScreenV2
-import com.superplanner.app.ui.notas.NotesScreenV2
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanningScreen(
     onOpenHorizons: () -> Unit,
@@ -48,55 +60,263 @@ fun PlanningScreen(
     onOpenPlans: () -> Unit,
     viewModel: PlanningViewModel = hiltViewModel(),
 ) {
-    var showBackup by remember { mutableStateOf(false) }
-    var showLeisure by remember { mutableStateOf(false) }
-    var showNotes by remember { mutableStateOf(false) }
-    if (showBackup) { com.superplanner.app.ui.backup.BackupScreen(); return }
-    if (showLeisure) { LeisureScreenV2(); return }
-    if (showNotes) { NotesScreenV2(); return }
-
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var tab by remember { mutableIntStateOf(0) }
-    var addDialog by remember { mutableStateOf<String?>(null) }
+    var addType by remember { mutableStateOf<AddType?>(null) }
     var projectForStep by remember { mutableStateOf<Project?>(null) }
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Planejamento") }, actions = {
-                TextButton(onClick = onOpenHorizons) { Text("Horizontes") }
-                TextButton(onClick = onOpenReview) { Text("Revisão") }
-                TextButton(onClick = onOpenFinance) { Text("Finanças") }
-                TextButton(onClick = onOpenLifeAreas) { Text("Áreas") }
-                TextButton(onClick = onOpenDayCheckpoint) { Text("Hoje") }
-                TextButton(onClick = onOpenPlans) { Text("Planos") }
-                TextButton(onClick = { showLeisure = true }) { Text("Lazer") }
-                TextButton(onClick = { showNotes = true }) { Text("Notas") }
-                TextButton(onClick = { showBackup = true }) { Text("Backup") }
-            })
-        },
-        floatingActionButton = { FloatingActionButton(onClick = { addDialog = when (tab) { 0 -> "goal"; 1 -> "project"; else -> "inbox" } }) { Icon(Icons.Filled.Add, "Adicionar") } },
-    ) { padding ->
-        Column(Modifier.padding(padding)) {
-            TabRow(selectedTabIndex = tab) {
-                Tab(tab == 0, { tab = 0 }, text = { Text("Metas") })
-                Tab(tab == 1, { tab = 1 }, text = { Text("Projetos") })
-                Tab(tab == 2, { tab = 2 }, text = { Text("Inbox") })
+    var showMore by remember { mutableStateOf(false) }
+
+    Scaffold { padding ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(padding),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Planejar", style = MaterialTheme.typography.headlineMedium)
+                        Box(Modifier.weight(1f))
+                        IconButton(onClick = { showMore = !showMore }) {
+                            Icon(Icons.Outlined.MoreHoriz, contentDescription = "Mais opções")
+                        }
+                    }
+                    Text(
+                        "Organize o que importa. Depois, deixe a Rota transformar isso em ação.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-            LazyColumn(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                when (tab) {
-                    0 -> items(state.goals) { goal -> Card(Modifier.fillMaxWidth()) { Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(goal.title); TextButton({ viewModel.deleteGoal(goal.id.value) }) { Text("Excluir") } } } }
-                    1 -> items(state.projects) { project -> Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(project.title); Text("${project.steps.size} etapas"); project.steps.forEach { Text("• ${it.title} — ${it.plannedDuration.toMinutes()} min") }; Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { TextButton({ projectForStep = project }) { Text("Adicionar etapa") }; TextButton({ viewModel.deleteProject(project.id.value) }) { Text("Excluir") } } } } }
-                    else -> items(state.inbox.filter { it.status != InboxStatus.DISCARDED }) { item -> Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(item.text); Text(item.status.name.lowercase().replace('_', ' ')); Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { TextButton({ viewModel.setInboxStatus(item, InboxStatus.SOMEDAY) }) { Text("Someday") }; TextButton({ viewModel.setInboxStatus(item, InboxStatus.WAITING) }) { Text("Aguardando") }; TextButton({ viewModel.setInboxStatus(item, InboxStatus.PROCESSED) }) { Text("Processado") } }; TextButton({ viewModel.deleteInbox(item.id.value) }) { Text("Excluir") } } } }
+
+            item {
+                SectionLabel("O que importa")
+            }
+            item {
+                PlanningCard(
+                    icon = Icons.Outlined.Timeline,
+                    title = "Horizontes",
+                    subtitle = "Onde quero chegar?",
+                    onClick = onOpenHorizons,
+                )
+            }
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SmallPlanningCard(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.Flag,
+                        title = "Áreas",
+                        subtitle = "O que cuidar",
+                        onClick = onOpenLifeAreas,
+                    )
+                    SmallPlanningCard(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.CheckCircleOutline,
+                        title = "Metas",
+                        subtitle = "O que conquistar",
+                        onClick = { addType = AddType.GOAL },
+                    )
+                }
+            }
+
+            item { SectionLabel("O que estou construindo") }
+            item {
+                PlanningCard(
+                    icon = Icons.Outlined.FolderOpen,
+                    title = "Projetos",
+                    subtitle = if (state.projects.isEmpty()) "Transforme uma meta em resultado concreto" else "${state.projects.size} projeto(s) em andamento",
+                    onClick = { addType = AddType.PROJECT },
+                )
+            }
+            if (state.projects.isNotEmpty()) {
+                items(state.projects.take(3), key = { it.id.value }) { project ->
+                    ProjectPreview(project = project, onAddStep = { projectForStep = project }, onDelete = { viewModel.deleteProject(project.id.value) })
+                }
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SmallPlanningCard(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.EditNote,
+                        title = "Planos",
+                        subtitle = "Como fazer",
+                        onClick = onOpenPlans,
+                    )
+                    SmallPlanningCard(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.Loop,
+                        title = "Rotinas",
+                        subtitle = "O que se repete",
+                        onClick = onOpenDayCheckpoint,
+                    )
+                }
+            }
+
+            item { SectionLabel("O que ainda precisa de atenção") }
+            item {
+                InboxCard(
+                    count = state.inbox.count { it.status != InboxStatus.DISCARDED },
+                    onClick = { addType = AddType.INBOX },
+                )
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().clickable(onClick = onOpenReview),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        Icon(Icons.Outlined.Refresh, contentDescription = null, modifier = Modifier.size(28.dp))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Text("Revisar minha vida", style = MaterialTheme.typography.titleMedium)
+                            Text("Pare, olhe e ajuste o que mudou.", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Icon(Icons.Outlined.ArrowForward, contentDescription = null)
+                    }
+                }
+            }
+
+            if (showMore) {
+                item { SectionLabel("Outras ferramentas") }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = onOpenFinance, modifier = Modifier.weight(1f)) { Icon(Icons.Outlined.Paid, null); Text(" Finanças") }
+                        OutlinedButton(onClick = onOpenDayCheckpoint, modifier = Modifier.weight(1f)) { Icon(Icons.Outlined.CalendarToday, null); Text(" Hoje") }
+                    }
+                }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { showMore = false }, modifier = Modifier.weight(1f)) { Icon(Icons.Outlined.EditNote, null); Text(" Notas") }
+                        OutlinedButton(onClick = { showMore = false }, modifier = Modifier.weight(1f)) { Icon(Icons.Outlined.Backup, null); Text(" Backup") }
+                    }
                 }
             }
         }
     }
-    addDialog?.let { type ->
+
+    addType?.let { type ->
         var text by remember(type) { mutableStateOf("") }
-        AlertDialog(onDismissRequest = { addDialog = null }, title = { Text(when (type) { "goal" -> "Nova meta"; "project" -> "Novo projeto"; else -> "Capturar ideia" }) }, text = { OutlinedTextField(text, { text = it }, Modifier.fillMaxWidth(), singleLine = true) }, confirmButton = { Button({ when (type) { "goal" -> viewModel.createGoal(text); "project" -> viewModel.createProject(text, null); else -> viewModel.capture(text) }; addDialog = null }) { Text("Salvar") } }, dismissButton = { TextButton({ addDialog = null }) { Text("Cancelar") } })
+        AlertDialog(
+            onDismissRequest = { addType = null },
+            title = { Text(when (type) { AddType.GOAL -> "Nova meta"; AddType.PROJECT -> "Novo projeto"; AddType.INBOX -> "Capturar ideia" }) },
+            text = { OutlinedTextField(value = text, onValueChange = { text = it }, modifier = Modifier.fillMaxWidth(), singleLine = true) },
+            confirmButton = {
+                TextButton(onClick = {
+                    when (type) {
+                        AddType.GOAL -> viewModel.createGoal(text)
+                        AddType.PROJECT -> viewModel.createProject(text, null)
+                        AddType.INBOX -> viewModel.capture(text)
+                    }
+                    addType = null
+                }) { Text("Salvar") }
+            },
+            dismissButton = { TextButton(onClick = { addType = null }) { Text("Cancelar") } },
+        )
     }
+
     projectForStep?.let { project ->
         var title by remember(project.id) { mutableStateOf("") }
         var minutes by remember(project.id) { mutableStateOf("30") }
-        AlertDialog(onDismissRequest = { projectForStep = null }, title = { Text("Nova etapa") }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { OutlinedTextField(title, { title = it }, label = { Text("Etapa") }); OutlinedTextField(minutes, { minutes = it.filter(Char::isDigit) }, label = { Text("Minutos") }) } }, confirmButton = { Button({ viewModel.addProjectStep(project, title, minutes.toLongOrNull() ?: 30); projectForStep = null }) { Text("Salvar") } }, dismissButton = { TextButton({ projectForStep = null }) { Text("Cancelar") } })
+        AlertDialog(
+            onDismissRequest = { projectForStep = null },
+            title = { Text("Nova etapa") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(title, { title = it }, label = { Text("Etapa") })
+                    OutlinedTextField(minutes, { minutes = it.filter(Char::isDigit) }, label = { Text("Minutos") })
+                }
+            },
+            confirmButton = { TextButton(onClick = { viewModel.addProjectStep(project, title, minutes.toLongOrNull() ?: 30); projectForStep = null }) { Text("Salvar") } },
+            dismissButton = { TextButton(onClick = { projectForStep = null }) { Text("Cancelar") } },
+        )
+    }
+}
+
+private enum class AddType { GOAL, PROJECT, INBOX }
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, start = 4.dp))
+}
+
+@Composable
+private fun PlanningCard(icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Row(Modifier.fillMaxWidth().padding(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Icon(icon, null, Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, style = MaterialTheme.typography.titleLarge)
+                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Icon(Icons.Outlined.ArrowForward, null)
+        }
+    }
+}
+
+@Composable
+private fun SmallPlanningCard(modifier: Modifier, icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit) {
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(icon, null, Modifier.size(26.dp), tint = MaterialTheme.colorScheme.primary)
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun ProjectPreview(project: Project, onAddStep: () -> Unit, onDelete: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(project.title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                if (project.steps.isEmpty()) "Ainda sem etapas" else "${project.steps.size} etapa(s)",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (project.steps.isNotEmpty()) {
+                project.steps.take(2).forEach { Text("• ${it.title}", style = MaterialTheme.typography.bodyMedium) }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextButton(onClick = onAddStep) { Text("Adicionar etapa") }
+                TextButton(onClick = onDelete) { Text("Excluir") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InboxCard(count: Int, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Icon(Icons.Outlined.EditNote, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text("Inbox", style = MaterialTheme.typography.titleMedium)
+                Text(if (count == 0) "Está tudo organizado." else "$count item(ns) aguardando organização.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Icon(Icons.Outlined.ArrowForward, null)
+        }
     }
 }
