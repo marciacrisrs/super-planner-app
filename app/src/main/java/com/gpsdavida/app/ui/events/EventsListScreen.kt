@@ -10,8 +10,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -49,8 +51,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.R
 import com.superplanner.app.domain.model.Event
-import com.superplanner.app.ui.theme.SuperPlannerColors
 import com.superplanner.app.ui.theme.SuperPlannerCard
+import com.superplanner.app.ui.theme.SuperPlannerColors
 import com.superplanner.app.ui.theme.SuperPlannerSoftBackground
 import java.time.LocalDate
 import java.time.ZoneId
@@ -67,6 +69,7 @@ fun EventsListScreen(
     val events by viewModel.events.collectAsStateWithLifecycle()
     val isImporting by viewModel.isImporting.collectAsStateWithLifecycle()
     val importedCount by viewModel.importedCount.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var pendingCalendarImport by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -78,11 +81,7 @@ fun EventsListScreen(
 
     fun importGoogleCalendar() {
         pendingCalendarImport = true
-        if (ContextCompat.checkSelfPermission(
-                androidx.compose.ui.platform.LocalContext.current,
-                Manifest.permission.READ_CALENDAR,
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
             viewModel.importFromGoogleCalendar()
             pendingCalendarImport = false
         } else {
@@ -161,21 +160,14 @@ private fun EditorialEventsDecorations() {
         Image(
             painter = painterResource(R.drawable.sp_decor_leaves_right),
             contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(170.dp)
-                .padding(top = 18.dp)
-                .background(Color.Transparent),
+            modifier = Modifier.align(Alignment.TopEnd).size(170.dp).padding(top = 18.dp),
             contentScale = ContentScale.Fit,
             alpha = 0.18f,
         )
         Image(
             painter = painterResource(R.drawable.sp_decor_pink_blob),
             contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .size(150.dp)
-                .padding(bottom = 18.dp),
+            modifier = Modifier.align(Alignment.BottomStart).size(150.dp).padding(bottom = 18.dp),
             contentScale = ContentScale.Fit,
             alpha = 0.16f,
         )
@@ -241,7 +233,7 @@ private fun CalendarImportCard(
                 }
                 Text(stringResource(R.string.events_import_google))
             }
-            androidx.compose.material3.TextButton(
+            TextButton(
                 onClick = onCreate,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             ) {
