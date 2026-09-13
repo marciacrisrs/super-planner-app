@@ -31,6 +31,7 @@ enum class RecalculationReason {
     EXECUTION_CHANGED,
     ACTIVITY_CHANGED,
     AVAILABILITY_CHANGED,
+    USER_REQUESTED,
 }
 
 data class RouteSnapshot(
