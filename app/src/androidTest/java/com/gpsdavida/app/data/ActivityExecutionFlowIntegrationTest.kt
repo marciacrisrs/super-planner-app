@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.superplanner.app.data.local.SuperPlannerDatabase
+import com.superplanner.app.domain.model.ActivityExecution
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.ActivitySource
@@ -12,8 +13,8 @@ import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.TaskId
 import com.superplanner.app.domain.model.TimeRange
 import com.superplanner.app.domain.usecase.ApplyPersistedExecutions
-import com.superplanner.app.domain.usecase.DeferActivityInstance
 import com.superplanner.app.domain.usecase.RecordActivityExecution
+import com.superplanner.app.domain.usecase.DeferActivityInstance
 import com.superplanner.app.domain.usecase.SkipActivityInstance
 import java.time.Instant
 import kotlinx.coroutines.flow.first
@@ -43,49 +44,65 @@ class ActivityExecutionFlowIntegrationTest {
     }
 
     @Test
-    fun `complete skip and defer survive repository recreation`() = runTest {
+    fun `start complete skip and defer survive repository recreation`() = runTest {
         val activity = sampleActivity("activity-complete")
-        completeThroughFreshRepository(activity)
-        assertRecovered(activity.id, ActivityStatus.DONE)
+        val actualStart = Instant.parse("2026-01-01T09:15:00Z")
+        val actualEnd = Instant.parse("2026-01-01T10:20:00Z")
+        val repository = freshRepository()
+        val record = RecordActivityExecution(repository)
+
+        record.start(activity, actualStart)
+        val restartedRepository = freshRepository()
+        assertEquals(ActivityStatus.IN_PROGRESS, restartedRepository.getById(activity.id)?.status)
+        assertEquals(actualStart, restartedRepository.getById(activity.id)?.actualStart)
+
+        RecordActivityExecution(restartedRepository).complete(activity, actualEnd)
+        assertRecovered(activity.id, ActivityStatus.DONE, actualStart, actualEnd)
 
         val skipped = sampleActivity("activity-skip")
         skipThroughFreshRepository(skipped)
-        assertRecovered(skipped.id, ActivityStatus.SKIPPED)
+        assertRecovered(skipped.id, ActivityStatus.SKIPPED, null, null)
 
         val deferred = sampleActivity("activity-defer")
         deferThroughFreshRepository(deferred)
-        assertRecovered(deferred.id, ActivityStatus.DEFERRED)
+        assertRecovered(deferred.id, ActivityStatus.DEFERRED, null, null)
     }
 
     @Test
     fun `observeAll returns persisted executions for overlay`() = runTest {
-        val repository = RoomActivityExecutionRepository(database.activityExecutionDao())
+        val repository = freshRepository()
         val record = RecordActivityExecution(repository)
         val activity = sampleActivity("activity-overlay")
-        val completed = activity.completed(
-            TimeRange(
-                Instant.parse("2026-01-01T09:00:00Z"),
-                Instant.parse("2026-01-01T09:40:00Z"),
-            ),
-        )
+        val actualStart = Instant.parse("2026-01-01T09:10:00Z")
+        val actualEnd = Instant.parse("2026-01-01T10:40:00Z")
 
-        record.complete(activity, completed.actual!!.start, completed.actual.end)
+        record.start(activity, actualStart)
+        record.complete(activity, actualEnd)
 
-        val recreated = RoomActivityExecutionRepository(database.activityExecutionDao())
+        val recreated = freshRepository()
         val persisted = recreated.observeAll().first().associateBy { it.activityInstanceId }
         val merged = ApplyPersistedExecutions()(listOf(activity), persisted).single()
 
         assertEquals(ActivityStatus.DONE, merged.status)
-        assertEquals(completed.actual, merged.actual)
+        assertEquals(actualStart, merged.actualStart)
+        assertEquals(TimeRange(actualStart, actualEnd), merged.actual)
     }
 
-    private suspend fun completeThroughFreshRepository(activity: ActivityInstance) {
-        val repository = RoomActivityExecutionRepository(database.activityExecutionDao())
-        RecordActivityExecution(repository).complete(
-            activity,
-            activity.planned.start,
-            Instant.parse("2026-01-01T10:00:00Z"),
-        )
+    @Test
+    fun `in-progress execution overlays onto a freshly scheduled activity`() = runTest {
+        val repository = freshRepository()
+        val record = RecordActivityExecution(repository)
+        val activity = sampleActivity("activity-running")
+        val actualStart = Instant.parse("2026-01-01T09:25:00Z")
+
+        record.start(activity, actualStart)
+
+        val persisted = freshRepository().observeAll().first().associateBy { it.activityInstanceId }
+        val merged = ApplyPersistedExecutions()(listOf(activity), persisted).single()
+
+        assertEquals(ActivityStatus.IN_PROGRESS, merged.status)
+        assertEquals(actualStart, merged.actualStart)
+        assertNull(merged.actual)
     }
 
     private suspend fun skipThroughFreshRepository(activity: ActivityInstance) {
@@ -96,12 +113,18 @@ class ActivityExecutionFlowIntegrationTest {
         DeferActivityInstance(RecordActivityExecution(freshRepository())).invoke(activity)
     }
 
-    private suspend fun assertRecovered(id: ActivityInstanceId, status: ActivityStatus) {
+    private suspend fun assertRecovered(
+        id: ActivityInstanceId,
+        status: ActivityStatus,
+        actualStart: Instant?,
+        actualEnd: Instant?,
+    ) {
         val loaded = freshRepository().getById(id)
         requireNotNull(loaded)
         assertEquals(status, loaded.status)
-        if (status == ActivityStatus.DONE) {
-            assertEquals(Instant.parse("2026-01-01T10:00:00Z"), loaded.actual?.end)
+        assertEquals(actualStart, loaded.actualStart)
+        if (actualStart != null && actualEnd != null) {
+            assertEquals(TimeRange(actualStart, actualEnd), loaded.actual)
         } else {
             assertNull(loaded.actual)
         }
