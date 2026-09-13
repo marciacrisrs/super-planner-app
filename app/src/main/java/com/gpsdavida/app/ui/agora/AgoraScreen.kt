@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.R
+import com.superplanner.app.domain.model.RouteFeedbackReason
 import com.superplanner.app.ui.next.NextActionCard
 import com.superplanner.app.ui.next.NextActionUiModel
 import com.superplanner.app.ui.tasks.labelRes
@@ -41,18 +42,25 @@ fun AgoraScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val currentActivity = state.currentActivity
     var showCapacityDialog by remember { mutableStateOf(false) }
+    var showFeedbackDialog by remember { mutableStateOf(false) }
+    var feedbackGivenFor by remember { mutableStateOf<String?>(null) }
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
     val dateFmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
 
-    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity, state.state, state.lowCapacity) {
+    LaunchedEffect(currentActivity?.id) {
+        feedbackGivenFor = null
+    }
+
+    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, currentActivity, state.state, state.lowCapacity) {
         AgoraWidgetSnapshot.write(
             context = context,
             snapshot = AgoraWidgetSnapshot(
                 title = state.title,
                 scheduledTime = state.scheduledTime?.format(timeFmt).orEmpty(),
                 durationMinutes = state.durationMinutes?.toInt() ?: 0,
-                isEmpty = state.currentActivity == null,
+                isEmpty = currentActivity == null,
             ),
         )
         AgoraWidgetProvider.updateAll(context)
@@ -82,6 +90,39 @@ fun AgoraScreen(
                     Text(stringResource(R.string.action_cancel))
                 }
             },
+        )
+    }
+
+    if (showFeedbackDialog && currentActivity != null) {
+        val feedbackActivityId = currentActivity.id.value
+        AlertDialog(
+            onDismissRequest = { showFeedbackDialog = false },
+            title = { Text("Como foi esta sugestão?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FeedbackOption("Isso fez sentido.", RouteFeedbackReason.HELPFUL, viewModel) {
+                        showFeedbackDialog = false
+                        feedbackGivenFor = feedbackActivityId
+                    }
+                    FeedbackOption("Eu queria fazer outra coisa.", RouteFeedbackReason.WANTED_OTHER, viewModel) {
+                        showFeedbackDialog = false
+                        feedbackGivenFor = feedbackActivityId
+                    }
+                    FeedbackOption("A duração estava errada.", RouteFeedbackReason.DURATION_WRONG, viewModel) {
+                        showFeedbackDialog = false
+                        feedbackGivenFor = feedbackActivityId
+                    }
+                    FeedbackOption("Não quero fazer isso nesse horário.", RouteFeedbackReason.TIME_WRONG, viewModel) {
+                        showFeedbackDialog = false
+                        feedbackGivenFor = feedbackActivityId
+                    }
+                    FeedbackOption("O Planner errou.", RouteFeedbackReason.PLANNER_WRONG, viewModel) {
+                        showFeedbackDialog = false
+                        feedbackGivenFor = feedbackActivityId
+                    }
+                }
+            },
+            confirmButton = {},
         )
     }
 
@@ -135,8 +176,41 @@ fun AgoraScreen(
             onSwap = viewModel::skipCurrent,
         )
 
+        if (currentActivity != null && feedbackGivenFor != currentActivity.id.value) {
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { showFeedbackDialog = true },
+            ) {
+                Text("A recomendação fez sentido?")
+            }
+        } else if (feedbackGivenFor == currentActivity?.id?.value) {
+            Text(
+                text = "Feedback registrado.",
+                style = MaterialTheme.typography.bodySmall,
+                color = SuperPlannerColors.InkSoft,
+            )
+        }
+
         if (state.nextUpcoming != null || state.laterUpcoming.isNotEmpty()) {
             AgoraUpcomingSection(next = state.nextUpcoming, later = state.laterUpcoming)
         }
+    }
+}
+
+@Composable
+private fun FeedbackOption(
+    label: String,
+    reason: RouteFeedbackReason,
+    viewModel: AgoraViewModel,
+    onRecorded: () -> Unit,
+) {
+    OutlinedButton(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            viewModel.recordCurrentFeedback(reason)
+            onRecorded()
+        },
+    ) {
+        Text(label)
     }
 }
