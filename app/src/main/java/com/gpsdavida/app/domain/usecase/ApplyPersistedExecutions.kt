@@ -1,8 +1,8 @@
 package com.superplanner.app.domain.usecase
 
-import com.superplanner.app.domain.model.ActivityExecution
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivityExecution
 import javax.inject.Inject
 
 /** Overlays persisted execution state onto freshly materialized activities. */
@@ -14,6 +14,7 @@ class ApplyPersistedExecutions @Inject constructor() {
         val execution = persisted[activity.id] ?: return@map activity
         activity.copy(
             status = execution.status,
+            actualStart = execution.actualStart,
             actual = execution.actual,
         )
     }
