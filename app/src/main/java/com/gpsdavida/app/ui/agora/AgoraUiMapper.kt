@@ -40,23 +40,21 @@ object AgoraUiMapper {
         zoneId: ZoneId,
     ): AgoraUiState {
         val running = activities.firstOrNull { it.instance.status == ActivityStatus.IN_PROGRESS }
-        val recommended = running ?: decision.recommended
+        val recommendedId = running?.id ?: decision.recommended?.id
         val base = AgoraUiState(
             currentTime = now.atZone(zoneId).toLocalTime(),
             currentDate = now.atZone(zoneId).toLocalDate(),
         )
 
-        if (recommended == null) {
+        if (recommendedId == null) {
             val hasPending = activities.any { it.instance.status == ActivityStatus.PENDING }
             return base.copy(state = if (hasPending) NextActionState.Empty else NextActionState.Completed)
         }
 
-        val current = activities.first { it.instance.id == recommended.id }
-        val (nextUpcoming, laterUpcoming) = if (running == null) {
-            buildUpcoming(activities, recommended, decision.next, zoneId)
-        } else {
-            buildUpcoming(activities, recommended, decision.recommended, zoneId)
-        }
+        val current = activities.first { it.instance.id == recommendedId }
+        val recommended = current.instance
+        val nextForUpcoming = if (running == null) decision.next else null
+        val (nextUpcoming, laterUpcoming) = buildUpcoming(activities, recommended, nextForUpcoming, zoneId)
 
         return base.copy(
             title = current.title,
@@ -85,15 +83,20 @@ object AgoraUiMapper {
         next: ActivityInstance?,
         zoneId: ZoneId,
     ): Pair<AgoraUpcomingItem?, List<AgoraUpcomingItem>> {
-        val pending = activities.filter { it.instance.status == ActivityStatus.PENDING }.sortedBy { it.instance.planned.start }
+        val pending = activities
+            .filter { it.instance.status == ActivityStatus.PENDING }
+            .sortedBy { it.instance.planned.start }
         val excluded = mutableSetOf(recommended.id)
         val nextUpcoming = next
             ?.takeIf { it.status == ActivityStatus.PENDING && it.id != recommended.id }
             ?.let { instance ->
                 excluded.add(instance.id)
-                pending.first { it.instance.id == instance.id }.toUpcoming(zoneId)
+                pending.firstOrNull { it.instance.id == instance.id }?.toUpcoming(zoneId)
             }
-        val laterUpcoming = pending.filter { it.instance.id !in excluded }.take(3).map { it.toUpcoming(zoneId) }
+        val laterUpcoming = pending
+            .filter { it.instance.id !in excluded }
+            .take(3)
+            .map { it.toUpcoming(zoneId) }
         return nextUpcoming to laterUpcoming
     }
 
