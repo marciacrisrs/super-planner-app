@@ -64,6 +64,7 @@ class ChooseNextActivity @Inject constructor() {
     ): List<NextActionReason> = buildList {
         if (isCurrent) add(NextActionReason.CURRENTLY_ACTIVE)
         if (activity.planned.start <= context.now) add(NextActionReason.DUE_NOW)
+        if (isHighestPriorityInSameUrgencyGroup(activity, activities, context)) add(NextActionReason.HIGHER_PRIORITY)
         if (activity.flexibility == Flexibility.FIXED) add(NextActionReason.FIXED_COMMITMENT)
         if (isAvailable(activity, context)) add(NextActionReason.AVAILABLE_IN_WINDOW)
         if (activity.contexts.isEmpty() || context.currentContext == null || context.currentContext in activity.contexts) add(NextActionReason.CONTEXT_MATCH)
@@ -72,6 +73,26 @@ class ChooseNextActivity @Inject constructor() {
         if (activity.flexibility != Flexibility.FIXED) add(NextActionReason.FLEXIBLE_SLOT)
         if (capacityFits(activity, activities, context, null)) add(NextActionReason.CAPACITY_AVAILABLE)
         if (travelDurationTo(activity, null, context).isZero() || travelAndBufferFitBeforeStart(activity, null, context)) add(NextActionReason.TRAVEL_FITS)
+    }
+
+    private fun isHighestPriorityInSameUrgencyGroup(
+        activity: ActivityInstance,
+        activities: List<ActivityInstance>,
+        context: NextActionContext,
+    ): Boolean {
+        val urgency = urgency(activity, context.now)
+        val candidates = activities
+            .asSequence()
+            .filter { it.status == ActivityStatus.PENDING }
+            .filter { urgency(it, context.now) == urgency }
+            .filter { isAvailable(it, context) }
+            .filter { matchesContext(it, context.currentContext) }
+            .filter { dependenciesSatisfied(it, activities, context.dependencies) }
+            .filter { capacityFits(it, activities, context, null) }
+            .filter { travelAndBufferFitBeforeStart(it, null, context) }
+            .toList()
+
+        return candidates.minOfOrNull { it.priority.weight } == activity.priority.weight
     }
 
     private fun matchesContext(activity: ActivityInstance, currentContext: ExecutionContext?): Boolean =
