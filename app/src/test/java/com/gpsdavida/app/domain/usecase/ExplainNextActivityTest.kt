@@ -1,18 +1,29 @@
 package com.superplanner.app.domain.usecase
 
+import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.NextActionDecision
 import com.superplanner.app.domain.model.NextActionReason
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.model.TimeRange
+import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExplainNextActivityTest {
+    private val start = Instant.parse("2026-09-13T09:00:00Z")
+
     @Test
     fun `explanation exposes only structured domain evidence`() {
-        val activity = com.gpsdavida.app.test.testutil.TestActivities.flexibleTask(
+        val activity = ActivityInstance(
             id = ActivityInstanceId("study"),
+            source = ActivitySource.FromTask(TaskId("study-task")),
+            flexibility = Flexibility.FLEXIBLE,
+            planned = TimeRange(start, start.plusSeconds(3600)),
         )
         val explanation = ExplainNextActivity()(
             NextActionDecision(
