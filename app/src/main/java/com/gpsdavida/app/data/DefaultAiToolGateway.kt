@@ -40,7 +40,7 @@ class DefaultAiToolGateway @Inject constructor(
             is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.Created -> AiToolResult.Success(
                 listOf(
                     "activity_created",
-                    "id=${result.task.id.value}",
+                    "id=${result.task.id}",
                     "title=${result.task.title}",
                 ),
             )
