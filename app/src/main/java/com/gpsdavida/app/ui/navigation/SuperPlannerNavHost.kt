@@ -29,6 +29,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.superplanner.app.R
+import com.superplanner.app.ui.about.AboutScreen
 import com.superplanner.app.ui.availability.AvailabilityScreen
 import com.superplanner.app.ui.contexto.LifeAreaScreen
 import com.superplanner.app.ui.dia.DailyCheckpointScreen
@@ -71,7 +72,8 @@ fun SuperPlannerNavHost() {
         },
     ) { padding ->
         NavHost(navController, SuperPlannerRoutes.AGORA, Modifier.padding(padding).swipeBetweenMainTabs(navController, currentRoute)) {
-            composable(SuperPlannerRoutes.AGORA) { HomeScreen() }
+            composable(SuperPlannerRoutes.AGORA) { HomeScreen(onOpenAbout = { navController.navigate(SuperPlannerRoutes.ABOUT) }) }
+            composable(SuperPlannerRoutes.ABOUT) { AboutScreen(onBack = { navController.popBackStack() }) }
             composable(SuperPlannerRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(SuperPlannerRoutes.eventEditor()) }, { navController.navigate(SuperPlannerRoutes.eventEditor(it)) }, { navController.navigate(SuperPlannerRoutes.taskEditor(it)) }, { navController.navigate(SuperPlannerRoutes.habitEditor(it)) }, { navController.navigate(SuperPlannerRoutes.AVAILABILITY) }, { navController.navigate(SuperPlannerRoutes.WEEK) }) }
             composable(SuperPlannerRoutes.WEEK) { WeekScreen(onOpenDay = { date -> navController.navigate(SuperPlannerRoutes.weekDay(date)) }) }
             composable(SuperPlannerRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry -> WeekDayScreen(LocalDate.parse(entry.arguments?.getString("date"))) }
