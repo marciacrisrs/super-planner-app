@@ -15,9 +15,6 @@ data class PlanningInput(
         require(activities.map { it.id }.distinct().size == activities.size) {
             "Activity ids must be unique"
         }
-        require(delayedActivity == null || activities.any { it.id == delayedActivity.id }) {
-            "Delayed activity must belong to the planning snapshot"
-        }
     }
 
     fun snapshot(): PlanningInput = copy(
