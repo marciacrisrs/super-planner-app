@@ -38,7 +38,7 @@ fun AgoraScreen(
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
     val dateFmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
 
-    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity) {
+    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity, state.state) {
         AgoraWidgetSnapshot.write(
             context = context,
             snapshot = AgoraWidgetSnapshot(
@@ -85,7 +85,8 @@ fun AgoraScreen(
                 priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
                 state = state.state,
             ),
-            oneTapComplete = true,
+            oneTapComplete = false,
+            onStart = viewModel::startCurrent,
             onSnooze = viewModel::deferCurrent,
             onComplete = viewModel::completeCurrent,
             onSwap = viewModel::skipCurrent,
