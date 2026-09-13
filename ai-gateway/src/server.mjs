@@ -4,12 +4,14 @@ import OpenAI from "openai";
 const port = Number(process.env.PORT ?? 8080);
 const model = process.env.OPENAI_MODEL ?? "gpt-5.6-luna";
 const gatewayToken = process.env.AI_GATEWAY_TOKEN;
+const proposalSchemaVersion = "1";
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const proposalSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
+    schemaVersion: { type: "string", enum: [proposalSchemaVersion] },
     commandType: {
       type: "string",
       enum: ["CREATE_ACTIVITY_DRAFT", "REORGANIZE_DAY", "EXPLAIN_NEXT_ACTIVITY", "MISSING_INFORMATION", "RECALCULATE_ROUTE"],
@@ -47,16 +49,34 @@ const proposalSchema = {
       ],
     },
   },
-  required: ["commandType", "explanation", "requiresConfirmation", "payload"],
+  required: ["schemaVersion", "commandType", "explanation", "requiresConfirmation", "payload"],
 };
 
 const instructions = `You are the interpretation layer of Super Planner. Never invent planner state. Never decide scheduling rules. Never claim an action happened. Return only the structured proposal. Material changes require confirmation. Use only the supplied minimal context.
 
-For CREATE_ACTIVITY_DRAFT, extract only facts expressed or unambiguously implied by the user's message. Return ISO date when a date is specified, 24-hour HH:mm when a start time is specified, duration in minutes, and one of the allowed priority/energy values only when justified. If a field is not known, return null. The title must be concise and describe the activity itself, not scheduling instructions. Never move an activity earlier than a stated start time.`;
+For CREATE_ACTIVITY_DRAFT, extract only facts expressed or unambiguously implied by the user's message. Return ISO date when a date is specified, 24-hour HH:mm when a start time is specified, duration in minutes, and one of the allowed priority/energy values only when justified. If a field is not known, return null. The title must be concise and describe the activity itself, not scheduling instructions. Never move an activity earlier than a stated start time. Always return schemaVersion=${proposalSchemaVersion}.`;
 
 function send(res, status, body) {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(body));
+}
+
+function validateProposal(proposal) {
+  if (!proposal || proposal.schemaVersion !== proposalSchemaVersion) throw new Error("unsupported_ai_schema");
+  if (typeof proposal.commandType !== "string") throw new Error("command_type_required");
+  if (typeof proposal.explanation !== "string") throw new Error("explanation_required");
+  if (typeof proposal.requiresConfirmation !== "boolean") throw new Error("confirmation_flag_required");
+  if (!proposal.payload || typeof proposal.payload !== "object") throw new Error("payload_required");
+
+  if (proposal.commandType === "CREATE_ACTIVITY_DRAFT") {
+    const { title, durationMinutes, date, startTime } = proposal.payload;
+    if (title !== null && typeof title !== "string") throw new Error("invalid_title");
+    if (durationMinutes !== null && (!Number.isInteger(durationMinutes) || durationMinutes <= 0)) throw new Error("invalid_duration");
+    if (date !== null && !/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) throw new Error("invalid_date");
+    if (startTime !== null && !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(startTime)) throw new Error("invalid_start_time");
+  }
+
+  return proposal;
 }
 
 async function propose(input) {
@@ -75,12 +95,12 @@ async function propose(input) {
     },
   });
 
-  return JSON.parse(response.output_text);
+  return validateProposal(JSON.parse(response.output_text));
 }
 
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/health") {
-    return send(res, 200, { status: "ok", service: "super-planner-ai-gateway", model });
+    return send(res, 200, { status: "ok", service: "super-planner-ai-gateway", model, schemaVersion: proposalSchemaVersion });
   }
 
   if (req.method !== "POST" || req.url !== "/v1/ai/propose") {
