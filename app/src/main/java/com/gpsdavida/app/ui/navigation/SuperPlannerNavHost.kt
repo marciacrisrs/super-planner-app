@@ -73,7 +73,12 @@ fun SuperPlannerNavHost() {
         },
     ) { padding ->
         NavHost(navController, SuperPlannerRoutes.AGORA, Modifier.padding(padding).swipeBetweenMainTabs(navController, currentRoute)) {
-            composable(SuperPlannerRoutes.AGORA) { HomeScreen(onOpenAbout = { navController.navigate(SuperPlannerRoutes.ABOUT) }) }
+            composable(SuperPlannerRoutes.AGORA) {
+                HomeScreen(
+                    onOpenAbout = { navController.navigate(SuperPlannerRoutes.ABOUT) },
+                    onOpenAiCapture = { navController.navigate(SuperPlannerRoutes.AI_CAPTURE) },
+                )
+            }
             composable(SuperPlannerRoutes.ABOUT) { AboutScreen(onBack = { navController.popBackStack() }) }
             composable(SuperPlannerRoutes.AI_CAPTURE) { AiCaptureScreen(onBack = { navController.popBackStack() }) }
             composable(SuperPlannerRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(SuperPlannerRoutes.eventEditor()) }, { navController.navigate(SuperPlannerRoutes.eventEditor(it)) }, { navController.navigate(SuperPlannerRoutes.taskEditor(it)) }, { navController.navigate(SuperPlannerRoutes.habitEditor(it)) }, { navController.navigate(SuperPlannerRoutes.AVAILABILITY) }, { navController.navigate(SuperPlannerRoutes.WEEK) }) }
