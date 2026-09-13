@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 /**
  * Production PlanningEngine backed by the existing deterministic scheduling rules.
- * The engine is the single boundary used by the executable route consumers.
+ * Capacity and learned durations are passed through the same boundary used by Agora.
  */
 class DefaultPlanningEngine @Inject constructor(
     private val generateDailySchedule: GenerateDailySchedule,
@@ -47,7 +47,9 @@ class DefaultPlanningEngine @Inject constructor(
                 activity.copy(
                     planned = activity.planned.copy(
                         start = input.context.now,
-                        end = input.context.now.plus(activity.plannedDuration),
+                        end = input.context.now.plus(
+                            input.context.learnedDurations[activity.id] ?: activity.plannedDuration,
+                        ),
                     ),
                 )
             } else {
@@ -63,6 +65,8 @@ class DefaultPlanningEngine @Inject constructor(
             defaultBuffer = input.context.defaultBuffer,
             travelTimes = input.context.travelTimes,
             zoneId = input.context.zoneId,
+            dailyCapacity = input.context.dailyCapacity,
+            learnedDurations = input.context.learnedDurations,
         )
     }
 
@@ -112,5 +116,6 @@ class DefaultPlanningEngine @Inject constructor(
         ScheduleConflictReason.FIXED_OVERLAP -> PlanningReason.REQUIRED_CONFLICT
         ScheduleConflictReason.NO_AVAILABLE_WINDOW -> PlanningReason.NO_VALID_WINDOW
         ScheduleConflictReason.DEPENDENCY_NOT_SATISFIED -> PlanningReason.DEPENDENCY_BLOCKED
+        ScheduleConflictReason.CAPACITY_EXCEEDED -> PlanningReason.CAPACITY_EXCEEDED
     }
 }
