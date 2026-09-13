@@ -1,6 +1,8 @@
 package com.superplanner.app.di
 
 import com.superplanner.app.data.*
+import com.superplanner.app.domain.planning.DefaultPlanningEngine
+import com.superplanner.app.domain.planning.PlanningEngine
 import com.superplanner.app.domain.port.*
 import dagger.Binds
 import dagger.Module
@@ -24,4 +26,5 @@ abstract class RepositoryModule {
     @Binds @Singleton abstract fun bindFinanceRepository(impl: RoomFinanceRepository): FinanceRepository
     @Binds @Singleton abstract fun bindLifeAreaRepository(impl: RoomLifeAreaRepository): LifeAreaRepository
     @Binds @Singleton abstract fun bindPlanRepository(impl: RoomPlanRepository): PlanRepository
+    @Binds @Singleton abstract fun bindPlanningEngine(impl: DefaultPlanningEngine): PlanningEngine
 }
