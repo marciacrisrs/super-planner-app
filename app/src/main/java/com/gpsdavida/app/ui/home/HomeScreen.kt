@@ -79,27 +79,17 @@ fun HomeScreen(
                     )
                 }
                 IconButton(onClick = onOpenAbout) {
-                    Icon(
-                        Icons.Outlined.Info,
-                        contentDescription = "Sobre",
-                        tint = SuperPlannerColors.Terracotta,
-                    )
+                    Icon(Icons.Outlined.Info, contentDescription = "Sobre", tint = SuperPlannerColors.Terracotta)
                 }
             }
 
-            Button(
-                onClick = onOpenAiCapture,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            Button(onClick = onOpenAiCapture, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Outlined.AutoAwesome, contentDescription = null)
                 Spacer(modifier = Modifier.size(8.dp))
                 Text("Diga o que você precisa fazer")
             }
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 SuperPlannerSectionHeader(
                     title = "O que faço agora?",
                     supportingText = state.currentTime.format(timeFormatter),
@@ -110,7 +100,7 @@ fun HomeScreen(
                         title = state.title,
                         durationMinutes = state.durationMinutes,
                         scheduledTime = state.scheduledTime,
-                        priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
+                        priorityLabel = state.priority?.name,
                         explanation = state.explanation,
                         reasonLabels = state.reasons.map { reason ->
                             when (reason) {
@@ -158,11 +148,7 @@ fun HomeScreen(
                                 Text(it, style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
                             }
                         }
-                        Text(
-                            upcoming.scheduledTime.format(timeFormatter),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = SuperPlannerColors.TerracottaDark,
-                        )
+                        Text(upcoming.scheduledTime.format(timeFormatter), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
                     }
                 }
             }
