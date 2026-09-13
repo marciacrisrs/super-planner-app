@@ -36,6 +36,7 @@ data class NextActionUiModel(
     val priorityLabel: String? = null,
     val contextLabel: String? = null,
     val reasonLabels: List<String> = emptyList(),
+    val explanation: String? = null,
     val state: NextActionState = NextActionState.Ready,
 )
 
@@ -79,6 +80,13 @@ private fun ReadyContent(
                 NextLabel()
                 Text(model.title, style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Ink)
                 MetadataRow(model)
+                model.explanation?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SuperPlannerColors.Ink,
+                    )
+                }
                 if (model.reasonLabels.isNotEmpty()) {
                     Text(
                         text = model.reasonLabels.take(3).joinToString(" · "),
