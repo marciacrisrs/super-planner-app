@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -177,27 +178,24 @@ fun PlanningScreen(
 }
 
 @Composable
-private fun EditorialPlanningDecorations() {
+private fun BoxScope.EditorialPlanningDecorations() {
     Image(
         painter = painterResource(R.drawable.sp_decor_leaves_right),
         contentDescription = null,
-        modifier = Modifier.fillMaxWidth().size(180.dp).alpha(0.16f),
-        contentScale = ContentScale.Crop,
-        alignment = Alignment.TopEnd,
+        modifier = Modifier.align(Alignment.TopEnd).size(190.dp).alpha(0.15f),
+        contentScale = ContentScale.Fit,
     )
     Image(
         painter = painterResource(R.drawable.sp_decor_pink_blob),
         contentDescription = null,
-        modifier = Modifier.size(230.dp).alpha(0.10f).padding(top = 210.dp),
+        modifier = Modifier.align(Alignment.TopStart).padding(top = 210.dp).size(230.dp).alpha(0.08f),
         contentScale = ContentScale.Fit,
-        alignment = Alignment.TopStart,
     )
     Image(
         painter = painterResource(R.drawable.sp_decor_leaves_left),
         contentDescription = null,
-        modifier = Modifier.fillMaxWidth().size(180.dp).alpha(0.11f).padding(top = 420.dp),
-        contentScale = ContentScale.Crop,
-        alignment = Alignment.BottomStart,
+        modifier = Modifier.align(Alignment.BottomStart).size(190.dp).alpha(0.10f),
+        contentScale = ContentScale.Fit,
     )
 }
 
