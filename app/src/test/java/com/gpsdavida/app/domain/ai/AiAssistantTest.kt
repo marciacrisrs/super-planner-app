@@ -1,7 +1,9 @@
 package com.superplanner.app.domain.ai
 
+import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.port.AiToolGateway
 import com.superplanner.app.domain.port.AiToolResult
+import com.superplanner.app.domain.planning.DayReorganizationOperation
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -20,7 +22,12 @@ class AiAssistantTest {
         }
         val provider = object : AiProvider {
             override suspend fun interpret(request: AiRequest) = AiProposal(
-                command = AiCommand.ReorganizeDay(request.message),
+                command = AiCommand.ReorganizeDay(
+                    com.superplanner.app.domain.planning.DayReorganizationRequest(
+                        operation = DayReorganizationOperation.DelayActivity(ActivityInstanceId("activity"), 40),
+                        now = java.time.Instant.parse("2026-09-13T19:00:00Z"),
+                    ),
+                ),
                 explanation = "structured",
                 requiresConfirmation = true,
             )
@@ -78,6 +85,49 @@ class AiAssistantTest {
         assertEquals(Duration.ofHours(1), command.draft.plannedDuration)
         assertEquals("2026-09-14", command.draft.date.toString())
         assertTrue(proposal.requiresConfirmation)
+    }
+
+    @Test
+    fun `late request becomes a structured reorganization operation`() = runTest {
+        val assistant = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
+            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+        })
+
+        val proposal = assistant.propose(
+            AiRequest(
+                message = "estou 40 minutos atrasada, reorganize",
+                context = AiContext(
+                    nowIso = "2026-09-13T19:00:00Z",
+                    activeActivityId = "activity-123",
+                ),
+            ),
+        )
+
+        val command = proposal.command as AiCommand.ReorganizeDay
+        assertTrue(command.request.operation is DayReorganizationOperation.DelayActivity)
+        val delay = command.request.operation as DayReorganizationOperation.DelayActivity
+        assertEquals(ActivityInstanceId("activity-123"), delay.activityId)
+        assertEquals(40, delay.minutes)
+        assertTrue(proposal.requiresConfirmation)
+    }
+
+    @Test
+    fun `reorganization asks for missing information instead of guessing`() = runTest {
+        val assistant = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
+            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+        })
+
+        val proposal = assistant.propose(
+            AiRequest(
+                message = "estou atrasada, reorganize",
+                context = AiContext(nowIso = "2026-09-13T19:00:00Z"),
+            ),
+        )
+
+        val command = proposal.command as AiCommand.MissingInformation
+        assertTrue(command.fields.contains("qual atividade deve ser alterada"))
+        assertTrue(command.fields.contains("quantos minutos mudou"))
+        assertTrue(!proposal.requiresConfirmation)
     }
 
     @Test
