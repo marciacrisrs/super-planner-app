@@ -1,11 +1,11 @@
----
+﻿---
 description: GPS da Vida agent collaboration, skill governance, and work order (#17 then #18 then #1)
 alwaysApply: true
 ---
 
-# Colaboração GPS da Vida
+# ColaboraÃ§Ã£o GPS da Vida
 
-Márcia decides product. The Android architect orchestrates. Other agents stay in their lane.
+MÃ¡rcia decides product. The Android architect orchestrates. Other agents stay in their lane.
 
 ## Work order
 
@@ -13,14 +13,15 @@ Architecture: [ADR 001](../../docs/adr/001-arquitetura-inicial.md). Domain: [ADR
 
 ## Protocol
 
-Architect closes the contract → domain implements testable rules → app persists → UI observes state → tests cover acceptance → quality gates at batch end.
+Architect closes the contract â†’ domain implements testable rules â†’ app persists â†’ UI observes state â†’ tests cover acceptance â†’ quality gates at batch end.
 
 - Domain: no Android. UI: no Room, no route recalculation. App: no planning rules in ViewModels.
 
 ## New skills
 
-Never create a Cursor skill alone. Propose name, mission, when-to-use, must-not. Wait for Márcia’s OK, then write `SKILL.md`. Same ritual to merge, split, or drop a skill.
+Never create a Cursor skill alone. Propose name, mission, when-to-use, must-not. Wait for MÃ¡rciaâ€™s OK, then write `SKILL.md`. Same ritual to merge, split, or drop a skill.
 
 ## Product defaults
 
-ADR 001: offline-first Android, Compose, Material 3, no backend. English code; Portuguese UI. Namespace `com.gpsdavida.app`.
+ADR 001: offline-first Android, Compose, Material 3, no backend. English code; Portuguese UI. Namespace `com.SuperPlanner.app`.
+
