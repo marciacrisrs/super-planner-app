@@ -1,6 +1,7 @@
 package com.superplanner.app.domain.usecase
 
 import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.DailySchedule
 import com.superplanner.app.domain.model.NextActionContext
@@ -8,6 +9,7 @@ import com.superplanner.app.domain.model.ScheduleConflict
 import com.superplanner.app.domain.model.ScheduleConflictReason
 import com.superplanner.app.domain.planning.PlanningEngine
 import com.superplanner.app.domain.planning.PlanningInput
+import com.superplanner.app.domain.planning.PlanningReason
 import com.superplanner.app.domain.planning.RecalculationReason
 import java.time.Duration
 import java.time.Instant
@@ -29,6 +31,7 @@ class RecalculateRoute @Inject constructor(
         delayedActivity: ActivityInstance? = null,
         now: Instant? = null,
         dailyCapacity: DailyCapacity? = null,
+        learnedDurations: Map<ActivityInstanceId, Duration> = emptyMap(),
     ): DailySchedule {
         val current = now ?: activities.firstOrNull()?.planned?.start ?: Instant.EPOCH
         val result = planningEngine(
@@ -41,6 +44,7 @@ class RecalculateRoute @Inject constructor(
                     travelTimes = travelTimes,
                     defaultBuffer = defaultBuffer,
                     dailyCapacity = dailyCapacity,
+                    learnedDurations = learnedDurations,
                     zoneId = zoneId,
                 ),
                 date = date,
@@ -60,9 +64,10 @@ class RecalculateRoute @Inject constructor(
         )
     }
 
-    private fun com.superplanner.app.domain.planning.PlanningReason.toScheduleConflictReason(): ScheduleConflictReason = when (this) {
-        com.superplanner.app.domain.planning.PlanningReason.REQUIRED_CONFLICT -> ScheduleConflictReason.FIXED_OVERLAP
-        com.superplanner.app.domain.planning.PlanningReason.DEPENDENCY_BLOCKED -> ScheduleConflictReason.DEPENDENCY_NOT_SATISFIED
+    private fun PlanningReason.toScheduleConflictReason(): ScheduleConflictReason = when (this) {
+        PlanningReason.REQUIRED_CONFLICT -> ScheduleConflictReason.FIXED_OVERLAP
+        PlanningReason.DEPENDENCY_BLOCKED -> ScheduleConflictReason.DEPENDENCY_NOT_SATISFIED
+        PlanningReason.CAPACITY_EXCEEDED -> ScheduleConflictReason.CAPACITY_EXCEEDED
         else -> ScheduleConflictReason.NO_AVAILABLE_WINDOW
     }
 }
