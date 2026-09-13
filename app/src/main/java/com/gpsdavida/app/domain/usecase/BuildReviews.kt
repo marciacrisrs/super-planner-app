@@ -12,13 +12,11 @@ class BuildReviews @Inject constructor() {
         val day = planning.days.firstOrNull { it.date == date }
         if (day == null) return DailyReview(date, null, 0, 0, emptyList(), emptyList(), emptyList())
 
-        val priority = day.activities
-            .sortedByDescending { it.instance.priority.ordinal }
-            .firstOrNull()?.title
+        val priority = day.activities.minByOrNull { it.instance.priority.weight }?.title
         val unfinished = (day.plannedCount - day.completedCount).coerceAtLeast(0)
         val changed = buildList {
             if (day.conflictCount > 0) add("Há ${day.conflictCount} conflito(s) na rota de hoje.")
-            if (day.completedCount < day.plannedCount) add("${unfinished} atividade(s) planejada(s) ainda não aconteceu(aram).")
+            if (unfinished > 0) add("$unfinished atividade(s) planejada(s) ainda não aconteceu(aram).")
         }
         val toReorganize = if (day.conflictCount > 0 || unfinished > 0) {
             day.activities.takeLast(unfinished.coerceAtMost(day.activities.size)).map { it.title }
@@ -47,7 +45,7 @@ class BuildReviews @Inject constructor() {
 
     fun weekly(planning: WeeklyPlanning): WeeklyReview {
         val advanced = planning.days.filter { it.completedCount > 0 }
-            .flatMap { it.activities.filter { activity -> activity.instance.priority.ordinal >= 1 }.map { it.title } }
+            .flatMap { it.activities.filter { activity -> activity.instance.priority.weight <= 1 }.map { it.title } }
             .distinct()
             .take(5)
         val repeated = planning.days
