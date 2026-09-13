@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,7 +80,7 @@ fun PlanningScreen(
     Scaffold { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
@@ -97,7 +98,7 @@ fun PlanningScreen(
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     SmallPlanningCard(Modifier.weight(1f), Icons.Outlined.Flag, "Áreas", "O que cuidar", onOpenLifeAreas)
-                    SmallPlanningCard(Modifier.weight(1f), Icons.Outlined.CheckCircleOutline, "Metas", "O que conquistar") { addType = AddType.GOAL }
+                    SmallPlanningCard(Modifier.weight(1f), Icons.Outlined.Flag, "Metas", "O que conquistar") { addType = AddType.GOAL }
                 }
             }
             item { SectionLabel("O que estou construindo") }
