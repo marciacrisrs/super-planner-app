@@ -17,6 +17,12 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "AI_GATEWAY_URL",
+            "\"${project.findProperty("AI_GATEWAY_URL") ?: ""}\"",
+        )
     }
 
     buildTypes {
@@ -36,6 +42,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
