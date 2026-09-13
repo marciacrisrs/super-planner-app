@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.R
+import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.ui.agora.AgoraViewModel
 import com.superplanner.app.ui.next.NextActionCard
@@ -51,7 +52,7 @@ fun HomeScreen(
     viewModel: AgoraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var startedActivityId by remember { mutableStateOf<String?>(null) }
+    var startedActivityId by remember { mutableStateOf<ActivityInstanceId?>(null) }
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
     val greeting = when (state.currentTime.hour) {
@@ -125,7 +126,7 @@ fun HomeScreen(
                         },
                     ),
                     oneTapComplete = false,
-                    onStart = { state.currentActivity?.let { startedActivityId = it.id.value } },
+                    onStart = { state.currentActivity?.let { startedActivityId = it.id } },
                     onSnooze = viewModel::deferCurrent,
                     onComplete = {
                         startedActivityId = null
