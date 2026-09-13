@@ -7,31 +7,32 @@ import com.superplanner.app.domain.port.ActivityExecutionRepository
 import java.time.Instant
 import javax.inject.Inject
 
-/** Applies an execution transition and persists the resulting domain state. */
+/** Applies execution transitions without allowing stale caller snapshots to overwrite state. */
 class RecordActivityExecution @Inject constructor(
     private val repository: ActivityExecutionRepository,
 ) {
     suspend fun start(
         activity: ActivityInstance,
         actualStart: Instant,
-    ) {
-        repository.save(activity.started(actualStart))
+    ): ActivityInstance {
+        require(activity.status == ActivityStatus.PENDING) { "Only pending activities can be started" }
+        check(repository.startIfPending(activity, actualStart)) { "Activity is no longer pending" }
+        return activity.started(actualStart)
     }
 
     suspend fun complete(
         activity: ActivityInstance,
         actualEnd: Instant,
-    ) {
-        val actualStart = activity.actualStart
-            ?: repository.getById(activity.id)?.actualStart
-        require(actualStart != null) { "Cannot complete an activity without an actual start" }
-
-        val runningActivity = activity.copy(
+    ): ActivityInstance {
+        val execution = repository.completeIfInProgress(activity.id, actualEnd)
+            ?: error("Cannot complete an activity that is not in progress")
+        val actualStart = execution.actualStart
+            ?: error("Completed execution must have an actual start")
+        return activity.copy(
             status = ActivityStatus.IN_PROGRESS,
             actualStart = actualStart,
             actual = null,
-        )
-        repository.save(runningActivity.completed(TimeRange(actualStart, actualEnd)))
+        ).completed(TimeRange(actualStart, actualEnd))
     }
 
     /** Compatibility entry point for callers that already have a real start and end. */
@@ -39,18 +40,28 @@ class RecordActivityExecution @Inject constructor(
         activity: ActivityInstance,
         actualStart: Instant,
         actualEnd: Instant,
-    ) {
-        require(activity.status == ActivityStatus.PENDING || activity.status == ActivityStatus.IN_PROGRESS) {
-            "Only pending or in-progress activities can be completed"
+    ): ActivityInstance {
+        if (activity.status == ActivityStatus.PENDING) {
+            start(activity, actualStart)
+        } else {
+            require(activity.status == ActivityStatus.IN_PROGRESS) {
+                "Only pending or in-progress activities can be completed"
+            }
         }
-        complete(activity.copy(status = ActivityStatus.IN_PROGRESS, actualStart = actualStart, actual = null), actualEnd)
+        val persisted = repository.getById(activity.id)
+        if (persisted?.actualStart != actualStart) {
+            error("Actual start does not match the persisted execution")
+        }
+        return complete(activity.copy(status = ActivityStatus.IN_PROGRESS, actualStart = actualStart, actual = null), actualEnd)
     }
 
     suspend fun skip(activity: ActivityInstance) {
+        require(activity.status == ActivityStatus.PENDING) { "Only pending activities can be skipped" }
         repository.save(activity.skipped())
     }
 
     suspend fun defer(activity: ActivityInstance) {
+        require(activity.status == ActivityStatus.PENDING) { "Only pending activities can be deferred" }
         repository.save(activity.deferred())
     }
 }
