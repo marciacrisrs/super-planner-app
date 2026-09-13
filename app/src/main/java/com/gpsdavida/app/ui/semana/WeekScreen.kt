@@ -99,10 +99,7 @@ fun WeekScreen(
 
         if (state.startDate != currentWeekStart) {
             TextButton(onClick = viewModel::currentWeek) {
-                Text(
-                    "Voltar para esta semana",
-                    color = SuperPlannerColors.Terracotta,
-                )
+                Text("Voltar para esta semana", color = SuperPlannerColors.Terracotta)
             }
         }
 
@@ -128,12 +125,7 @@ private fun AgendaNavigationButton(
         color = SuperPlannerColors.Surface,
         contentColor = SuperPlannerColors.InkSoft,
     ) {
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier.size(44.dp),
-        ) {
-            icon()
-        }
+        IconButton(onClick = onClick, modifier = Modifier.size(44.dp)) { icon() }
     }
 }
 
@@ -143,9 +135,7 @@ private fun WeeklyDayCard(
     onOpenDay: (String) -> Unit,
 ) {
     val isToday = day.date == LocalDate.now()
-    val dayName = day.date
-        .format(DayFormatter)
-        .replaceFirstChar { it.uppercase(PtBr) }
+    val dayName = day.date.format(DayFormatter).replaceFirstChar { it.uppercase(PtBr) }
 
     SuperPlannerCard(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -157,42 +147,21 @@ private fun WeeklyDayCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     DateBadge(day = day.date.dayOfMonth, isToday = isToday)
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                dayName,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = SuperPlannerColors.Ink,
-                            )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(dayName, style = MaterialTheme.typography.titleLarge, color = SuperPlannerColors.Ink)
                             if (isToday) {
-                                Text(
-                                    "Hoje",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = SuperPlannerColors.Terracotta,
-                                )
+                                Text("Hoje", style = MaterialTheme.typography.labelSmall, color = SuperPlannerColors.Terracotta)
                             }
                         }
-                        Text(
-                            day.date.format(WeekRangeFormatter),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = SuperPlannerColors.InkSoft,
-                        )
+                        Text(day.date.format(WeekRangeFormatter), style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
                     }
                 }
 
                 TextButton(onClick = { onOpenDay(day.date.toString()) }) {
-                    Text(
-                        "Abrir dia",
-                        color = SuperPlannerColors.Terracotta,
-                    )
+                    Text("Abrir dia", color = SuperPlannerColors.Terracotta)
                 }
             }
 
@@ -207,22 +176,38 @@ private fun WeeklyDayCard(
             Spacer(modifier = Modifier.size(1.dp))
 
             if (day.activities.isEmpty()) {
-                Text(
-                    stringResource(R.string.week_empty_day),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = SuperPlannerColors.InkSoft,
-                )
-            } else {
-                day.activities.take(4).forEach { activity ->
-                    ActivityPreviewRow(title = activity.title)
-                }
-                if (day.activities.size > 4) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = SuperPlannerColors.SurfaceWarm,
+                    shape = RoundedCornerShape(18.dp),
+                ) {
                     Text(
-                        "+ ${day.activities.size - 4} atividades",
-                        style = MaterialTheme.typography.bodySmall,
+                        stringResource(R.string.week_empty_day),
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
                         color = SuperPlannerColors.InkSoft,
-                        modifier = Modifier.padding(start = 8.dp),
                     )
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    day.activities.take(4).forEachIndexed { index, activity ->
+                        WeeklyTaskCard(
+                            title = activity.title,
+                            accent = when (index % 3) {
+                                0 -> SuperPlannerColors.Terracotta
+                                1 -> SuperPlannerColors.Sage
+                                else -> SuperPlannerColors.BlueGray
+                            },
+                        )
+                    }
+                    if (day.activities.size > 4) {
+                        Text(
+                            "+ ${day.activities.size - 4} atividades",
+                            modifier = Modifier.padding(start = 12.dp, top = 2.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = SuperPlannerColors.InkSoft,
+                        )
+                    }
                 }
             }
         }
@@ -230,10 +215,7 @@ private fun WeeklyDayCard(
 }
 
 @Composable
-private fun DateBadge(
-    day: Int,
-    isToday: Boolean,
-) {
+private fun DateBadge(day: Int, isToday: Boolean) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = if (isToday) SuperPlannerColors.TerracottaSoft else SuperPlannerColors.SurfaceWarm,
@@ -249,21 +231,34 @@ private fun DateBadge(
 }
 
 @Composable
-private fun ActivityPreviewRow(title: String) {
-    Row(
+private fun WeeklyTaskCard(title: String, accent: Color) {
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        color = SuperPlannerColors.SurfaceWarm,
+        shape = RoundedCornerShape(18.dp),
     ) {
-        Spacer(
-            modifier = Modifier
-                .size(7.dp)
-                .background(SuperPlannerColors.Rose, RoundedCornerShape(50)),
-        )
-        Text(
-            title,
-            style = MaterialTheme.typography.bodyMedium,
-            color = SuperPlannerColors.Ink,
-            modifier = Modifier.padding(start = 10.dp),
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Spacer(
+                modifier = Modifier
+                    .size(width = 4.dp, height = 30.dp)
+                    .background(accent, RoundedCornerShape(50)),
+            )
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = SuperPlannerColors.Ink,
+                )
+                Text(
+                    "Atividade planejada",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = SuperPlannerColors.InkSoft,
+                )
+            }
+        }
     }
 }
