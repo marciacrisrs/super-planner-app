@@ -6,6 +6,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Duration
 
 class AiAssistantTest {
     @Test
@@ -59,7 +60,28 @@ class AiAssistantTest {
     }
 
     @Test
-    fun `free text is never executed directly by the assistant`() = runTest {
+    fun `natural language is converted to structured draft without persisting it`() = runTest {
+        val gateway = object : AiToolGateway {
+            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+        }
+        val assistant = AiAssistant(RuleBasedAiProvider(), gateway)
+
+        val proposal = assistant.propose(
+            AiRequest(
+                message = "amanhã preciso estudar francês por uma hora depois do trabalho",
+                context = AiContext(nowIso = "2026-09-13T19:00:00Z"),
+            ),
+        )
+
+        val command = proposal.command as AiCommand.CreateActivityDraft
+        assertEquals("francês", command.draft.title)
+        assertEquals(Duration.ofHours(1), command.draft.plannedDuration)
+        assertEquals("2026-09-14", command.draft.date.toString())
+        assertTrue(proposal.requiresConfirmation)
+    }
+
+    @Test
+    fun `free text never reaches tool execution before confirmation`() = runTest {
         var received: AiCommand? = null
         val gateway = object : AiToolGateway {
             override suspend fun execute(command: AiCommand): AiToolResult {
@@ -67,12 +89,18 @@ class AiAssistantTest {
                 return AiToolResult.Success(emptyList())
             }
         }
-        val provider = RuleBasedAiProvider()
-        val assistant = AiAssistant(provider, gateway)
+        val assistant = AiAssistant(RuleBasedAiProvider(), gateway)
 
-        val result = assistant.execute(assistant.propose(AiRequest("amanhã preciso estudar francês")))
+        val result = assistant.execute(
+            assistant.propose(
+                AiRequest(
+                    "amanhã estudar francês por uma hora",
+                    AiContext(nowIso = "2026-09-13T19:00:00Z"),
+                ),
+            ),
+        )
 
         assertTrue(result is AiExecution.AwaitingConfirmation)
-        assertTrue(received == null)
+        assertEquals(null, received)
     }
 }

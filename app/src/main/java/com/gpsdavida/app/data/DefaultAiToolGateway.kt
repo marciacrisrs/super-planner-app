@@ -7,8 +7,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Safe placeholder gateway. Real tool adapters are introduced independently and
- * must delegate to existing use cases instead of writing state directly.
+ * Safe placeholder gateway. Real tool adapters delegate to existing use cases
+ * instead of writing planner state directly.
  */
 @Singleton
 class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
@@ -17,7 +17,15 @@ class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
             listOf("explanation_requested", command.activityId),
         )
         is AiCommand.CreateActivityDraft -> AiToolResult.Success(
-            listOf("activity_draft", command.title),
+            buildList {
+                add("activity_draft")
+                add(command.draft.title)
+                command.draft.plannedDuration?.let { add("duration=${it.toMinutes()}m") }
+                command.draft.date?.let { add("date=$it") }
+                command.draft.startTime?.let { add("time=$it") }
+                command.draft.recurrence?.let { add("recurrence=${it.unit}:${it.interval}") }
+                command.draft.missingFields.forEach { add("missing=${it.name}") }
+            },
         )
         is AiCommand.ReorganizeDay -> AiToolResult.Success(
             listOf("reorganize_requested", command.instruction),
