@@ -25,14 +25,34 @@ const proposalSchema = {
         evidence: { type: "array", items: { type: "string" } },
         fields: { type: "array", items: { type: "string" } },
         delayMinutes: { type: ["integer", "null"] },
+        title: { type: ["string", "null"] },
+        durationMinutes: { type: ["integer", "null"] },
+        date: { type: ["string", "null"] },
+        startTime: { type: ["string", "null"] },
+        priority: { type: ["string", "null"], enum: ["REQUIRED", "IMPORTANT", "DESIRABLE", "LEISURE", null] },
+        energy: { type: ["string", "null"], enum: ["LOW", "MEDIUM", "HIGH", null] },
       },
-      required: ["message", "activityId", "evidence", "fields", "delayMinutes"],
+      required: [
+        "message",
+        "activityId",
+        "evidence",
+        "fields",
+        "delayMinutes",
+        "title",
+        "durationMinutes",
+        "date",
+        "startTime",
+        "priority",
+        "energy",
+      ],
     },
   },
   required: ["commandType", "explanation", "requiresConfirmation", "payload"],
 };
 
-const instructions = `You are the interpretation layer of Super Planner. Never invent planner state. Never decide scheduling rules. Never claim an action happened. Return only the structured proposal. Material changes require confirmation. Use only the supplied minimal context.`;
+const instructions = `You are the interpretation layer of Super Planner. Never invent planner state. Never decide scheduling rules. Never claim an action happened. Return only the structured proposal. Material changes require confirmation. Use only the supplied minimal context.
+
+For CREATE_ACTIVITY_DRAFT, extract only facts expressed or unambiguously implied by the user's message. Return ISO date when a date is specified, 24-hour HH:mm when a start time is specified, duration in minutes, and one of the allowed priority/energy values only when justified. If a field is not known, return null. The title must be concise and describe the activity itself, not scheduling instructions. Never move an activity earlier than a stated start time.`;
 
 function send(res, status, body) {
   res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
