@@ -1,6 +1,7 @@
 package com.superplanner.app.ui.onboarding
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,26 +45,26 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = SuperPlannerSpacing.Page, vertical = 24.dp),
+                .padding(horizontal = SuperPlannerSpacing.Page, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.size(4.dp))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Image(
                     painter = painterResource(R.drawable.sp_illustration_compass),
                     contentDescription = "Bússola do Super Planner",
-                    modifier = Modifier.size(210.dp),
+                    modifier = Modifier.size(190.dp),
                     contentScale = ContentScale.Fit,
                 )
                 Image(
                     painter = painterResource(R.drawable.sp_logo_full),
                     contentDescription = "Super Planner",
-                    modifier = Modifier.size(width = 220.dp, height = 92.dp),
+                    modifier = Modifier.size(width = 210.dp, height = 88.dp),
                     contentScale = ContentScale.Fit,
                 )
             }
@@ -70,7 +72,13 @@ fun OnboardingScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = SuperPlannerColors.Canvas,
+                        shape = RoundedCornerShape(24.dp),
+                    )
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             ) {
                 Text(
                     "Primeira rota",
@@ -79,7 +87,7 @@ fun OnboardingScreen(
                 )
                 Text(
                     "Vamos transformar o que importa para você em uma primeira rota simples para hoje.",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = SuperPlannerColors.InkSoft,
                 )
             }
@@ -87,7 +95,7 @@ fun OnboardingScreen(
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 SuperPlannerPrimaryButton(
                     text = "Criar minha primeira rota",
