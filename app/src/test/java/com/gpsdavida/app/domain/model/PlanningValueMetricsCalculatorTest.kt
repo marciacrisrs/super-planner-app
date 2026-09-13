@@ -28,11 +28,11 @@ class PlanningValueMetricsCalculatorTest {
         )
 
         assertEquals(Duration.ofMinutes(4), metrics.firstPlanningDuration)
-        assertEquals(0.8, metrics.automaticDecisionRate, 0.0001)
-        assertEquals(0.7, metrics.plannedVsCompletedRate, 0.0001)
-        assertEquals(1.0, metrics.priorityPreservationRate, 0.0001)
-        assertEquals(1.0, metrics.agoraUseRate, 0.0001)
-        assertEquals(0.5, metrics.recoverySuccessRate, 0.0001)
+        assertEquals(0.8, metrics.automaticDecisionRate ?: error("automatic decision rate should exist"), 0.0001)
+        assertEquals(0.7, metrics.plannedVsCompletedRate ?: error("planned/completed rate should exist"), 0.0001)
+        assertEquals(1.0, metrics.priorityPreservationRate ?: error("priority rate should exist"), 0.0001)
+        assertEquals(1.0, metrics.agoraUseRate ?: error("Agora use rate should exist"), 0.0001)
+        assertEquals(0.5, metrics.recoverySuccessRate ?: error("recovery rate should exist"), 0.0001)
         assertTrue(metrics.avoidsProductivityScore)
     }
 
