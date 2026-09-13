@@ -89,7 +89,7 @@ fun AiCaptureScreen(
             }
 
             if (state.execution is com.superplanner.app.domain.ai.AiExecution.Executed) {
-                Text("Feito. O Planner recebeu a operação e pode recalcular a rota.", color = SuperPlannerColors.SageDark)
+                Text("Feito. O Planner recebeu a operação e pode recalcular a rota.", color = SuperPlannerColors.Success)
             }
         }
     }
