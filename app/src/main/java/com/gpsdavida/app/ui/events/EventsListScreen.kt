@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,6 +35,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +51,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.R
 import com.superplanner.app.domain.model.Event
@@ -68,26 +73,39 @@ fun EventsListScreen(
     viewModel: EventsListViewModel = hiltViewModel(),
 ) {
     val events by viewModel.events.collectAsStateWithLifecycle()
-    val isImporting by viewModel.isImporting.collectAsStateWithLifecycle()
-    val importedCount by viewModel.importedCount.collectAsStateWithLifecycle()
+    val isSyncing by viewModel.isImporting.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var pendingCalendarImport by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var permissionRequested by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { granted ->
-        if (granted && pendingCalendarImport) viewModel.importFromGoogleCalendar()
-        pendingCalendarImport = false
+        permissionRequested = false
+        if (granted) viewModel.syncGoogleCalendar()
     }
 
-    fun importGoogleCalendar() {
-        pendingCalendarImport = true
+    fun syncIfAllowed() {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            viewModel.importFromGoogleCalendar()
-            pendingCalendarImport = false
-        } else {
+            viewModel.syncGoogleCalendar()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+            viewModel.syncGoogleCalendar()
+        } else if (!permissionRequested) {
+            permissionRequested = true
             permissionLauncher.launch(Manifest.permission.READ_CALENDAR)
         }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) syncIfAllowed()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val groupedEvents = events
@@ -126,12 +144,7 @@ fun EventsListScreen(
                     }
 
                     item {
-                        CalendarImportCard(
-                            isImporting = isImporting,
-                            importedCount = importedCount,
-                            onImport = ::importGoogleCalendar,
-                            onCreate = onAdd,
-                        )
+                        CalendarSyncCard(isSyncing = isSyncing, onCreate = onAdd)
                     }
 
                     if (groupedEvents.isEmpty()) {
@@ -139,14 +152,8 @@ fun EventsListScreen(
                     } else {
                         groupedEvents.forEach { (date, dayEvents) ->
                             item { EventDayHeader(date) }
-                            items(
-                                items = dayEvents,
-                                key = { it.id.value },
-                            ) { event ->
-                                EventRow(
-                                    event = event,
-                                    onClick = { onOpen(event.id.value) },
-                                )
+                            items(items = dayEvents, key = { it.id.value }) { event ->
+                                EventRow(event = event, onClick = { onOpen(event.id.value) })
                             }
                         }
                     }
@@ -177,10 +184,8 @@ private fun EditorialEventsDecorations() {
 }
 
 @Composable
-private fun CalendarImportCard(
-    isImporting: Boolean,
-    importedCount: Int?,
-    onImport: () -> Unit,
+private fun CalendarSyncCard(
+    isSyncing: Boolean,
     onCreate: () -> Unit,
 ) {
     SuperPlannerCard {
@@ -202,53 +207,31 @@ private fun CalendarImportCard(
                     color = SuperPlannerColors.Ink,
                 )
                 Text(
-                    text = stringResource(R.string.events_agenda_description),
+                    text = if (isSyncing) "Sincronizando sua agenda…" else "Sua agenda está sincronizada com o Google Agenda.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = SuperPlannerColors.InkSoft,
                 )
             }
-        }
-        Column(
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Button(
-                onClick = onImport,
-                enabled = !isImporting,
-                modifier = Modifier.fillMaxWidth(),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SuperPlannerColors.Terracotta,
-                    contentColor = SuperPlannerColors.Surface,
-                ),
-            ) {
-                if (isImporting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                        color = SuperPlannerColors.Surface,
-                    )
-                    Spacer(Modifier.width(10.dp))
-                } else {
-                    Icon(Icons.Outlined.CloudDownload, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                }
-                Text(stringResource(R.string.events_import_google))
-            }
-            TextButton(
-                onClick = onCreate,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            ) {
-                Text(stringResource(R.string.events_create_manual))
-            }
-            importedCount?.let { count ->
-                Text(
-                    text = if (count == 0) stringResource(R.string.events_import_none) else stringResource(R.string.events_import_success, count),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SuperPlannerColors.InkSoft,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
+            if (isSyncing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = SuperPlannerColors.Terracotta,
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.CloudSync,
+                    contentDescription = null,
+                    tint = SuperPlannerColors.Terracotta,
+                    modifier = Modifier.size(24.dp),
                 )
             }
+        }
+        TextButton(
+            onClick = onCreate,
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 10.dp),
+        ) {
+            Text(stringResource(R.string.events_create_manual))
         }
     }
 }
@@ -320,9 +303,7 @@ fun EventRow(
     val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale("pt", "BR"))
     val start = event.range.start.atZone(zone).format(formatter)
     val end = event.range.end.atZone(zone).format(formatter)
-    SuperPlannerCard(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-    ) {
+    SuperPlannerCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(18.dp),
             verticalAlignment = Alignment.Top,
