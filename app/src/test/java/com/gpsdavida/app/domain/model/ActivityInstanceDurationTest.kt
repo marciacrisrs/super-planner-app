@@ -15,10 +15,11 @@ class ActivityInstanceDurationTest {
 
     @Test
     fun actualDurationIsAvailableAfterCompletion() {
-        val completed = activity(30).completed(range(42))
+        val completed = activity(30).started(start).completed(range(42))
 
         assertEquals(Duration.ofMinutes(42), completed.actualDuration)
         assertEquals(ActivityStatus.DONE, completed.status)
+        assertEquals(start, completed.actualStart)
     }
 
     @Test
