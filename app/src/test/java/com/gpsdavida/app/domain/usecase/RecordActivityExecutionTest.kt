@@ -41,6 +41,7 @@ class RecordActivityExecutionTest {
         val actualEnd = Instant.parse("2026-01-01T10:45:00Z")
         val started = activity().started(actualStart)
 
+        useCase.start(activity(), actualStart)
         useCase.complete(started, actualEnd)
 
         val result = repository.saved!!
@@ -96,7 +97,7 @@ class RecordActivityExecutionTest {
         useCase.start(activity().started(plannedStart), plannedStart)
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = IllegalStateException::class)
     fun `cannot complete an activity without an actual start`() = runTest {
         useCase.complete(activity(), plannedEnd)
     }
