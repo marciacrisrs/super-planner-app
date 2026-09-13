@@ -35,8 +35,22 @@ class ReorganizeDayTest {
 
         assertEquals(start, input.activities.single().planned.start)
         assertEquals(start.plusSeconds(40 * 60), engine.lastInput!!.activities.single().planned.start)
-        assertEquals(RecalculationReason.USER_REQUESTED, engine.lastInput!!.recalculationReason)
-        assertEquals(40 * 60, result.recalculation.result.route.single().activity.planned.start.epochSecond - start.epochSecond)
+        assertEquals(RecalculationReason.USER_REQUESTED, result.recalculation.reason)
+        assertEquals(start.plusSeconds(40 * 60), result.recalculation.result.route.single().activity.planned.start)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `delay must be positive`() {
+        ReorganizeDay(AdaptiveRouteRecalculator(RecordingEngine)).execute(
+            PlanningInput(
+                activities = listOf(activity("study")),
+                context = NextActionContext(now = start),
+            ),
+            DayReorganizationRequest(
+                operation = DayReorganizationOperation.DelayActivity(ActivityInstanceId("activity-study"), 0),
+                now = start,
+            ),
+        )
     }
 
     private fun activity(name: String) = ActivityInstance(
@@ -51,7 +65,10 @@ class ReorganizeDayTest {
 
         override fun invoke(input: PlanningInput): PlanningResult {
             lastInput = input
-            return PlanningResult(route = input.activities.map { RouteStep(it) }, unscheduled = emptyList())
+            return PlanningResult(
+                route = input.activities.map { activity -> RouteStep(activity) },
+                unscheduled = emptyList(),
+            )
         }
     }
 }
