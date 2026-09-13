@@ -24,7 +24,7 @@ class RecordActivityExecution @Inject constructor(
     ) {
         val actualStart = activity.actualStart
             ?: repository.getById(activity.id)?.actualStart
-        requireNotNull(actualStart) { "Cannot complete an activity without an actual start" }
+        require(actualStart != null) { "Cannot complete an activity without an actual start" }
 
         val runningActivity = activity.copy(
             status = ActivityStatus.IN_PROGRESS,
