@@ -34,6 +34,7 @@ class ActivityInstanceDurationTest {
     @Test
     fun `variance is positive when activity takes longer than planned`() {
         val activity = activity(plannedEnd)
+            .started(plannedStart)
             .completed(TimeRange(plannedStart, Instant.parse("2026-01-01T10:30:00Z")))
 
         assertEquals(Duration.ofMinutes(90), activity.actualDuration)
@@ -43,6 +44,7 @@ class ActivityInstanceDurationTest {
     @Test
     fun `variance is negative when activity finishes early`() {
         val activity = activity(plannedEnd)
+            .started(plannedStart)
             .completed(TimeRange(plannedStart, Instant.parse("2026-01-01T09:45:00Z")))
 
         assertEquals(Duration.ofMinutes(-15), activity.durationVariance)
