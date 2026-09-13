@@ -42,24 +42,25 @@ fun AgoraScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val currentActivity = state.currentActivity
     var showCapacityDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var feedbackGivenFor by remember { mutableStateOf<String?>(null) }
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
     val dateFmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
 
-    LaunchedEffect(state.currentActivity?.id) {
+    LaunchedEffect(currentActivity?.id) {
         feedbackGivenFor = null
     }
 
-    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity, state.state, state.lowCapacity) {
+    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, currentActivity, state.state, state.lowCapacity) {
         AgoraWidgetSnapshot.write(
             context = context,
             snapshot = AgoraWidgetSnapshot(
                 title = state.title,
                 scheduledTime = state.scheduledTime?.format(timeFmt).orEmpty(),
                 durationMinutes = state.durationMinutes?.toInt() ?: 0,
-                isEmpty = state.currentActivity == null,
+                isEmpty = currentActivity == null,
             ),
         )
         AgoraWidgetProvider.updateAll(context)
@@ -92,7 +93,8 @@ fun AgoraScreen(
         )
     }
 
-    if (showFeedbackDialog && state.currentActivity != null) {
+    if (showFeedbackDialog && currentActivity != null) {
+        val feedbackActivityId = currentActivity.id.value
         AlertDialog(
             onDismissRequest = { showFeedbackDialog = false },
             title = { Text("Como foi esta sugestão?") },
@@ -100,23 +102,23 @@ fun AgoraScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     FeedbackOption("Isso fez sentido.", RouteFeedbackReason.HELPFUL, viewModel) {
                         showFeedbackDialog = false
-                        feedbackGivenFor = state.currentActivity.id.value
+                        feedbackGivenFor = feedbackActivityId
                     }
                     FeedbackOption("Eu queria fazer outra coisa.", RouteFeedbackReason.WANTED_OTHER, viewModel) {
                         showFeedbackDialog = false
-                        feedbackGivenFor = state.currentActivity.id.value
+                        feedbackGivenFor = feedbackActivityId
                     }
                     FeedbackOption("A duração estava errada.", RouteFeedbackReason.DURATION_WRONG, viewModel) {
                         showFeedbackDialog = false
-                        feedbackGivenFor = state.currentActivity.id.value
+                        feedbackGivenFor = feedbackActivityId
                     }
                     FeedbackOption("Não quero fazer isso nesse horário.", RouteFeedbackReason.TIME_WRONG, viewModel) {
                         showFeedbackDialog = false
-                        feedbackGivenFor = state.currentActivity.id.value
+                        feedbackGivenFor = feedbackActivityId
                     }
                     FeedbackOption("O Planner errou.", RouteFeedbackReason.PLANNER_WRONG, viewModel) {
                         showFeedbackDialog = false
-                        feedbackGivenFor = state.currentActivity.id.value
+                        feedbackGivenFor = feedbackActivityId
                     }
                 }
             },
@@ -174,14 +176,14 @@ fun AgoraScreen(
             onSwap = viewModel::skipCurrent,
         )
 
-        if (state.currentActivity != null && feedbackGivenFor != state.currentActivity.id.value) {
+        if (currentActivity != null && feedbackGivenFor != currentActivity.id.value) {
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { showFeedbackDialog = true },
             ) {
                 Text("A recomendação fez sentido?")
             }
-        } else if (feedbackGivenFor == state.currentActivity?.id?.value) {
+        } else if (feedbackGivenFor == currentActivity?.id?.value) {
             Text(
                 text = "Feedback registrado.",
                 style = MaterialTheme.typography.bodySmall,
