@@ -48,6 +48,21 @@ class AgoraUiMapperTest {
     }
 
     @Test
+    fun `running activity stays main focus regardless of next decision`() {
+        val running = daily("running", "09:00", "10:00").copy(
+            instance = daily("running", "09:00", "10:00").instance.copy(status = ActivityStatus.IN_PROGRESS),
+        )
+        val next = daily("next", "10:00", "10:30")
+        val decision = NextActionDecision(current = next.instance, next = null)
+
+        val state = AgoraUiMapper.map(listOf(running, next), decision, now, zone)
+
+        assertEquals("running", state.title)
+        assertEquals(ActivityStatus.IN_PROGRESS, state.currentActivity?.status)
+        assertEquals(NextActionState.InProgress, state.state)
+    }
+
+    @Test
     fun `all done shows completed state`() {
         val done = daily("done", "09:00", "09:30").copy(
             instance = daily("done", "09:00", "09:30").instance.copy(status = ActivityStatus.DONE),
