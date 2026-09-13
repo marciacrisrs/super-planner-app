@@ -50,6 +50,23 @@ class CapacityTradeoffNegotiator {
         )
     }
 
+    fun applyChoice(
+        activities: List<ActivityInstance>,
+        negotiation: CapacityNegotiation,
+        choice: TradeoffChoice,
+    ): List<ActivityInstance> {
+        val option = negotiation.alternatives.firstOrNull { it.id == choice.optionId }
+            ?: error("Unknown trade-off option: ${choice.optionId}")
+        val moved = option.movedItems.toSet()
+        return activities.map { activity ->
+            if (activity.id in moved && activity.status == ActivityStatus.PENDING) {
+                activity.deferred()
+            } else {
+                activity
+            }
+        }
+    }
+
     private fun buildAlternatives(
         movableItems: List<ActivityInstance>,
         flexibleBudget: Duration,
@@ -60,7 +77,7 @@ class CapacityTradeoffNegotiator {
                     id = "protect-anchors-only",
                     movedItems = movableItems.map { it.id },
                     preservedItems = emptyList(),
-                    residualOverload = Duration.ZERO,
+                    residualOverload = flexibleBudget.negated(),
                 ),
             )
         }
@@ -76,8 +93,8 @@ class CapacityTradeoffNegotiator {
         val preserveTopPriorities = selectThatFit(ordered.take(2), flexibleBudget)
 
         return listOf(
-            optionFor("preserve-highest-priority", preserveHighestPriority, ordered),
-            optionFor("preserve-top-priorities", preserveTopPriorities, ordered),
+            optionFor("preserve-highest-priority", preserveHighestPriority, ordered, flexibleBudget),
+            optionFor("preserve-top-priorities", preserveTopPriorities, ordered, flexibleBudget),
         ).distinct()
     }
 
@@ -100,14 +117,17 @@ class CapacityTradeoffNegotiator {
         id: String,
         preserved: List<ActivityInstance>,
         allMovable: List<ActivityInstance>,
+        flexibleBudget: Duration,
     ): TradeoffOption {
         val preservedIds = preserved.map { it.id }.toSet()
         val moved = allMovable.filterNot { it.id in preservedIds }
+        val preservedDuration = preserved.sumDuration()
+        val residual = preservedDuration.minus(flexibleBudget).coerceAtLeastZero()
         return TradeoffOption(
             id = id,
             movedItems = moved.map { it.id },
             preservedItems = preserved.map { it.id },
-            residualOverload = Duration.ZERO,
+            residualOverload = residual,
         )
     }
 }
@@ -128,6 +148,10 @@ data class CapacityNegotiation(
     val requiresUserDecision: Boolean
         get() = overloaded && movableItems.isNotEmpty()
 }
+
+data class TradeoffChoice(
+    val optionId: String,
+)
 
 data class TradeoffOption(
     val id: String,
