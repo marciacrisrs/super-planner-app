@@ -89,10 +89,12 @@ fun HomeScreen(
                         durationMinutes = state.durationMinutes,
                         scheduledTime = state.scheduledTime,
                         priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
+                        explanation = state.explanation,
                         reasonLabels = state.reasons.map { reason ->
                             when (reason) {
                                 NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
                                 NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
+                                NextActionReason.HIGHER_PRIORITY -> stringResource(R.string.reason_higher_priority)
                                 NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
                                 NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
                                 NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
@@ -130,6 +132,9 @@ fun HomeScreen(
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text("Depois", style = MaterialTheme.typography.labelMedium, color = SuperPlannerColors.InkSoft)
                             Text(upcoming.title, style = MaterialTheme.typography.titleMedium, color = SuperPlannerColors.Ink)
+                            upcoming.explanation?.let {
+                                Text(it, style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
+                            }
                         }
                         Text(
                             upcoming.scheduledTime.format(timeFormatter),
