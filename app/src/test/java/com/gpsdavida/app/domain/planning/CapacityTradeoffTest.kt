@@ -30,8 +30,9 @@ class CapacityTradeoffTest {
         val result = negotiator.analyze(activities, capacity(hours = 5))
 
         assertTrue(result.overloaded)
-        assertEquals(Duration.ofHours(2), result.totalEstimated)
-            .also { /* replaced below to keep assertions explicit */ }
+        assertEquals(Duration.ofHours(6), result.totalEstimated)
+        assertEquals(Duration.ofHours(5), result.schedulableCapacity)
+        assertEquals(Duration.ofHours(1), result.overload)
     }
 
     @Test
