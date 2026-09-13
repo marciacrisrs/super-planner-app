@@ -18,4 +18,7 @@ interface EventDao {
 
     @Query("DELETE FROM events WHERE id = :id")
     suspend fun delete(id: String)
+
+    @Query("DELETE FROM events WHERE id LIKE 'google-calendar:%'")
+    suspend fun deleteAllGoogleCalendarEvents()
 }
