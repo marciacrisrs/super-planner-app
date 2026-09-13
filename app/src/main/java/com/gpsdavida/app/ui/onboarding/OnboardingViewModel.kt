@@ -30,6 +30,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+data class OnboardingState(
+    val finished: Boolean = false,
+)
+
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val events: EventRepository,
@@ -38,52 +42,85 @@ class OnboardingViewModel @Inject constructor(
     private val availability: AvailabilityRepository,
     private val clock: Clock,
 ) : ViewModel() {
-    private val _finished = MutableStateFlow(false)
-    val finished: StateFlow<Boolean> = _finished.asStateFlow()
+    private val _state = MutableStateFlow(OnboardingState())
+    val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
-    fun createFirstRoute() {
+    fun createFirstRoute(
+        intent: String,
+        wakeTime: String,
+        sleepTime: String,
+        fixedTitle: String,
+        fixedStart: String,
+        fixedEnd: String,
+        availabilityStart: String,
+        availabilityEnd: String,
+        recurringActivity: String,
+    ) {
         viewModelScope.launch {
-            val zone = clock.zone
             val today = LocalDate.now(clock)
-            val start = today.atTime(19, 0).atZone(zone).toInstant()
-            events.save(
-                Event(
-                    id = EventId(UUID.randomUUID().toString()),
-                    title = "Planejamento do dia",
-                    range = TimeRange(start, start.plus(Duration.ofMinutes(30))),
-                ),
-            )
-            tasks.save(
-                Task(
-                    id = TaskId(UUID.randomUUID().toString()),
-                    title = "Escolher a próxima prioridade",
-                    plannedDuration = Duration.ofMinutes(20),
-                    priority = Priority.IMPORTANT,
-                    due = today.plusDays(1).atStartOfDay(zone).toInstant(),
-                ),
-            )
-            habits.save(
-                Habit(
-                    id = HabitId(UUID.randomUUID().toString()),
-                    title = "Caminhar",
-                    plannedDuration = Duration.ofMinutes(20),
-                    daysOfWeek = setOf(java.time.DayOfWeek.values()[today.dayOfWeek.ordinal]),
-                    window = LocalTimeWindow(LocalTime.of(7, 0), LocalTime.of(21, 0)),
-                ),
-            )
+            val zone = clock.zone
+            val availableFrom = parseTime(availabilityStart, LocalTime.of(7, 0))
+            val availableUntil = parseTime(availabilityEnd, LocalTime.of(21, 0))
+            val wake = parseTime(wakeTime, availableFrom)
+            val sleep = parseTime(sleepTime, availableUntil)
+
+            if (intent.isNotBlank()) {
+                tasks.save(
+                    Task(
+                        id = TaskId(UUID.randomUUID().toString()),
+                        title = intent.trim(),
+                        plannedDuration = Duration.ofMinutes(30),
+                        priority = Priority.IMPORTANT,
+                        due = today.plusDays(1).atStartOfDay(zone).toInstant(),
+                    ),
+                )
+            }
+
+            if (fixedTitle.isNotBlank()) {
+                val start = parseTime(fixedStart, LocalTime.of(9, 0))
+                val end = parseTime(fixedEnd, start.plusHours(1))
+                val safeEnd = if (end.isAfter(start)) end else start.plusHours(1)
+                events.save(
+                    Event(
+                        id = EventId(UUID.randomUUID().toString()),
+                        title = fixedTitle.trim(),
+                        range = TimeRange(
+                            today.atTime(start).atZone(zone).toInstant(),
+                            today.atTime(safeEnd).atZone(zone).toInstant(),
+                        ),
+                    ),
+                )
+            }
+
+            if (recurringActivity.isNotBlank()) {
+                habits.save(
+                    Habit(
+                        id = HabitId(UUID.randomUUID().toString()),
+                        title = recurringActivity.trim(),
+                        plannedDuration = Duration.ofMinutes(20),
+                        daysOfWeek = setOf(today.dayOfWeek),
+                        window = LocalTimeWindow(wake, sleep),
+                    ),
+                )
+            }
+
             availability.save(
                 Availability(
                     id = AvailabilityId(UUID.randomUUID().toString()),
                     dayOfWeek = today.dayOfWeek,
-                    window = LocalTimeWindow(LocalTime.of(7, 0), LocalTime.of(21, 0)),
+                    window = LocalTimeWindow(availableFrom, availableUntil),
                     kind = AvailabilityKind.FREE,
                 ),
             )
-            _finished.value = true
+
+            _state.value = OnboardingState(finished = true)
         }
     }
 
     fun skip() {
-        _finished.value = true
+        _state.value = OnboardingState(finished = true)
     }
+
+    private fun parseTime(value: String, fallback: LocalTime): LocalTime =
+        runCatching { LocalTime.parse(value.trim()) }.getOrDefault(fallback)
 }
