@@ -4,6 +4,7 @@ package com.superplanner.app.domain.model
 enum class NextActionReason {
     CURRENTLY_ACTIVE,
     DUE_NOW,
+    HIGHER_PRIORITY,
     FIXED_COMMITMENT,
     AVAILABLE_IN_WINDOW,
     ENERGY_MATCH,
