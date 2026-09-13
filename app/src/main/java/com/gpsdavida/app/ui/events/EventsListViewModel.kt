@@ -36,9 +36,11 @@ class EventsListViewModel @Inject constructor(
             _isImporting.value = true
             _importedCount.value = null
             runCatching {
-                googleCalendarReader.readUpcoming().also { rows ->
-                    rows.forEach(eventDao::upsert)
-                }.size
+                val rows = googleCalendarReader.readUpcoming()
+                for (row in rows) {
+                    eventDao.upsert(row)
+                }
+                rows.size
             }.onSuccess { _importedCount.value = it }
                 .onFailure { _importedCount.value = 0 }
             _isImporting.value = false
