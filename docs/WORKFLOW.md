@@ -15,10 +15,17 @@ Não pular o motor para desenhar telas “de mentira”: placeholders de navega�
 ## Regras
 
 - Um PR ≈ uma issue. Dependência explícita na descrição.
+- **Toda nova issue de feature deve passar pela régua #292** antes da implementação. A issue precisa registrar o problema real, a solução de referência em planner de papel, o ganho digital/IA, as sete respostas da régua e a decisão de seguir, simplificar, adiar ou não implementar.
 - Código e pacotes em inglês; strings da UI em português.
 - `domain` sem Android; `ui` sem Room; regras de agenda só em `domain/planning`.
 - Skill nova: propor → Márcia aceita → só então gravar `SKILL.md`.
 - Commits e PRs: o agente pode abrir, revisar e mergear. Márcia só entra nos **gates humanos** abaixo.
+
+## Régua de produto
+
+A referência oficial está em [Régua permanente de produto — planner de papel](product/002-regua-permanente-planner-de-papel.md).
+
+A regra é simples: o digital pode ser mais sofisticado que o papel, mas precisa comprar essa complexidade com uma redução real de carga mental, melhor uso da capacidade e/ou melhor preservação das prioridades.
 
 ## Gates humanos
 
