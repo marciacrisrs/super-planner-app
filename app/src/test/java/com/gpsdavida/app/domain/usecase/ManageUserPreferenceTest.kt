@@ -2,6 +2,7 @@ package com.superplanner.app.domain.usecase
 
 import com.superplanner.app.domain.model.PreferenceSource
 import com.superplanner.app.domain.model.PreferenceStatus
+import com.superplanner.app.domain.model.PreferenceSuggestion
 import com.superplanner.app.domain.model.PreferenceValue
 import com.superplanner.app.domain.model.UserPreference
 import com.superplanner.app.domain.model.UserPreferenceId
