@@ -27,27 +27,18 @@ class EventsListViewModel @Inject constructor(
     private val _isImporting = MutableStateFlow(false)
     val isImporting: StateFlow<Boolean> = _isImporting.asStateFlow()
 
-    private val _importedCount = MutableStateFlow<Int?>(null)
-    val importedCount: StateFlow<Int?> = _importedCount.asStateFlow()
-
-    fun importFromGoogleCalendar() {
+    fun syncGoogleCalendar() {
         if (_isImporting.value) return
         viewModelScope.launch {
             _isImporting.value = true
-            _importedCount.value = null
             runCatching {
                 val rows = googleCalendarReader.readUpcoming()
+                eventDao.deleteAllGoogleCalendarEvents()
                 for (row in rows) {
                     eventDao.upsert(row)
                 }
-                rows.size
-            }.onSuccess { _importedCount.value = it }
-                .onFailure { _importedCount.value = 0 }
+            }
             _isImporting.value = false
         }
-    }
-
-    fun clearImportFeedback() {
-        _importedCount.value = null
     }
 }
