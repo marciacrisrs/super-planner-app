@@ -312,7 +312,7 @@ private fun EventDayHeader(date: LocalDate) {
 }
 
 @Composable
-private fun EventRow(
+fun EventRow(
     event: Event,
     onClick: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
