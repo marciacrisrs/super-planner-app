@@ -3,12 +3,16 @@ package com.superplanner.app.data
 import com.superplanner.app.domain.ai.AiCommand
 import com.superplanner.app.domain.port.AiToolGateway
 import com.superplanner.app.domain.port.AiToolResult
+import com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageDraft
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Safe gateway: structured commands remain explicit until connected to use cases. */
+/** Safe gateway: AI commands are translated into existing domain use cases. */
 @Singleton
-class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
+class DefaultAiToolGateway @Inject constructor(
+    private val createTaskFromDraft: CreateTaskFromNaturalLanguageDraft,
+) : AiToolGateway {
     override suspend fun execute(command: AiCommand): AiToolResult = when (command) {
         is AiCommand.ExplainNextActivity -> AiToolResult.Success(
             buildList {
@@ -17,17 +21,7 @@ class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
                 command.evidence.forEach { add("evidence=$it") }
             },
         )
-        is AiCommand.CreateActivityDraft -> AiToolResult.Success(
-            buildList {
-                add("activity_draft")
-                add(command.draft.title)
-                command.draft.plannedDuration?.let { add("duration=${it.toMinutes()}m") }
-                command.draft.date?.let { add("date=$it") }
-                command.draft.startTime?.let { add("time=$it") }
-                command.draft.recurrence?.let { add("recurrence=${it.unit}:${it.interval}") }
-                command.draft.missingFields.forEach { add("missing=${it.name}") }
-            },
-        )
+        is AiCommand.CreateActivityDraft -> executeCreate(command)
         is AiCommand.ReorganizeDay -> AiToolResult.Success(
             listOf("reorganize_requested", command.request.operation.javaClass.simpleName),
         )
@@ -36,4 +30,23 @@ class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
         )
         AiCommand.RecalculateRoute -> AiToolResult.Success(listOf("route_recalculation_requested"))
     }
+
+    private suspend fun executeCreate(command: AiCommand.CreateActivityDraft): AiToolResult =
+        when (val result = createTaskFromDraft(
+            draft = command.draft,
+            confirmed = true,
+            now = Instant.now(),
+        )) {
+            is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.Created -> AiToolResult.Success(
+                listOf(
+                    "activity_created",
+                    "id=${result.task.id.value}",
+                    "title=${result.task.title}",
+                ),
+            )
+            is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.NeedsConfirmation ->
+                AiToolResult.Rejected(result.reason)
+            is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.NeedsMoreInformation ->
+                AiToolResult.Rejected("missing=${result.fields.joinToString(",")}")
+        }
 }
