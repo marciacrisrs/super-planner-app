@@ -5,8 +5,8 @@ import com.superplanner.app.domain.model.DailySchedule
 import com.superplanner.app.domain.model.NextActionContext
 import com.superplanner.app.domain.model.ScheduleConflict
 import com.superplanner.app.domain.model.ScheduleConflictReason
-import com.superplanner.app.domain.planning.PlanningInput
 import com.superplanner.app.domain.planning.PlanningEngine
+import com.superplanner.app.domain.planning.PlanningInput
 import com.superplanner.app.domain.planning.RecalculationReason
 import java.time.Duration
 import java.time.Instant
@@ -40,6 +40,7 @@ class RecalculateRoute @Inject constructor(
                     defaultBuffer = defaultBuffer,
                     zoneId = zoneId,
                 ),
+                date = date,
                 recalculationReason = if (delayedActivity != null) {
                     RecalculationReason.EXECUTION_CHANGED
                 } else if (now != null) {
