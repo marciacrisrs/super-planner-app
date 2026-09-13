@@ -124,17 +124,22 @@ class ChooseNextActivity @Inject constructor() {
             }
             used = used
                 .plus(transition)
-                .plus(scheduled.plannedDuration)
+                .plus(capacityDuration(scheduled))
                 .plus(scheduled.bufferAfter ?: context.defaultBuffer)
             previous = scheduled
         }
 
         if (current != null && ordered.none { it.id == current.id }) {
-            used = used.plus(current.plannedDuration).plus(current.bufferAfter ?: context.defaultBuffer)
+            used = used.plus(capacityDuration(current)).plus(current.bufferAfter ?: context.defaultBuffer)
         }
 
-        return capacity.remaining(used.minus(activity.plannedDuration).coerceAtLeast(Duration.ZERO)) >= activity.plannedDuration
+        return capacity.remaining(used.minus(capacityDuration(activity)).coerceAtLeast(Duration.ZERO)) >= capacityDuration(activity)
     }
+
+    /** Completed instances teach the planner about actual effort without changing the user's estimate. */
+    private fun capacityDuration(activity: ActivityInstance): Duration =
+        if (activity.status == ActivityStatus.DONE) activity.actualDuration ?: activity.plannedDuration
+        else activity.plannedDuration
 
     private fun travelAndBufferFitBeforeStart(activity: ActivityInstance, current: ActivityInstance?, context: NextActionContext): Boolean {
         if (activity.id == current?.id || activity.planned.start <= context.now) return true
