@@ -60,6 +60,7 @@ fun EventFormScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.finished) { if (state.finished) onDone() }
     var confirmDelete by remember { mutableStateOf(false) }
+    var pickRecurrenceEnd by remember { mutableStateOf(false) }
     val zone = ZoneId.systemDefault()
     val dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale("pt", "BR"))
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm", Locale("pt", "BR"))
@@ -109,10 +110,35 @@ fun EventFormScreen(
                     }
                 }
             }
+
+            if (state.recurrenceDays.isNotEmpty() || state.recurrenceUnit != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { pickRecurrenceEnd = true }) {
+                        Text(
+                            state.recurrenceEndDate?.let { "Termina em: ${it.format(dateFmt)}" }
+                                ?: "Sem data final",
+                        )
+                    }
+                    if (state.recurrenceEndDate != null) {
+                        TextButton(onClick = { viewModel.setRecurrenceEndDate(null) }) {
+                            Text("Remover")
+                        }
+                    }
+                }
+            }
+
             if (state.error == EventFormError.INVALID_RECURRENCE) Text(stringResource(R.string.event_invalid_recurrence))
 
             Button(onClick = viewModel::save, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.event_save)) }
         }
+    }
+
+    if (pickRecurrenceEnd) {
+        RecurrenceEndDateSheet(
+            initial = state.recurrenceEndDate ?: state.start.atZone(zone).toLocalDate(),
+            onDismiss = { pickRecurrenceEnd = false },
+            onConfirm = { viewModel.setRecurrenceEndDate(it); pickRecurrenceEnd = false },
+        )
     }
 
     if (confirmDelete) {
@@ -146,6 +172,22 @@ private fun DateTimeRow(label: String, instant: Instant, zone: ZoneId, dateFmt: 
 private fun DatePickerSheet(initial: LocalDate, onDismiss: () -> Unit, onConfirm: (LocalDate) -> Unit) {
     val state = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
     DatePickerDialog(onDismissRequest = onDismiss, confirmButton = { TextButton(onClick = { val millis = state.selectedDateMillis ?: return@TextButton; onConfirm(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()) }) { Text(stringResource(R.string.action_ok)) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } }) { DatePicker(state = state) }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RecurrenceEndDateSheet(initial: LocalDate, onDismiss: () -> Unit, onConfirm: (LocalDate) -> Unit) {
+    val state = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                val millis = state.selectedDateMillis ?: return@TextButton
+                onConfirm(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
+            }) { Text(stringResource(R.string.action_ok)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    ) { DatePicker(state = state) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
