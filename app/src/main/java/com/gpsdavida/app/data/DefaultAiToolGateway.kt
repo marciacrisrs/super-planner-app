@@ -6,10 +6,7 @@ import com.superplanner.app.domain.port.AiToolResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Safe placeholder gateway. Real tool adapters delegate to existing use cases
- * instead of writing planner state directly.
- */
+/** Safe gateway: structured commands remain explicit until connected to use cases. */
 @Singleton
 class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
     override suspend fun execute(command: AiCommand): AiToolResult = when (command) {
@@ -28,7 +25,13 @@ class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
             },
         )
         is AiCommand.ReorganizeDay -> AiToolResult.Success(
-            listOf("reorganize_requested", command.instruction),
+            listOf(
+                "reorganize_requested",
+                command.request.operation.javaClass.simpleName,
+            ),
+        )
+        is AiCommand.MissingInformation -> AiToolResult.Success(
+            command.fields.map { "missing=$it" },
         )
         AiCommand.RecalculateRoute -> AiToolResult.Success(listOf("route_recalculation_requested"))
     }
