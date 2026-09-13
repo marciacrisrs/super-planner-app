@@ -92,7 +92,9 @@ class ManageUserPreferenceTest {
 
         override suspend fun revoke(id: UserPreferenceId) {
             val current = getById(id) ?: return
-            state.value = state.value.filterNot { it.id == id } + current.revoke(updated)
+            state.value = state.value.filterNot { it.id == id } + current.revoke(
+                Instant.parse("2026-09-13T13:00:00Z"),
+            )
         }
     }
 }
