@@ -22,13 +22,41 @@ class ApplyPersistedExecutionsTest {
         val activity = pendingActivity()
         val actual = TimeRange(plannedStart, Instant.parse("2026-01-01T10:20:00Z"))
         val persisted = mapOf(
-            activity.id to ActivityExecution(activity.id, ActivityStatus.DONE, activity.planned, actual),
+            activity.id to ActivityExecution(
+                activity.id,
+                ActivityStatus.DONE,
+                activity.planned,
+                actualStart = actual.start,
+                actual = actual,
+            ),
         )
 
         val result = useCase(listOf(activity), persisted).single()
 
         assertEquals(ActivityStatus.DONE, result.status)
+        assertEquals(actual.start, result.actualStart)
         assertEquals(actual, result.actual)
+    }
+
+    @Test
+    fun `overlays in-progress execution start without inventing end`() {
+        val activity = pendingActivity()
+        val actualStart = Instant.parse("2026-01-01T09:25:00Z")
+        val persisted = mapOf(
+            activity.id to ActivityExecution(
+                activity.id,
+                ActivityStatus.IN_PROGRESS,
+                activity.planned,
+                actualStart = actualStart,
+                actual = null,
+            ),
+        )
+
+        val result = useCase(listOf(activity), persisted).single()
+
+        assertEquals(ActivityStatus.IN_PROGRESS, result.status)
+        assertEquals(actualStart, result.actualStart)
+        assertEquals(null, result.actual)
     }
 
     @Test
@@ -38,6 +66,7 @@ class ApplyPersistedExecutionsTest {
         val result = useCase(listOf(activity), emptyMap()).single()
 
         assertEquals(ActivityStatus.PENDING, result.status)
+        assertEquals(null, result.actualStart)
         assertEquals(null, result.actual)
     }
 
