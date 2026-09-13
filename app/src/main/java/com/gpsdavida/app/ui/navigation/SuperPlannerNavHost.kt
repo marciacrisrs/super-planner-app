@@ -1,7 +1,9 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.superplanner.app.ui.navigation
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pointerInput
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.CheckCircleOutline
@@ -40,7 +42,7 @@ import com.superplanner.app.ui.horizontes.HorizonsScreen
 import com.superplanner.app.ui.horizontes.WeeklyReviewScreen
 import com.superplanner.app.ui.meudia.MeuDiaScreen
 import com.superplanner.app.ui.planos.AdvancedPlansScreen
-import com.superplanner.app.ui.planejamento.PlanningScreen
+import com.superplanner.app.ui.planos.PlanningScreen
 import com.superplanner.app.ui.routines.RoutineFormScreen
 import com.superplanner.app.ui.routines.RoutinesListScreen
 import com.superplanner.app.ui.semana.WeekDayScreen
@@ -55,13 +57,7 @@ fun SuperPlannerNavHost() {
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
-    val showBar = currentRoute in setOf(
-        SuperPlannerRoutes.AGORA,
-        SuperPlannerRoutes.MEU_DIA,
-        SuperPlannerRoutes.PLANNING,
-        SuperPlannerRoutes.EVENTS,
-        SuperPlannerRoutes.TASKS,
-    )
+    val showBar = currentRoute in MAIN_TABS
 
     Scaffold(
         bottomBar = {
@@ -106,7 +102,13 @@ fun SuperPlannerNavHost() {
             }
         },
     ) { padding ->
-        NavHost(navController, SuperPlannerRoutes.AGORA, Modifier.padding(padding)) {
+        NavHost(
+            navController,
+            SuperPlannerRoutes.AGORA,
+            Modifier
+                .padding(padding)
+                .swipeBetweenMainTabs(navController, currentRoute),
+        ) {
             composable(SuperPlannerRoutes.AGORA) { HomeScreen() }
             composable(SuperPlannerRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(SuperPlannerRoutes.eventEditor()) }, { navController.navigate(SuperPlannerRoutes.eventEditor(it)) }, { navController.navigate(SuperPlannerRoutes.taskEditor(it)) }, { navController.navigate(SuperPlannerRoutes.habitEditor(it)) }, { navController.navigate(SuperPlannerRoutes.AVAILABILITY) }, { navController.navigate(SuperPlannerRoutes.WEEK) }) }
             composable(SuperPlannerRoutes.WEEK) { WeekScreen(onOpenDay = { date -> navController.navigate(SuperPlannerRoutes.weekDay(date)) }) }
@@ -130,6 +132,36 @@ fun SuperPlannerNavHost() {
         }
     }
 }
+
+private val MAIN_TABS = listOf(
+    SuperPlannerRoutes.AGORA,
+    SuperPlannerRoutes.MEU_DIA,
+    SuperPlannerRoutes.PLANNING,
+    SuperPlannerRoutes.EVENTS,
+    SuperPlannerRoutes.TASKS,
+)
+
+private fun Modifier.swipeBetweenMainTabs(
+    navController: NavHostController,
+    currentRoute: String?,
+): Modifier = if (currentRoute in MAIN_TABS) {
+    pointerInput(currentRoute) {
+        var totalDrag = 0f
+        detectHorizontalDragGestures(
+            onDragStart = { totalDrag = 0f },
+            onHorizontalDrag = { _, dragAmount -> totalDrag += dragAmount },
+            onDragEnd = {
+                if (kotlin.math.abs(totalDrag) >= 96f) {
+                    val index = MAIN_TABS.indexOf(currentRoute)
+                    val targetIndex = if (totalDrag < 0) index + 1 else index - 1
+                    MAIN_TABS.getOrNull(targetIndex)?.let { navController.navigateToTab(it) }
+                }
+                totalDrag = 0f
+            },
+            onDragCancel = { totalDrag = 0f },
+        )
+    }
+} else this
 
 @Composable
 private fun navColors() = NavigationBarItemDefaults.colors(
