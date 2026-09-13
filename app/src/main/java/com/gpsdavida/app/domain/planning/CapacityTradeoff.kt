@@ -2,9 +2,12 @@ package com.superplanner.app.domain.planning
 
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.Flexibility
+import com.superplanner.app.domain.usecase.weight
 import java.time.Duration
+import java.time.Instant
 
 /**
  * Detects capacity overload and turns it into explicit, user-selectable trade-offs.
@@ -18,7 +21,7 @@ class CapacityTradeoffNegotiator {
         activities: List<ActivityInstance>,
         capacity: DailyCapacity,
     ): CapacityNegotiation {
-        val pending = activities.filter { it.status == com.superplanner.app.domain.model.ActivityStatus.PENDING }
+        val pending = activities.filter { it.status == ActivityStatus.PENDING }
         val protectedItems = pending.filter { it.flexibility == Flexibility.FIXED }
         val movableItems = pending.filter { it.flexibility == Flexibility.FLEXIBLE }
 
@@ -65,18 +68,17 @@ class CapacityTradeoffNegotiator {
         val ordered = movableItems.sortedWith(
             compareBy<ActivityInstance> { it.priority.weight }
                 .thenByDescending { it.delayConsequence.weight }
-                .thenBy { it.dueAt ?: java.time.Instant.MAX }
+                .thenBy { it.dueAt ?: Instant.MAX }
                 .thenBy { it.id.value },
         )
 
         val preserveHighestPriority = selectThatFit(ordered, flexibleBudget)
-        val preserveFirstTwo = selectThatFit(ordered.take(2), flexibleBudget)
-        val alternatives = linkedSetOf(
-            optionFor("preserve-highest-priority", preserveHighestPriority, ordered),
-            optionFor("preserve-top-priorities", preserveFirstTwo, ordered),
-        )
+        val preserveTopPriorities = selectThatFit(ordered.take(2), flexibleBudget)
 
-        return alternatives.toList()
+        return listOf(
+            optionFor("preserve-highest-priority", preserveHighestPriority, ordered),
+            optionFor("preserve-top-priorities", preserveTopPriorities, ordered),
+        ).distinct()
     }
 
     private fun selectThatFit(
@@ -121,7 +123,7 @@ data class CapacityNegotiation(
         get() = totalEstimated > schedulableCapacity
 
     val overload: Duration
-        get() = (totalEstimated - schedulableCapacity).coerceAtLeastZero()
+        get() = totalEstimated.minus(schedulableCapacity).coerceAtLeastZero()
 
     val requiresUserDecision: Boolean
         get() = overloaded && movableItems.isNotEmpty()
