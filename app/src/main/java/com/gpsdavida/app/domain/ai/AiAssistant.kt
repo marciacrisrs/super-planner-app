@@ -2,6 +2,7 @@ package com.superplanner.app.domain.ai
 
 import com.superplanner.app.domain.port.AiToolGateway
 import com.superplanner.app.domain.port.AiToolResult
+import java.time.LocalDate
 import javax.inject.Inject
 
 /** Provider-independent boundary between conversational AI and Planner truth. */
@@ -37,7 +38,7 @@ data class AiProposal(
 )
 
 sealed interface AiCommand {
-    data class CreateActivityDraft(val title: String) : AiCommand
+    data class CreateActivityDraft(val draft: NaturalLanguageActivityDraft) : AiCommand
     data class ReorganizeDay(val instruction: String) : AiCommand
     data class ExplainNextActivity(val activityId: String) : AiCommand
     data object RecalculateRoute : AiCommand
@@ -75,11 +76,15 @@ class RuleBasedAiProvider @Inject constructor() : AiProvider {
                     requiresConfirmation = true,
                 )
             }
-            else -> AiProposal(
-                command = AiCommand.CreateActivityDraft(normalized),
-                explanation = "Entendi um possível pedido para criar uma atividade; nada é persistido antes da confirmação.",
-                requiresConfirmation = true,
-            )
+            else -> {
+                val today = request.context.nowIso?.take(10)?.let(LocalDate::parse) ?: LocalDate.now()
+                val draft = NaturalLanguageActivityParser.parse(normalized, today)
+                AiProposal(
+                    command = AiCommand.CreateActivityDraft(draft),
+                    explanation = "Entendi estes dados estruturados. Nada é persistido antes da sua confirmação.",
+                    requiresConfirmation = true,
+                )
+            }
         }
     }
 }
