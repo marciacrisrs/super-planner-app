@@ -4,20 +4,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.superplanner.app.domain.ai.AiAssistant
 import com.superplanner.app.domain.ai.AiConfirmation
-import com.superplanner.app.domain.ai.AiContext
 import com.superplanner.app.domain.ai.AiExecution
 import com.superplanner.app.domain.ai.AiProposal
 import com.superplanner.app.domain.ai.AiRequest
+import com.superplanner.app.domain.ai.PlannerAiContextBuilder
+import com.superplanner.app.domain.usecase.ObserveExecutableDay
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AiCaptureViewModel @Inject constructor(
     private val assistant: AiAssistant,
+    private val observeExecutableDay: ObserveExecutableDay,
+    private val contextBuilder: PlannerAiContextBuilder,
+    private val clock: Clock,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AiCaptureUiState())
     val state: StateFlow<AiCaptureUiState> = _state.asStateFlow()
@@ -28,10 +34,14 @@ class AiCaptureViewModel @Inject constructor(
         _state.value = _state.value.copy(isLoading = true, error = null)
         viewModelScope.launch {
             runCatching {
+                val now = clock.instant()
+                val activities = observeExecutableDay(
+                    now.atZone(clock.zone).toLocalDate(),
+                ).first()
                 assistant.propose(
                     AiRequest(
                         message = normalized,
-                        context = AiContext(),
+                        context = contextBuilder.build(activities, now = now),
                     ),
                 )
             }.onSuccess { proposal ->
