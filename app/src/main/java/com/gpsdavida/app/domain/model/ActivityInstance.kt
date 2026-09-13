@@ -1,6 +1,7 @@
 package com.superplanner.app.domain.model
 
 import java.time.Duration
+import java.time.Instant
 
 data class ActivityInstance(
     val id: ActivityInstanceId,
@@ -14,6 +15,8 @@ data class ActivityInstance(
     val bufferAfter: Duration? = null,
     val actual: TimeRange? = null,
     val status: ActivityStatus = ActivityStatus.PENDING,
+    val dueAt: Instant? = null,
+    val delayConsequence: DelayConsequence = DelayConsequence.NONE,
 ) {
     val plannedDuration: Duration get() = planned.duration
 
@@ -38,4 +41,12 @@ data class ActivityInstance(
         require(status == ActivityStatus.PENDING) { "Only pending activities can be deferred" }
         return copy(actual = null, status = ActivityStatus.DEFERRED)
     }
+}
+
+enum class DelayConsequence(val weight: Int) {
+    NONE(0),
+    LOW(1),
+    MODERATE(2),
+    HIGH(3),
+    CRITICAL(4),
 }
