@@ -45,26 +45,26 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = SuperPlannerSpacing.Page, vertical = 20.dp),
+                .padding(horizontal = SuperPlannerSpacing.Page, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Spacer(modifier = Modifier.size(4.dp))
+            Spacer(modifier = Modifier.size(2.dp))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Image(
                     painter = painterResource(R.drawable.sp_illustration_compass),
                     contentDescription = "Bússola do Super Planner",
-                    modifier = Modifier.size(180.dp),
+                    modifier = Modifier.size(155.dp),
                     contentScale = ContentScale.Fit,
                 )
                 Image(
                     painter = painterResource(R.drawable.sp_logo_text),
                     contentDescription = "Super Planner",
-                    modifier = Modifier.size(width = 190.dp, height = 76.dp),
+                    modifier = Modifier.size(width = 210.dp, height = 88.dp),
                     contentScale = ContentScale.Fit,
                 )
             }
@@ -75,10 +75,10 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = SuperPlannerColors.Surface.copy(alpha = 0.90f),
+                        color = SuperPlannerColors.Surface.copy(alpha = 0.95f),
                         shape = RoundedCornerShape(28.dp),
                     )
-                    .padding(horizontal = 22.dp, vertical = 18.dp),
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
             ) {
                 Text(
                     "Primeira rota",
