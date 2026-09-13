@@ -18,7 +18,6 @@ class DefaultPlanningEngine @Inject constructor(
     private val rescheduleAfterDelay: RescheduleAfterDelay,
 ) : PlanningEngine {
     override fun invoke(input: PlanningInput): PlanningResult {
-        val date = input.context.now.atZone(input.context.zoneId).toLocalDate()
         val delayed = input.delayedActivity?.takeIf {
             it.actual != null && it.actual.end > it.planned.end
         }
@@ -33,9 +32,9 @@ class DefaultPlanningEngine @Inject constructor(
                 travelTimes = input.context.travelTimes,
                 zoneId = input.context.zoneId,
             )
-        } ?: generateForCurrentTime(input, date)
+        } ?: generateForCurrentTime(input, input.date)
 
-        return schedule.toPlanningResult(input)
+        return schedule.toPlanningResult()
     }
 
     private fun generateForCurrentTime(input: PlanningInput, date: LocalDate): DailySchedule {
@@ -67,7 +66,7 @@ class DefaultPlanningEngine @Inject constructor(
         )
     }
 
-    private fun DailySchedule.toPlanningResult(input: PlanningInput): PlanningResult {
+    private fun DailySchedule.toPlanningResult(): PlanningResult {
         val route = activities.map { activity ->
             RouteStep(
                 activity = activity,
