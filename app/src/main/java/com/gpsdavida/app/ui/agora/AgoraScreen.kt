@@ -83,6 +83,7 @@ fun AgoraScreen(
                 durationMinutes = state.durationMinutes,
                 scheduledTime = state.scheduledTime,
                 priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
+                explanation = state.explanation,
                 state = state.state,
             ),
             oneTapComplete = false,
