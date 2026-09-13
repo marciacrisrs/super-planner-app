@@ -102,9 +102,9 @@ private fun ReadyContent(
         )
         SuperPlannerSecondaryActions(
             primaryText = stringResource(R.string.next_action_swap),
-            onPrimary = onSwap,
+            onPrimary = if (model.state == NextActionState.InProgress) ({}) else onSwap,
             secondaryText = stringResource(R.string.next_action_snooze),
-            onSecondary = onSnooze,
+            onSecondary = if (model.state == NextActionState.InProgress) ({}) else onSnooze,
         )
     }
 }
