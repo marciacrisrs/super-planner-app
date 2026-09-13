@@ -5,6 +5,7 @@ App Android offline-first para planejar a vida e transformar Programações em u
 - Arquitetura: [ADR 001](docs/adr/001-arquitetura-inicial.md)
 - Domínio: [ADR 002](docs/adr/002-modelo-de-dominio.md)
 - Plano → Programação → Rota → Execução: [ADR 003](docs/adr/003-plano-programacao-rota-execucao.md)
+- Produto: [Régua permanente de produto](docs/product/002-regua-permanente-planner-de-papel.md)
 - Entrega: [WORKFLOW](docs/WORKFLOW.md)
 
 Abrir a pasta no Android Studio, sincronizar o Gradle e rodar no emulador. O package Android é `com.superplanner.app`.
