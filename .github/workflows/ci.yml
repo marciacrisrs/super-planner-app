@@ -10,9 +10,9 @@ permissions:
 
 jobs:
   test:
-    name: Build and test
+    name: Build, test and lint
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
@@ -28,7 +28,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
 
-      - name: Build and test
+      - name: Build, test and lint
         run: |
           chmod +x gradlew
-          ./gradlew test assembleDebug --stacktrace --no-daemon
+          ./gradlew test assembleDebug lintDebug --stacktrace --no-daemon
