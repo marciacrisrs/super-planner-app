@@ -9,10 +9,14 @@ data class PlanningInput(
     val context: NextActionContext,
     val recalculationReason: RecalculationReason = RecalculationReason.INITIAL,
     val previousRoute: RouteSnapshot? = null,
+    val delayedActivity: ActivityInstance? = null,
 ) {
     init {
         require(activities.map { it.id }.distinct().size == activities.size) {
             "Activity ids must be unique"
+        }
+        require(delayedActivity == null || activities.any { it.id == delayedActivity.id }) {
+            "Delayed activity must belong to the planning snapshot"
         }
     }
 
