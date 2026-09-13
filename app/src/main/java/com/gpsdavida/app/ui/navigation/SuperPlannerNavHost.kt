@@ -42,7 +42,7 @@ import com.superplanner.app.ui.horizontes.HorizonsScreen
 import com.superplanner.app.ui.horizontes.WeeklyReviewScreen
 import com.superplanner.app.ui.meudia.MeuDiaScreen
 import com.superplanner.app.ui.planos.AdvancedPlansScreen
-import com.superplanner.app.ui.planos.PlanningScreen
+import com.superplanner.app.ui.planejamento.PlanningScreen
 import com.superplanner.app.ui.routines.RoutineFormScreen
 import com.superplanner.app.ui.routines.RoutinesListScreen
 import com.superplanner.app.ui.semana.WeekDayScreen
@@ -61,54 +61,16 @@ fun SuperPlannerNavHost() {
 
     Scaffold(
         bottomBar = {
-            if (showBar) NavigationBar(
-                containerColor = SuperPlannerColors.Surface.copy(alpha = 0.96f),
-            ) {
-                NavigationBarItem(
-                    selected = currentRoute == SuperPlannerRoutes.AGORA,
-                    onClick = { navController.navigateToTab(SuperPlannerRoutes.AGORA) },
-                    icon = { Icon(Icons.Outlined.Home, null) },
-                    label = { Text(stringResource(R.string.nav_agora)) },
-                    colors = navColors(),
-                )
-                NavigationBarItem(
-                    selected = currentRoute == SuperPlannerRoutes.MEU_DIA,
-                    onClick = { navController.navigateToTab(SuperPlannerRoutes.MEU_DIA) },
-                    icon = { Icon(Icons.Outlined.CalendarToday, null) },
-                    label = { Text(stringResource(R.string.nav_meu_dia)) },
-                    colors = navColors(),
-                )
-                NavigationBarItem(
-                    selected = currentRoute == SuperPlannerRoutes.PLANNING,
-                    onClick = { navController.navigateToTab(SuperPlannerRoutes.PLANNING) },
-                    icon = { Icon(Icons.Outlined.FavoriteBorder, null) },
-                    label = { Text("Planejar") },
-                    colors = navColors(),
-                )
-                NavigationBarItem(
-                    selected = currentRoute == SuperPlannerRoutes.EVENTS,
-                    onClick = { navController.navigateToTab(SuperPlannerRoutes.EVENTS) },
-                    icon = { Icon(Icons.Outlined.Menu, null) },
-                    label = { Text(stringResource(R.string.nav_eventos)) },
-                    colors = navColors(),
-                )
-                NavigationBarItem(
-                    selected = currentRoute == SuperPlannerRoutes.TASKS,
-                    onClick = { navController.navigateToTab(SuperPlannerRoutes.TASKS) },
-                    icon = { Icon(Icons.Outlined.CheckCircleOutline, null) },
-                    label = { Text(stringResource(R.string.nav_tarefas)) },
-                    colors = navColors(),
-                )
+            if (showBar) NavigationBar(containerColor = SuperPlannerColors.Surface.copy(alpha = 0.96f)) {
+                NavigationBarItem(selected = currentRoute == SuperPlannerRoutes.AGORA, onClick = { navController.navigateToTab(SuperPlannerRoutes.AGORA) }, icon = { Icon(Icons.Outlined.Home, null) }, label = { Text(stringResource(R.string.nav_agora)) }, colors = navColors())
+                NavigationBarItem(selected = currentRoute == SuperPlannerRoutes.MEU_DIA, onClick = { navController.navigateToTab(SuperPlannerRoutes.MEU_DIA) }, icon = { Icon(Icons.Outlined.CalendarToday, null) }, label = { Text(stringResource(R.string.nav_meu_dia)) }, colors = navColors())
+                NavigationBarItem(selected = currentRoute == SuperPlannerRoutes.PLANNING, onClick = { navController.navigateToTab(SuperPlannerRoutes.PLANNING) }, icon = { Icon(Icons.Outlined.FavoriteBorder, null) }, label = { Text("Planejar") }, colors = navColors())
+                NavigationBarItem(selected = currentRoute == SuperPlannerRoutes.EVENTS, onClick = { navController.navigateToTab(SuperPlannerRoutes.EVENTS) }, icon = { Icon(Icons.Outlined.Menu, null) }, label = { Text(stringResource(R.string.nav_eventos)) }, colors = navColors())
+                NavigationBarItem(selected = currentRoute == SuperPlannerRoutes.TASKS, onClick = { navController.navigateToTab(SuperPlannerRoutes.TASKS) }, icon = { Icon(Icons.Outlined.CheckCircleOutline, null) }, label = { Text(stringResource(R.string.nav_tarefas)) }, colors = navColors())
             }
         },
     ) { padding ->
-        NavHost(
-            navController,
-            SuperPlannerRoutes.AGORA,
-            Modifier
-                .padding(padding)
-                .swipeBetweenMainTabs(navController, currentRoute),
-        ) {
+        NavHost(navController, SuperPlannerRoutes.AGORA, Modifier.padding(padding).swipeBetweenMainTabs(navController, currentRoute)) {
             composable(SuperPlannerRoutes.AGORA) { HomeScreen() }
             composable(SuperPlannerRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(SuperPlannerRoutes.eventEditor()) }, { navController.navigate(SuperPlannerRoutes.eventEditor(it)) }, { navController.navigate(SuperPlannerRoutes.taskEditor(it)) }, { navController.navigate(SuperPlannerRoutes.habitEditor(it)) }, { navController.navigate(SuperPlannerRoutes.AVAILABILITY) }, { navController.navigate(SuperPlannerRoutes.WEEK) }) }
             composable(SuperPlannerRoutes.WEEK) { WeekScreen(onOpenDay = { date -> navController.navigate(SuperPlannerRoutes.weekDay(date)) }) }
@@ -133,18 +95,9 @@ fun SuperPlannerNavHost() {
     }
 }
 
-private val MAIN_TABS = listOf(
-    SuperPlannerRoutes.AGORA,
-    SuperPlannerRoutes.MEU_DIA,
-    SuperPlannerRoutes.PLANNING,
-    SuperPlannerRoutes.EVENTS,
-    SuperPlannerRoutes.TASKS,
-)
+private val MAIN_TABS = listOf(SuperPlannerRoutes.AGORA, SuperPlannerRoutes.MEU_DIA, SuperPlannerRoutes.PLANNING, SuperPlannerRoutes.EVENTS, SuperPlannerRoutes.TASKS)
 
-private fun Modifier.swipeBetweenMainTabs(
-    navController: NavHostController,
-    currentRoute: String?,
-): Modifier = if (currentRoute in MAIN_TABS) {
+private fun Modifier.swipeBetweenMainTabs(navController: NavHostController, currentRoute: String?): Modifier = if (currentRoute in MAIN_TABS) {
     pointerInput(currentRoute) {
         var totalDrag = 0f
         detectHorizontalDragGestures(
@@ -164,13 +117,7 @@ private fun Modifier.swipeBetweenMainTabs(
 } else this
 
 @Composable
-private fun navColors() = NavigationBarItemDefaults.colors(
-    selectedIconColor = SuperPlannerColors.TerracottaDark,
-    selectedTextColor = SuperPlannerColors.TerracottaDark,
-    indicatorColor = SuperPlannerColors.TerracottaSoft,
-    unselectedIconColor = SuperPlannerColors.InkSoft,
-    unselectedTextColor = SuperPlannerColors.InkSoft,
-)
+private fun navColors() = NavigationBarItemDefaults.colors(selectedIconColor = SuperPlannerColors.TerracottaDark, selectedTextColor = SuperPlannerColors.TerracottaDark, indicatorColor = SuperPlannerColors.TerracottaSoft, unselectedIconColor = SuperPlannerColors.InkSoft, unselectedTextColor = SuperPlannerColors.InkSoft)
 
 private fun NavHostController.navigateToTab(route: String) {
     navigate(route) {
