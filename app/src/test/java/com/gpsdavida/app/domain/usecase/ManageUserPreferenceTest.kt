@@ -9,6 +9,7 @@ import com.superplanner.app.domain.port.UserPreferenceRepository
 import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -27,7 +28,7 @@ class ManageUserPreferenceTest {
         repository.save(preference)
 
         assertEquals(PreferenceStatus.SUGGESTED, repository.getById(preference.id)?.status)
-        assertTrue(repository.observeActive().map { it.isEmpty() }.firstValue())
+        assertTrue(repository.observeActive().map { it.isEmpty() }.first())
 
         ConfirmUserPreference(repository)(preference.id, updated)
 
@@ -45,13 +46,13 @@ class ManageUserPreferenceTest {
         RevokeUserPreference(repository)(preference.id, Instant.parse("2026-09-14T10:00:00Z"))
 
         assertEquals(PreferenceStatus.REVOKED, repository.getById(preference.id)?.status)
-        assertTrue(repository.observeActive().map { it.isEmpty() }.firstValue())
+        assertTrue(repository.observeActive().map { it.isEmpty() }.first())
         assertEquals(4, repository.executionHistorySize)
     }
 
     @Test
     fun `ai suggestions require evidence and do not persist by themselves`() {
-        val suggestion = com.superplanner.app.domain.model.PreferenceSuggestion(
+        val suggestion = PreferenceSuggestion(
             id = UserPreferenceId("morning-work"),
             title = "Prefere trabalho pela manhã",
             explanation = "As execuções observadas terminam melhor nesse período.",
@@ -94,5 +95,3 @@ class ManageUserPreferenceTest {
         }
     }
 }
-
-private suspend fun <T> Flow<T>.firstValue(): T = kotlinx.coroutines.flow.first()
