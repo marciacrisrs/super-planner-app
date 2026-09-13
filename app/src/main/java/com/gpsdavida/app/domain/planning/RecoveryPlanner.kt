@@ -3,9 +3,9 @@ package com.superplanner.app.domain.planning
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.DailyCapacity
-import com.superplanner.app.domain.model.Flexibility
 import java.time.Duration
 import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 
 /**
@@ -18,6 +18,7 @@ class RecoveryPlanner @Inject constructor() {
         recoveryStart: LocalDate,
         capacities: Map<LocalDate, DailyCapacity>,
         horizonDays: Int = 7,
+        zoneId: ZoneId = ZoneId.systemDefault(),
     ): RecoveryPlan {
         require(horizonDays > 0) { "Recovery horizon must be positive" }
 
@@ -25,18 +26,17 @@ class RecoveryPlanner @Inject constructor() {
         val pendingRecovery = activities
             .asSequence()
             .filter { it.status == ActivityStatus.PENDING || it.status == ActivityStatus.DEFERRED }
-            .map { RecoveryItem(it, it.planned.start.atZone(java.time.ZoneOffset.UTC).toLocalDate()) }
+            .map { RecoveryItem(it, localDate(it, zoneId)) }
             .filter { it.originalDate.isBefore(recoveryStart) }
             .distinctBy { it.activity.id }
             .toList()
 
         val future = activities.filter {
-            it.status == ActivityStatus.PENDING &&
-                !it.planned.start.atZone(java.time.ZoneOffset.UTC).toLocalDate().isBefore(recoveryStart)
+            it.status == ActivityStatus.PENDING && !localDate(it, zoneId).isBefore(recoveryStart)
         }
 
         val committed = horizon.associateWith { date ->
-            future.filter { it.flexibility == Flexibility.FIXED && localDate(it) == date }
+            future.filter { localDate(it, zoneId) == date }
                 .fold(Duration.ZERO) { total, activity -> total.plus(activity.plannedDuration) }
         }.toMutableMap()
 
@@ -45,21 +45,19 @@ class RecoveryPlanner @Inject constructor() {
         val reassess = mutableListOf<RecoveryItem>()
 
         val ordered = pendingRecovery.sortedWith(
-            compareBy<RecoveryItem> { deadlineRank(it.activity, recoveryStart) }
+            compareBy<RecoveryItem> { deadlineRank(it.activity, recoveryStart, zoneId) }
                 .thenBy { it.activity.priority.weight }
                 .thenByDescending { it.activity.delayConsequence.weight }
                 .thenBy { it.activity.planned.start },
         )
 
         for (item in ordered) {
-            val reason = reasonFor(item.activity, recoveryStart)
+            val reason = reasonFor(item.activity, recoveryStart, zoneId)
             val candidate = horizon.firstOrNull { date ->
                 val capacity = capacities[date] ?: return@firstOrNull false
-                if (item.activity.dueAt != null && item.activity.dueAt!!.atZone(java.time.ZoneOffset.UTC).toLocalDate().isBefore(date)) {
-                    return@firstOrNull false
-                }
-                val used = committed.getValue(date)
-                capacity.remaining(used) >= item.activity.plannedDuration
+                val dueDate = item.activity.dueAt?.atZone(zoneId)?.toLocalDate()
+                if (dueDate != null && dueDate.isBefore(date)) return@firstOrNull false
+                capacity.remaining(committed.getValue(date)) >= item.activity.plannedDuration
             }
 
             if (candidate != null && shouldRedistribute(item.activity)) {
@@ -90,22 +88,28 @@ class RecoveryPlanner @Inject constructor() {
             activity.dueAt != null ||
             activity.delayConsequence.weight >= 2
 
-    private fun reasonFor(activity: ActivityInstance, recoveryStart: LocalDate): RecoveryReason = when {
+    private fun reasonFor(
+        activity: ActivityInstance,
+        recoveryStart: LocalDate,
+        zoneId: ZoneId,
+    ): RecoveryReason = when {
         activity.dueAt != null -> RecoveryReason.DEADLINE
-        activity.priority.weight == 0 -> RecoveryReason.HIGH_PRIORITY
-        activity.priority.weight == 1 -> RecoveryReason.HIGH_PRIORITY
+        activity.priority.weight <= 1 -> RecoveryReason.HIGH_PRIORITY
         activity.delayConsequence.weight >= 2 -> RecoveryReason.HIGH_CONSEQUENCE
-        activity.source.toString().contains("goal", ignoreCase = true) -> RecoveryReason.LONG_TERM_GOAL
-        activity.planned.start.atZone(java.time.ZoneOffset.UTC).toLocalDate().isBefore(recoveryStart) -> RecoveryReason.LOW_VALUE_WITHOUT_DEADLINE
+        localDate(activity, zoneId).isBefore(recoveryStart) -> RecoveryReason.LOW_VALUE_WITHOUT_DEADLINE
         else -> RecoveryReason.CAPACITY_AVAILABLE
     }
 
-    private fun deadlineRank(activity: ActivityInstance, recoveryStart: LocalDate): Int = when {
+    private fun deadlineRank(
+        activity: ActivityInstance,
+        recoveryStart: LocalDate,
+        zoneId: ZoneId,
+    ): Int = when {
         activity.dueAt == null -> 1
-        activity.dueAt!!.atZone(java.time.ZoneOffset.UTC).toLocalDate().isBefore(recoveryStart) -> 0
+        activity.dueAt!!.atZone(zoneId).toLocalDate().isBefore(recoveryStart) -> 0
         else -> 0
     }
 
-    private fun localDate(activity: ActivityInstance): LocalDate =
-        activity.planned.start.atZone(java.time.ZoneOffset.UTC).toLocalDate()
+    private fun localDate(activity: ActivityInstance, zoneId: ZoneId): LocalDate =
+        activity.planned.start.atZone(zoneId).toLocalDate()
 }
