@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.R
+import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.ui.agora.AgoraViewModel
 import com.superplanner.app.ui.next.NextActionCard
 import com.superplanner.app.ui.next.NextActionUiModel
@@ -87,31 +88,6 @@ fun HomeScreen(
                 Text("♡", style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Terracotta)
             }
 
-            SuperPlannerCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(18.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                ) {
-                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Seu dia", style = MaterialTheme.typography.titleLarge, color = SuperPlannerColors.Ink)
-                        Text(
-                            "Um passo de cada vez. O Super Planner organiza o próximo.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = SuperPlannerColors.InkSoft,
-                        )
-                    }
-                    Box(modifier = Modifier.size(50.dp), contentAlignment = Alignment.Center) {
-                        Image(
-                            painter = painterResource(R.drawable.sp_decor_heart),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                }
-            }
-
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth(),
@@ -129,15 +105,16 @@ fun HomeScreen(
                         priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
                         reasonLabels = state.reasons.map { reason ->
                             when (reason) {
-                                com.superplanner.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
-                                com.superplanner.app.domain.model.NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
-                                com.superplanner.app.domain.model.NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
-                                com.superplanner.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
-                                com.superplanner.app.domain.model.NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
-                                com.superplanner.app.domain.model.NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
-                                com.superplanner.app.domain.model.NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
-                                com.superplanner.app.domain.model.NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
-                                com.superplanner.app.domain.model.NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
+                                NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
+                                NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
+                                NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
+                                NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
+                                NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
+                                NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
+                                NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
+                                NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
+                                NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
+                                NextActionReason.CAPACITY_AVAILABLE -> stringResource(R.string.reason_capacity_available)
                             }
                         },
                         state = state.state,
