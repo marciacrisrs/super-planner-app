@@ -12,12 +12,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -110,9 +110,7 @@ fun EventsListScreen(
 
     val groupedEvents = events
         .sortedBy { it.range.start }
-        .groupBy { event ->
-            event.range.start.atZone(ZoneId.systemDefault()).toLocalDate()
-        }
+        .groupBy { event -> event.range.start.atZone(ZoneId.systemDefault()).toLocalDate() }
 
     SuperPlannerSoftBackground {
         Scaffold(containerColor = Color.Transparent) { padding ->
@@ -189,47 +187,51 @@ private fun CalendarSyncCard(
     onCreate: () -> Unit,
 ) {
     SuperPlannerCard {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.sp_category_appointments),
-                contentDescription = null,
-                modifier = Modifier.size(82.dp),
-                contentScale = ContentScale.Fit,
-            )
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text(
-                    text = stringResource(R.string.events_agenda_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = SuperPlannerColors.Ink,
+        if (isSyncing) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = SuperPlannerColors.Terracotta,
                 )
                 Text(
-                    text = if (isSyncing) "Sincronizando sua agenda…" else "Sua agenda está sincronizada com o Google Agenda.",
+                    text = "Sincronizando sua agenda…",
                     style = MaterialTheme.typography.bodyMedium,
                     color = SuperPlannerColors.InkSoft,
                 )
             }
-            if (isSyncing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = SuperPlannerColors.Terracotta,
-                )
-            } else {
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Icon(
                     imageVector = Icons.Outlined.CloudSync,
                     contentDescription = null,
                     tint = SuperPlannerColors.Terracotta,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    text = "Sua agenda também cabe aqui",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SuperPlannerColors.Ink,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = "Sincronizada",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = SuperPlannerColors.InkSoft,
                 )
             }
         }
         TextButton(
             onClick = onCreate,
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 10.dp),
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 6.dp),
         ) {
             Text(stringResource(R.string.events_create_manual))
         }
