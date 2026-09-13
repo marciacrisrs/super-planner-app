@@ -160,7 +160,10 @@ class AiAssistantTest {
         val proposal = assistant.propose(
             AiRequest(
                 message = "por que estudar agora?",
-                context = AiContext(nextActionExplanation = domainExplanation),
+                context = AiContext(
+                    activeActivityId = "study",
+                    minimalRouteFacts = domainExplanation.facts.map { "${it.reason}:${it.value}" },
+                ),
             ),
         )
 
