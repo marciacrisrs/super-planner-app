@@ -5,6 +5,7 @@ import android.os.Trace
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.DailyActivity
 import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.NextActionContext
 import com.superplanner.app.domain.model.RouteFeedbackReason
@@ -61,7 +62,7 @@ class AgoraViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private data class PlannerSnapshot(
-        val activities: List<ExecutableActivityUi>,
+        val activities: List<DailyActivity>,
         val now: java.time.Instant,
         val completed: com.superplanner.app.domain.model.ActivityInstance?,
         val lowCapacity: Boolean,
