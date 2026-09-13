@@ -10,7 +10,7 @@ Ele não conhece Android, Compose, Room, rede ou a origem da atividade. A origem
 
 ## Entrada
 
-`PlanningInput` contém ocorrências candidatas, contexto atual, motivo do recálculo e a rota anterior quando houver. O contexto atual já concentra disponibilidade, dependências, energia, contexto, localização, deslocamentos, buffer e horário.
+`PlanningInput` contém ocorrências candidatas, contexto atual, motivo do recálculo, a rota anterior quando houver e a atividade cuja execução acabou de alterar a realidade, quando aplicável. O contexto atual já concentra disponibilidade, dependências, energia, contexto, localização, deslocamentos, buffer e horário.
 
 A entrada é tratada como snapshot: recalcular significa produzir outro resultado a partir de outro snapshot, não editar o anterior.
 
@@ -24,6 +24,12 @@ O contrato admite explicitamente trade-offs como conflito, dependência bloquead
 
 A mesma entrada deve produzir a mesma saída. A implementação não deve depender de relógio global, banco, rede ou estado oculto.
 
+## Wiring de produção
+
+`DefaultPlanningEngine` é a implementação determinística de produção. Ele reutiliza as regras existentes de geração e recálculo de rota, enquanto `RecalculateRoute` permanece apenas como adaptador de compatibilidade para callers existentes.
+
+`ObserveExecutableDay` usa o `PlanningEngine` para produzir a rota que chega à experiência de execução. Com isso, `Agora` não possui uma segunda fonte de verdade para a ordem da rota: a rota exibida nasce no motor.
+
 ## Relação com a régua #292
 
 - **Reduz carga mental:** recebe o contexto e devolve uma proposta de rota, em vez de transferir o replanejamento para a usuária.
@@ -36,4 +42,4 @@ A mesma entrada deve produzir a mesma saída. A implementação não deve depend
 
 ## Limite desta issue
 
-A #245 fecha o contrato. Algoritmos específicos de seleção, posicionamento, resolução de conflitos, recorrências e recálculo permanecem nas fatias próprias do motor.
+A #245 fecha o contrato. A integração desta fatia coloca o contrato no caminho real da experiência; algoritmos específicos de seleção, posicionamento, resolução de conflitos, recorrências e recálculo continuam nas fatias próprias do motor.
