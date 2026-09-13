@@ -28,5 +28,6 @@ data class NextActionContext(
     val travelTimes: List<TravelTime> = emptyList(),
     val defaultBuffer: Duration = Duration.ZERO,
     val dailyCapacity: DailyCapacity? = null,
+    val learnedDurations: Map<ActivityInstanceId, Duration> = emptyMap(),
     val zoneId: ZoneId = ZoneId.systemDefault(),
 )
