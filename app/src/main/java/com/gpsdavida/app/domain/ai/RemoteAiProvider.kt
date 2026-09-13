@@ -60,6 +60,7 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
     }
 
     private fun mapProposal(json: JSONObject, request: AiRequest): AiProposal {
+        require(json.optString("schemaVersion") == AI_PROPOSAL_SCHEMA_VERSION) { "Unsupported AI proposal schema" }
         val commandType = json.getString("commandType")
         val explanation = json.getString("explanation")
         val requiresConfirmation = json.getBoolean("requiresConfirmation")
@@ -136,6 +137,8 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         )
     }
 }
+
+private const val AI_PROPOSAL_SCHEMA_VERSION = "1"
 
 private fun JSONArray.toStringList(): List<String> = buildList {
     for (index in 0 until length()) add(getString(index))
