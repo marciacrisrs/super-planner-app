@@ -10,7 +10,8 @@ import javax.inject.Inject
 
 /**
  * Recovers work from missed days without treating every pending item as mandatory backlog.
- * The planner only redistributes within a bounded horizon and preserves existing future work.
+ * Recovery uses today's newly available capacity first; it does not silently create a
+ * chain of future reschedules when that capacity is already consumed by the user's plan.
  */
 class RecoveryPlanner @Inject constructor() {
     operator fun invoke(
@@ -43,6 +44,7 @@ class RecoveryPlanner @Inject constructor() {
         val capacityByDay = linkedMapOf<LocalDate, RecoveryCapacity>()
         val assignments = mutableListOf<RecoveryAssignment>()
         val reassess = mutableListOf<RecoveryItem>()
+        val recoveryCapacity = capacities[recoveryStart]
 
         val ordered = pendingRecovery.sortedWith(
             compareBy<RecoveryItem> { deadlineRank(it.activity, recoveryStart, zoneId) }
@@ -53,16 +55,14 @@ class RecoveryPlanner @Inject constructor() {
 
         for (item in ordered) {
             val reason = reasonFor(item.activity, recoveryStart, zoneId)
-            val candidate = horizon.firstOrNull { date ->
-                val capacity = capacities[date] ?: return@firstOrNull false
-                val dueDate = item.activity.dueAt?.atZone(zoneId)?.toLocalDate()
-                if (dueDate != null && dueDate.isBefore(date)) return@firstOrNull false
-                capacity.remaining(committed.getValue(date)) >= item.activity.plannedDuration
-            }
+            val dueDate = item.activity.dueAt?.atZone(zoneId)?.toLocalDate()
+            val fitsRecoveryStart = recoveryCapacity != null &&
+                (dueDate == null || !dueDate.isBefore(recoveryStart)) &&
+                recoveryCapacity.remaining(committed.getValue(recoveryStart)) >= item.activity.plannedDuration
 
-            if (candidate != null && shouldRedistribute(item.activity)) {
-                committed[candidate] = committed.getValue(candidate).plus(item.activity.plannedDuration)
-                assignments += RecoveryAssignment(item, candidate, RecoveryAction.REDISTRIBUTE, reason)
+            if (fitsRecoveryStart && shouldRedistribute(item.activity)) {
+                committed[recoveryStart] = committed.getValue(recoveryStart).plus(item.activity.plannedDuration)
+                assignments += RecoveryAssignment(item, recoveryStart, RecoveryAction.REDISTRIBUTE, reason)
             } else {
                 assignments += RecoveryAssignment(item, recoveryStart, RecoveryAction.REASSESS, reason)
                 reassess += item
