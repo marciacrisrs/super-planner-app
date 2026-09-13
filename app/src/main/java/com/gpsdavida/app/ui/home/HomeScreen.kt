@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.R
+import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.ui.agora.AgoraViewModel
 import com.superplanner.app.ui.next.NextActionCard
 import com.superplanner.app.ui.next.NextActionUiModel
@@ -129,15 +130,16 @@ fun HomeScreen(
                         priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
                         reasonLabels = state.reasons.map { reason ->
                             when (reason) {
-                                com.superplanner.app.domain.model.NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
-                                com.superplanner.app.domain.model.NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
-                                com.superplanner.app.domain.model.NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
-                                com.superplanner.app.domain.model.NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
-                                com.superplanner.app.domain.model.NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
-                                com.superplanner.app.domain.model.NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
-                                com.superplanner.app.domain.model.NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
-                                com.superplanner.app.domain.model.NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
-                                com.superplanner.app.domain.model.NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
+                                NextActionReason.CURRENTLY_ACTIVE -> stringResource(R.string.reason_currently_active)
+                                NextActionReason.DUE_NOW -> stringResource(R.string.reason_due_now)
+                                NextActionReason.FIXED_COMMITMENT -> stringResource(R.string.reason_fixed)
+                                NextActionReason.AVAILABLE_IN_WINDOW -> stringResource(R.string.reason_available)
+                                NextActionReason.ENERGY_MATCH -> stringResource(R.string.reason_energy)
+                                NextActionReason.CONTEXT_MATCH -> stringResource(R.string.reason_context)
+                                NextActionReason.DEPENDENCIES_SATISFIED -> stringResource(R.string.reason_dependencies)
+                                NextActionReason.FLEXIBLE_SLOT -> stringResource(R.string.reason_flexible)
+                                NextActionReason.TRAVEL_FITS -> stringResource(R.string.reason_travel)
+                                NextActionReason.CAPACITY_AVAILABLE -> stringResource(R.string.reason_capacity_available)
                             }
                         },
                         state = state.state,
