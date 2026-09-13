@@ -1,7 +1,11 @@
 package com.superplanner.app.domain.ai
 
+import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.planning.DayReorganizationOperation
+import com.superplanner.app.domain.planning.DayReorganizationRequest
 import com.superplanner.app.domain.port.AiToolGateway
 import com.superplanner.app.domain.port.AiToolResult
+import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -39,8 +43,9 @@ data class AiProposal(
 
 sealed interface AiCommand {
     data class CreateActivityDraft(val draft: NaturalLanguageActivityDraft) : AiCommand
-    data class ReorganizeDay(val instruction: String) : AiCommand
+    data class ReorganizeDay(val request: DayReorganizationRequest) : AiCommand
     data class ExplainNextActivity(val activityId: String) : AiCommand
+    data class MissingInformation(val fields: List<String>) : AiCommand
     data object RecalculateRoute : AiCommand
 }
 
@@ -70,11 +75,7 @@ class RuleBasedAiProvider @Inject constructor() : AiProvider {
                 )
             }
             normalized.contains("reorgan", ignoreCase = true) || normalized.contains("atras", ignoreCase = true) -> {
-                AiProposal(
-                    command = AiCommand.ReorganizeDay(normalized),
-                    explanation = "Entendi um pedido para reorganizar o dia; a mudança será executada por um use case conhecido.",
-                    requiresConfirmation = true,
-                )
+                buildReorganizationProposal(normalized, request.context)
             }
             else -> {
                 val today = request.context.nowIso?.take(10)?.let(LocalDate::parse) ?: LocalDate.now()
@@ -86,5 +87,39 @@ class RuleBasedAiProvider @Inject constructor() : AiProvider {
                 )
             }
         }
+    }
+
+    private fun buildReorganizationProposal(message: String, context: AiContext): AiProposal {
+        val activityId = context.activeActivityId?.takeIf(String::isNotBlank)
+        val now = context.nowIso?.let(Instant::parse)
+        val minutes = Regex("(?i)(\\d+)\\s*min").find(message)?.groupValues?.get(1)?.toLongOrNull()
+
+        if (activityId == null || now == null || minutes == null || minutes <= 0) {
+            return AiProposal(
+                command = AiCommand.MissingInformation(
+                    buildList {
+                        if (activityId == null) add("qual atividade deve ser alterada")
+                        if (now == null) add("o horário atual")
+                        if (minutes == null || minutes <= 0) add("quantos minutos mudou")
+                    },
+                ),
+                explanation = "Preciso de mais uma informação para reorganizar o dia com segurança.",
+                requiresConfirmation = false,
+            )
+        }
+
+        return AiProposal(
+            command = AiCommand.ReorganizeDay(
+                DayReorganizationRequest(
+                    operation = DayReorganizationOperation.DelayActivity(
+                        activityId = ActivityInstanceId(activityId),
+                        minutes = minutes,
+                    ),
+                    now = now,
+                ),
+            ),
+            explanation = "Entendi um atraso de $minutes minutos. Vou propor o recálculo, sem editar a rota diretamente.",
+            requiresConfirmation = true,
+        )
     }
 }
