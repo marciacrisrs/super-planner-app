@@ -3,12 +3,9 @@ package com.superplanner.app.di
 import com.superplanner.app.data.DefaultAiToolGateway
 import com.superplanner.app.domain.ai.AiProvider
 import com.superplanner.app.domain.ai.HybridAiProvider
-import com.superplanner.app.domain.ai.RuleBasedAiProvider
-import com.superplanner.app.domain.ai.RemoteAiProvider
 import com.superplanner.app.domain.port.AiToolGateway
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -23,16 +20,4 @@ abstract class AiModule {
     @Binds
     @Singleton
     abstract fun bindAiToolGateway(implementation: DefaultAiToolGateway): AiToolGateway
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-object AiProviderModule {
-    @Provides
-    @Singleton
-    fun provideRemoteAiProvider(): RemoteAiProvider = RemoteAiProvider()
-
-    @Provides
-    @Singleton
-    fun provideRuleBasedAiProvider(): RuleBasedAiProvider = RuleBasedAiProvider()
 }
