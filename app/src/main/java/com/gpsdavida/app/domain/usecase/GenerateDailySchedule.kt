@@ -1,10 +1,12 @@
 package com.superplanner.app.domain.usecase
 
 import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.ActivitySource
 import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.Availability
 import com.superplanner.app.domain.model.AvailabilityKind
+import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.DailySchedule
 import com.superplanner.app.domain.model.Dependency
 import com.superplanner.app.domain.model.Flexibility
@@ -20,7 +22,10 @@ import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
 
-/** Builds an executable daily schedule from materialized activity instances. */
+/**
+ * Builds an executable daily schedule from materialized activity instances.
+ * Capacity and learned durations are part of the same planning decision.
+ */
 class GenerateDailySchedule @Inject constructor() {
     operator fun invoke(
         activities: List<ActivityInstance>,
@@ -30,6 +35,8 @@ class GenerateDailySchedule @Inject constructor() {
         defaultBuffer: Duration = Duration.ZERO,
         travelTimes: List<TravelTime> = emptyList(),
         zoneId: ZoneId = ZoneId.systemDefault(),
+        dailyCapacity: DailyCapacity? = null,
+        learnedDurations: Map<ActivityInstanceId, Duration> = emptyMap(),
     ): DailySchedule {
         val eligible = activities
             .filter { it.status == ActivityStatus.PENDING }
@@ -81,6 +88,7 @@ class GenerateDailySchedule @Inject constructor() {
                 } ?: activity.planned.start,
             )
 
+            val duration = effectiveDuration(activity, learnedDurations)
             val slot = findSlot(
                 activity = activity,
                 scheduled = scheduled,
@@ -90,12 +98,28 @@ class GenerateDailySchedule @Inject constructor() {
                 travelTimes = travelTimes,
                 zoneId = zoneId,
                 earliestStart = earliestStart,
+                duration = duration,
             )
 
             if (slot == null) {
                 conflicts += ScheduleConflict(activity, ScheduleConflictReason.NO_AVAILABLE_WINDOW)
+                continue
+            }
+
+            val scheduledActivity = activity.copy(
+                planned = TimeRange(slot.start, slot.start.plus(duration)),
+            )
+            val projected = scheduled + scheduledActivity
+            if (dailyCapacity != null && usedCapacity(
+                    scheduled = projected,
+                    defaultBuffer = defaultBuffer,
+                    travelTimes = travelTimes,
+                    learnedDurations = learnedDurations,
+                ) > dailyCapacity.schedulable
+            ) {
+                conflicts += ScheduleConflict(activity, ScheduleConflictReason.CAPACITY_EXCEEDED)
             } else {
-                scheduled += activity.copy(planned = slot)
+                scheduled += scheduledActivity
             }
         }
 
@@ -114,10 +138,10 @@ class GenerateDailySchedule @Inject constructor() {
         travelTimes: List<TravelTime>,
         zoneId: ZoneId,
         earliestStart: Instant,
+        duration: Duration,
     ): TimeRange? {
         val windows = availableWindows(date, availability)
         val occupied = scheduled.sortedBy { it.planned.start }
-        val duration = activity.plannedDuration
 
         for (window in windows) {
             val windowEnd = window.end.atDate(date, zoneId)
@@ -148,6 +172,35 @@ class GenerateDailySchedule @Inject constructor() {
             }
         }
         return null
+    }
+
+    private fun usedCapacity(
+        scheduled: List<ActivityInstance>,
+        defaultBuffer: Duration,
+        travelTimes: List<TravelTime>,
+        learnedDurations: Map<ActivityInstanceId, Duration>,
+    ): Duration {
+        var used = Duration.ZERO
+        var previous: ActivityInstance? = null
+        for (activity in scheduled.sortedBy { it.planned.start }) {
+            if (previous != null) {
+                used = used.plus(travelDuration(previous, activity, travelTimes))
+            }
+            used = used
+                .plus(effectiveDuration(activity, learnedDurations))
+                .plus(bufferAfter(activity, defaultBuffer))
+            previous = activity
+        }
+        return used
+    }
+
+    private fun effectiveDuration(
+        activity: ActivityInstance,
+        learnedDurations: Map<ActivityInstanceId, Duration>,
+    ): Duration = if (activity.flexibility == Flexibility.FIXED) {
+        activity.plannedDuration
+    } else {
+        learnedDurations[activity.id] ?: activity.plannedDuration
     }
 
     private fun after(
@@ -210,11 +263,11 @@ class GenerateDailySchedule @Inject constructor() {
         activity.bufferAfter ?: defaultBuffer
 
     private fun travelDuration(
-        from: ActivityInstance,
+        from: ActivityInstance?,
         to: ActivityInstance,
         travelTimes: List<TravelTime>,
     ): Duration {
-        val fromLocation = from.location?.id ?: return Duration.ZERO
+        val fromLocation = from?.location?.id ?: return Duration.ZERO
         val toLocation = to.location?.id ?: return Duration.ZERO
         if (fromLocation == toLocation) return Duration.ZERO
         return travelTimes.firstOrNull { it.from == fromLocation && it.to == toLocation }?.duration ?: Duration.ZERO
