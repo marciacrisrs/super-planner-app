@@ -1,9 +1,7 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 package com.superplanner.app.ui.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +25,6 @@ import com.superplanner.app.R
 import com.superplanner.app.ui.theme.SuperPlannerBackground
 import com.superplanner.app.ui.theme.SuperPlannerColors
 import com.superplanner.app.ui.theme.SuperPlannerPrimaryButton
-import com.superplanner.app.ui.theme.SuperPlannerSecondaryActions
 import androidx.compose.material3.MaterialTheme
 
 @Composable
@@ -49,9 +47,7 @@ fun OnboardingScreen(
             Image(
                 painter = painterResource(R.drawable.sp_logo_full),
                 contentDescription = "Super Planner",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .size(220.dp),
+                modifier = Modifier.size(220.dp),
                 contentScale = ContentScale.Fit,
             )
 
@@ -79,18 +75,20 @@ fun OnboardingScreen(
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 SuperPlannerPrimaryButton(
                     text = "Criar minha primeira rota",
                     onClick = viewModel::createFirstRoute,
                 )
-                SuperPlannerSecondaryActions(
-                    primaryText = "Continuar",
-                    onPrimary = { viewModel.createFirstRoute() },
-                    secondaryText = "Pular por enquanto",
-                    onSecondary = viewModel::skip,
-                )
+                TextButton(onClick = viewModel::skip) {
+                    Text(
+                        "Pular por enquanto",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = SuperPlannerColors.InkSoft,
+                    )
+                }
             }
         }
     }
