@@ -1,5 +1,6 @@
 package com.superplanner.app.domain.usecase
 
+import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.ActivitySource
 import com.superplanner.app.domain.model.Flexibility
