@@ -6,6 +6,7 @@ import com.superplanner.app.domain.model.ActivitySource
 import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.NextActionContext
+import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.domain.model.TaskId
 import com.superplanner.app.domain.model.TimeRange
@@ -36,7 +37,7 @@ class ChooseNextActivityCapacityTest {
         )
 
         assertEquals(first.id, decision.next?.id)
-        assertEquals(true, decision.nextReasons.contains(com.superplanner.app.domain.model.NextActionReason.CAPACITY_AVAILABLE))
+        assertEquals(true, decision.nextReasons.contains(NextActionReason.CAPACITY_AVAILABLE))
     }
 
     @Test
@@ -65,8 +66,8 @@ class ChooseNextActivityCapacityTest {
         source = ActivitySource.FromTask(TaskId(id)),
         flexibility = Flexibility.FLEXIBLE,
         planned = TimeRange(
-            Instant.parse("2026-08-17T$start"),
-            Instant.parse("2026-08-17T$end"),
+            Instant.parse("2026-08-17T${start}Z"),
+            Instant.parse("2026-08-17T${end}Z"),
         ),
         priority = priority,
     )
