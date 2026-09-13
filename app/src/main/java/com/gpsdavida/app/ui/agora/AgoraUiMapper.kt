@@ -39,18 +39,24 @@ object AgoraUiMapper {
         now: Instant,
         zoneId: ZoneId,
     ): AgoraUiState {
-        val recommended = decision.recommended
+        val running = activities.firstOrNull { it.instance.status == ActivityStatus.IN_PROGRESS }
+        val recommended = running ?: decision.recommended
         val base = AgoraUiState(
             currentTime = now.atZone(zoneId).toLocalTime(),
             currentDate = now.atZone(zoneId).toLocalDate(),
         )
-        if (recommended == null || recommended.status != ActivityStatus.PENDING) {
+
+        if (recommended == null) {
             val hasPending = activities.any { it.instance.status == ActivityStatus.PENDING }
             return base.copy(state = if (hasPending) NextActionState.Empty else NextActionState.Completed)
         }
 
         val current = activities.first { it.instance.id == recommended.id }
-        val (nextUpcoming, laterUpcoming) = buildUpcoming(activities, recommended, decision.next, zoneId)
+        val (nextUpcoming, laterUpcoming) = if (running == null) {
+            buildUpcoming(activities, recommended, decision.next, zoneId)
+        } else {
+            buildUpcoming(activities, recommended, decision.recommended, zoneId)
+        }
 
         return base.copy(
             title = current.title,
@@ -59,9 +65,17 @@ object AgoraUiMapper {
             priority = recommended.priority,
             nextUpcoming = nextUpcoming,
             laterUpcoming = laterUpcoming,
-            state = NextActionState.Ready,
+            state = when (recommended.status) {
+                ActivityStatus.IN_PROGRESS -> NextActionState.InProgress
+                ActivityStatus.DONE -> NextActionState.Completed
+                else -> NextActionState.Ready
+            },
             currentActivity = recommended,
-            reasons = decision.recommendedReasons,
+            reasons = if (running != null) {
+                listOf(NextActionReason.CURRENTLY_ACTIVE)
+            } else {
+                decision.recommendedReasons
+            },
         )
     }
 
