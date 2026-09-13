@@ -1,6 +1,5 @@
 package com.superplanner.app.ui.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,22 +14,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.R
-import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.ui.agora.AgoraViewModel
 import com.superplanner.app.ui.next.NextActionCard
@@ -52,19 +42,12 @@ fun HomeScreen(
     viewModel: AgoraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var startedActivityId by remember { mutableStateOf<ActivityInstanceId?>(null) }
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
     val greeting = when (state.currentTime.hour) {
         in 5..11 -> "Bom dia"
         in 12..17 -> "Boa tarde"
         else -> "Boa noite"
-    }
-
-    LaunchedEffect(state.currentActivity?.id) {
-        if (state.currentActivity?.id != startedActivityId) {
-            startedActivityId = null
-        }
     }
 
     SuperPlannerBackground {
@@ -119,19 +102,12 @@ fun HomeScreen(
                                 NextActionReason.CAPACITY_AVAILABLE -> stringResource(R.string.reason_capacity_available)
                             }
                         },
-                        state = if (startedActivityId == state.currentActivity?.id) {
-                            NextActionState.InProgress
-                        } else {
-                            state.state
-                        },
+                        state = state.state,
                     ),
                     oneTapComplete = false,
-                    onStart = { state.currentActivity?.let { startedActivityId = it.id } },
+                    onStart = viewModel::startCurrent,
                     onSnooze = viewModel::deferCurrent,
-                    onComplete = {
-                        startedActivityId = null
-                        viewModel.completeCurrent()
-                    },
+                    onComplete = viewModel::completeCurrent,
                     onSwap = viewModel::skipCurrent,
                 )
             }
