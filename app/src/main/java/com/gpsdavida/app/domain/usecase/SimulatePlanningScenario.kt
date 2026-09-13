@@ -31,8 +31,7 @@ class SimulatePlanningScenario @Inject constructor(
 
         val moved = baselineById.keys.intersect(simulatedById.keys)
             .filter { id ->
-                baselineById.getValue(id).start != simulatedById.getValue(id).start ||
-                    baselineById.getValue(id).end != simulatedById.getValue(id).end
+                baselineById.getValue(id).start != simulatedById.getValue(id).start
             }
         val newlyUnscheduled = simulatedUnscheduled - baselineUnscheduled
         val newlyScheduled = baselineUnscheduled - simulatedUnscheduled
