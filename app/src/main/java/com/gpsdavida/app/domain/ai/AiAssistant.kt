@@ -1,6 +1,7 @@
 package com.superplanner.app.domain.ai
 
 import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.NextActionExplanation
 import com.superplanner.app.domain.planning.DayReorganizationOperation
 import com.superplanner.app.domain.planning.DayReorganizationRequest
 import com.superplanner.app.domain.port.AiToolGateway
@@ -33,6 +34,7 @@ data class AiContext(
     val nowIso: String? = null,
     val activeActivityId: String? = null,
     val minimalRouteFacts: List<String> = emptyList(),
+    val nextActionExplanation: NextActionExplanation? = null,
 )
 
 data class AiProposal(
@@ -44,7 +46,10 @@ data class AiProposal(
 sealed interface AiCommand {
     data class CreateActivityDraft(val draft: NaturalLanguageActivityDraft) : AiCommand
     data class ReorganizeDay(val request: DayReorganizationRequest) : AiCommand
-    data class ExplainNextActivity(val activityId: String) : AiCommand
+    data class ExplainNextActivity(
+        val activityId: String,
+        val evidence: List<String>,
+    ) : AiCommand
     data class MissingInformation(val fields: List<String>) : AiCommand
     data object RecalculateRoute : AiCommand
 }
@@ -68,11 +73,27 @@ class RuleBasedAiProvider @Inject constructor() : AiProvider {
         val normalized = request.message.trim()
         return when {
             normalized.contains("por que", ignoreCase = true) || normalized.contains("por quê", ignoreCase = true) -> {
-                AiProposal(
-                    command = AiCommand.ExplainNextActivity(request.context.activeActivityId.orEmpty()),
-                    explanation = "Vou explicar usando apenas os fatos estruturados da rota.",
-                    requiresConfirmation = false,
-                )
+                val evidence = request.context.nextActionExplanation?.facts
+                    ?.map { "${it.reason}: ${it.value}" }
+                    .orEmpty()
+                if (evidence.isEmpty()) {
+                    AiProposal(
+                        command = AiCommand.MissingInformation(listOf("evidências da decisão atual")),
+                        explanation = request.context.nextActionExplanation?.fallbackMessage
+                            ?: "Não tenho evidências suficientes para explicar esta escolha.",
+                        requiresConfirmation = false,
+                    )
+                } else {
+                    AiProposal(
+                        command = AiCommand.ExplainNextActivity(
+                            activityId = request.context.nextActionExplanation?.activity?.id?.value
+                                ?: request.context.activeActivityId.orEmpty(),
+                            evidence = evidence,
+                        ),
+                        explanation = "Vou explicar somente com base nas evidências estruturadas da decisão.",
+                        requiresConfirmation = false,
+                    )
+                }
             }
             normalized.contains("reorgan", ignoreCase = true) || normalized.contains("atras", ignoreCase = true) -> {
                 buildReorganizationProposal(normalized, request.context)

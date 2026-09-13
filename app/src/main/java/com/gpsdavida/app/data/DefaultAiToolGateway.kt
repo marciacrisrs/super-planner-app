@@ -11,7 +11,11 @@ import javax.inject.Singleton
 class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
     override suspend fun execute(command: AiCommand): AiToolResult = when (command) {
         is AiCommand.ExplainNextActivity -> AiToolResult.Success(
-            listOf("explanation_requested", command.activityId),
+            buildList {
+                add("explanation_requested")
+                add(command.activityId)
+                command.evidence.forEach { add("evidence=$it") }
+            },
         )
         is AiCommand.CreateActivityDraft -> AiToolResult.Success(
             buildList {
@@ -25,10 +29,7 @@ class DefaultAiToolGateway @Inject constructor() : AiToolGateway {
             },
         )
         is AiCommand.ReorganizeDay -> AiToolResult.Success(
-            listOf(
-                "reorganize_requested",
-                command.request.operation.javaClass.simpleName,
-            ),
+            listOf("reorganize_requested", command.request.operation.javaClass.simpleName),
         )
         is AiCommand.MissingInformation -> AiToolResult.Success(
             command.fields.map { "missing=$it" },
