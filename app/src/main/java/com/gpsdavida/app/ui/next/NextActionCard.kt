@@ -1,5 +1,6 @@
 package com.superplanner.app.ui.next
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.superplanner.app.R
@@ -68,17 +71,32 @@ private fun ReadyContent(
     onSwap: () -> Unit,
     oneTapComplete: Boolean,
 ) {
-    Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        NextLabel()
-        Text(model.title, style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Ink)
-        MetadataRow(model)
-        if (model.reasonLabels.isNotEmpty()) {
-            Text(
-                text = model.reasonLabels.take(3).joinToString(" · "),
-                style = MaterialTheme.typography.bodySmall,
-                color = SuperPlannerColors.InkSoft,
+    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                NextLabel()
+                Text(model.title, style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Ink)
+                MetadataRow(model)
+                if (model.reasonLabels.isNotEmpty()) {
+                    Text(
+                        text = model.reasonLabels.take(3).joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SuperPlannerColors.InkSoft,
+                    )
+                }
+            }
+            Image(
+                painter = painterResource(R.drawable.sp_illustration_next_action),
+                contentDescription = null,
+                modifier = Modifier.size(92.dp),
+                contentScale = ContentScale.Fit,
             )
         }
+
         Spacer(modifier = Modifier.size(1.dp))
         SuperPlannerPrimaryButton(
             text = stringResource(if (oneTapComplete || model.state == NextActionState.InProgress) R.string.next_action_complete else R.string.next_action_start),
