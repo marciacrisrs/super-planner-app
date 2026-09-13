@@ -10,7 +10,7 @@ import com.superplanner.app.domain.model.TimeRange
 import com.superplanner.app.domain.usecase.GenerateDailySchedule
 import com.superplanner.app.domain.usecase.RescheduleAfterDelay
 import java.time.Instant
-import java.time.Duration
+import java.time.ZoneOffset
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -31,7 +31,7 @@ class DefaultPlanningEngineTest {
         val result = engine(
             PlanningInput(
                 activities = listOf(later, earlier),
-                context = NextActionContext(now = start, zoneId = java.time.ZoneOffset.UTC),
+                context = NextActionContext(now = start, zoneId = ZoneOffset.UTC),
             ),
         )
 
@@ -47,11 +47,11 @@ class DefaultPlanningEngineTest {
         val result = engine(
             PlanningInput(
                 activities = listOf(first, second),
-                context = NextActionContext(now = start, zoneId = java.time.ZoneOffset.UTC),
+                context = NextActionContext(now = start, zoneId = ZoneOffset.UTC),
             ),
         )
 
-        assertEquals(1, result.route.size)
+        assertEquals(listOf("first", "second"), result.route.map { it.activity.id.value })
         assertEquals(1, result.unscheduled.size)
         assertEquals(PlanningReason.REQUIRED_CONFLICT, result.unscheduled.single().reasons.single())
     }
