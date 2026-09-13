@@ -40,7 +40,7 @@ object AgoraUiMapper {
         zoneId: ZoneId,
     ): AgoraUiState {
         val running = activities.firstOrNull { it.instance.status == ActivityStatus.IN_PROGRESS }
-        val recommendedId = running?.id ?: decision.recommended?.id
+        val recommendedId = running?.instance?.id ?: decision.recommended?.id
         val base = AgoraUiState(
             currentTime = now.atZone(zoneId).toLocalTime(),
             currentDate = now.atZone(zoneId).toLocalDate(),
