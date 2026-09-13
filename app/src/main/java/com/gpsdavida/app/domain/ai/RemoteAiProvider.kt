@@ -126,7 +126,7 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         return NaturalLanguageActivityDraft(
             sourceText = request.message,
             title = title,
-            plannedDuration = durationMinutes.takeIf { it > 0 }?.let(Duration::ofMinutes),
+            plannedDuration = durationMinutes.takeIf { it > 0 }?.let { Duration.ofMinutes(it.toLong()) },
             date = date,
             startTime = startTime,
             recurrence = parserDraft.recurrence,
