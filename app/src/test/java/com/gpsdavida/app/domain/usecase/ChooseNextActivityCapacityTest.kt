@@ -3,6 +3,7 @@ package com.superplanner.app.domain.usecase
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.NextActionContext
@@ -54,6 +55,30 @@ class ChooseNextActivityCapacityTest {
         )
 
         assertNull(decision.next)
+    }
+
+    @Test
+    fun `observed duration is used for completed work without changing future estimates`() {
+        val completed = activity("completed", "08:00:00", "08:30:00", Priority.IMPORTANT).copy(
+            status = ActivityStatus.DONE,
+            actual = TimeRange(
+                Instant.parse("2026-08-17T08:00:00Z"),
+                Instant.parse("2026-08-17T09:00:00Z"),
+            ),
+        )
+        val next = activity("next", "11:00:00", "11:30:00", Priority.IMPORTANT)
+
+        val decision = useCase(
+            listOf(completed, next),
+            NextActionContext(
+                now = now,
+                zoneId = zone,
+                dailyCapacity = DailyCapacity(normal = Duration.ofMinutes(90)),
+            ),
+        )
+
+        assertNull(decision.next)
+        assertEquals(Duration.ofMinutes(30), next.plannedDuration)
     }
 
     private fun activity(
