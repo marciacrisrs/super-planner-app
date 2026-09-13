@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +32,7 @@ fun DailyCheckpointScreen(viewModel: DailyReviewViewModel = hiltViewModel()) {
     val prefs = remember { context.getSharedPreferences("daily_checkpoint", Context.MODE_PRIVATE) }
     val today = remember { state.date.toString() }
     var energy by remember { mutableStateOf(prefs.getString("$today.energy", "") ?: "") }
+    val decisions = remember { mutableStateMapOf<String, Boolean>() }
 
     LazyColumn(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
@@ -39,42 +41,25 @@ fun DailyCheckpointScreen(viewModel: DailyReviewViewModel = hiltViewModel()) {
         }
         item { ReviewCard("O que importa hoje?", state.priorityTitle ?: "Nenhuma prioridade identificada ainda.") }
         item { ReviewCard("O que já aconteceu?", "${state.completedCount} de ${state.plannedCount} atividades planejadas foram concluídas.") }
-        item {
-            ReviewCard(
-                "O que mudou?",
-                state.changed.ifEmpty { listOf("Nada relevante apareceu na rota.") },
-            )
-        }
-        item {
-            ReviewCard(
-                "O que precisa ser reorganizado?",
-                state.toReorganize.ifEmpty { listOf("Nada precisa ser reorganizado agora.") },
-            )
-        }
+        item { ReviewCard("O que mudou?", state.changed.ifEmpty { listOf("Nada relevante apareceu na rota.") }) }
+        item { ReviewCard("O que precisa ser reorganizado?", state.toReorganize.ifEmpty { listOf("Nada precisa ser reorganizado agora.") }) }
         item {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Como está sua energia?", style = MaterialTheme.typography.titleMedium)
-                    OutlinedTextField(
-                        value = energy,
-                        onValueChange = { energy = it },
-                        label = { Text("Baixa / média / alta") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    OutlinedTextField(value = energy, onValueChange = { energy = it }, label = { Text("Baixa / média / alta") }, modifier = Modifier.fillMaxWidth())
                     TextButton(onClick = { prefs.edit().putString("$today.energy", energy).apply() }) { Text("Salvar") }
                 }
             }
         }
         state.suggestions.forEach { suggestion ->
-            item { DailySuggestion(suggestion) }
+            item { DailySuggestion(suggestion, decisions[suggestion.id]) { accepted -> decisions[suggestion.id] = accepted } }
         }
     }
 }
 
 @Composable
-private fun ReviewCard(title: String, value: String) {
-    ReviewCard(title, listOf(value))
-}
+private fun ReviewCard(title: String, value: String) = ReviewCard(title, listOf(value))
 
 @Composable
 private fun ReviewCard(title: String, values: List<String>) {
@@ -87,12 +72,17 @@ private fun ReviewCard(title: String, values: List<String>) {
 }
 
 @Composable
-private fun DailySuggestion(suggestion: ReviewSuggestion) {
+private fun DailySuggestion(suggestion: ReviewSuggestion, decision: Boolean?, onDecision: (Boolean) -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(suggestion.title, style = MaterialTheme.typography.titleMedium)
             Text(suggestion.explanation, style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = { }) { Text(suggestion.actionLabel) }
+            if (decision == null) {
+                TextButton(onClick = { onDecision(true) }) { Text(suggestion.actionLabel) }
+                TextButton(onClick = { onDecision(false) }) { Text("Não agora") }
+            } else {
+                Text(if (decision) "Sugestão aceita." else "Sugestão descartada.", style = MaterialTheme.typography.bodySmall)
+            }
         }
     }
 }
