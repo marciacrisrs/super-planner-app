@@ -9,6 +9,7 @@ enum class ScheduleConflictReason {
     FIXED_OVERLAP,
     NO_AVAILABLE_WINDOW,
     DEPENDENCY_NOT_SATISFIED,
+    CAPACITY_EXCEEDED,
 }
 
 data class DailySchedule(
