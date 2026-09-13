@@ -3,7 +3,6 @@ package com.superplanner.app.domain.usecase
 import com.superplanner.app.domain.model.DailyActivity
 import com.superplanner.app.domain.model.NextActionContext
 import com.superplanner.app.domain.planning.PlanningEngine
-import com.superplanner.app.domain.planning.PlanningInput
 import com.superplanner.app.domain.port.ActivityExecutionRepository
 import com.superplanner.app.domain.port.AvailabilityRepository
 import java.time.Clock
@@ -12,7 +11,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-/** Builds the executable day from the PlanningEngine and overlays persisted execution state. */
+/** Builds the executable day from the PlanningEngine using persisted execution state. */
 class ObserveExecutableDay @Inject constructor(
     private val observeEventsForDay: ObserveEventsForDay,
     private val observeTasksForDay: ObserveTasksForDay,
@@ -21,7 +20,7 @@ class ObserveExecutableDay @Inject constructor(
     private val availabilityRepository: AvailabilityRepository,
     private val materializeDailyActivities: MaterializeDailyActivities,
     private val planningEngine: PlanningEngine,
-    private val applyPersistedExecutions: ApplyPersistedExecutions,
+    private val buildPlanningInput: BuildPlanningInput,
     private val executions: ActivityExecutionRepository,
     private val clock: Clock,
 ) {
@@ -49,21 +48,19 @@ class ObserveExecutableDay @Inject constructor(
                 date = date,
                 zoneId = zoneId,
             )
-            val result = planningEngine(
-                PlanningInput(
-                    activities = materialized.map { it.instance },
-                    context = NextActionContext(
-                        now = clock.instant(),
-                        availability = availability,
-                        zoneId = zoneId,
-                    ),
+            val planningInput = buildPlanningInput(
+                activities = materialized.map { it.instance },
+                persisted = persisted.associateBy { it.activityInstanceId },
+                date = date,
+                context = NextActionContext(
+                    now = clock.instant(),
+                    availability = availability,
+                    zoneId = zoneId,
                 ),
             )
+            val result = planningEngine(planningInput)
             val titlesById = materialized.associate { it.instance.id to it.title }
-            val scheduled = applyPersistedExecutions(
-                activities = result.route.map { it.activity },
-                persisted = persisted.associateBy { it.activityInstanceId },
-            )
+            val scheduled = result.route.map { it.activity }
             scheduled.map { instance ->
                 DailyActivity(
                     title = titlesById[instance.id].orEmpty(),
