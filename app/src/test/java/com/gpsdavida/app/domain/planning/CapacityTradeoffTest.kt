@@ -65,6 +65,25 @@ class CapacityTradeoffTest {
     }
 
     @Test
+    fun `user choice marks selected movable activities deferred`() {
+        val activities = listOf(
+            activity("study", Duration.ofHours(2), priority = Priority.IMPORTANT),
+            activity("house", Duration.ofHours(2), priority = Priority.DESIRABLE),
+        )
+        val negotiation = negotiator.analyze(activities, capacity(hours = 2))
+        val option = negotiation.alternatives.first()
+
+        val result = negotiator.applyChoice(
+            activities = activities,
+            negotiation = negotiation,
+            choice = TradeoffChoice(option.id),
+        )
+
+        assertEquals("PENDING", result.first { it.id == ActivityInstanceId("activity-study") }.status.name)
+        assertEquals("DEFERRED", result.first { it.id == ActivityInstanceId("activity-house") }.status.name)
+    }
+
+    @Test
     fun `pending activities are considered while completed activities do not create overload`() {
         val completed = activity("done", Duration.ofHours(4)).completed(
             TimeRange(start, start.plus(Duration.ofHours(4))),
