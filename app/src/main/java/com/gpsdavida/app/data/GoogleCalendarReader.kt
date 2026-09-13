@@ -9,6 +9,8 @@ import com.superplanner.app.data.local.EventEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 /** Reads Google calendars already synchronized to the Android Calendar provider. */
@@ -20,16 +22,23 @@ class GoogleCalendarReader @Inject constructor(
             return@withContext emptyList()
         }
 
-        val now = System.currentTimeMillis()
-        val from = now - 30L * 24 * 60 * 60 * 1000
-        val to = now + 90L * 24 * 60 * 60 * 1000
+        val zone = ZoneId.systemDefault()
+        val startOfToday = ZonedDateTime.now(zone)
+            .toLocalDate()
+            .atStartOfDay(zone)
+            .toInstant()
+            .toEpochMilli()
+        val to = ZonedDateTime.now(zone)
+            .plusDays(90)
+            .toInstant()
+            .toEpochMilli()
         val calendarIds = googleCalendarIds()
         if (calendarIds.isEmpty()) return@withContext emptyList()
 
         val result = mutableListOf<EventEntity>()
         calendarIds.forEach { calendarId ->
             val uri = CalendarContract.Instances.CONTENT_URI.buildUpon()
-                .appendPath(from.toString())
+                .appendPath(startOfToday.toString())
                 .appendPath(to.toString())
                 .build()
             val projection = arrayOf(
