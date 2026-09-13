@@ -12,6 +12,12 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 
+data class LowCapacitySummary(
+    val preserved: Int = 0,
+    val moved: Int = 0,
+    val deferred: Int = 0,
+)
+
 data class AgoraUpcomingItem(
     val title: String,
     val scheduledTime: LocalTime,
@@ -32,6 +38,8 @@ data class AgoraUiState(
     val currentActivity: ActivityInstance? = null,
     val reasons: List<NextActionReason> = emptyList(),
     val explanation: String? = null,
+    val lowCapacity: Boolean = false,
+    val lowCapacitySummary: LowCapacitySummary = LowCapacitySummary(),
 )
 
 object AgoraUiMapper {
@@ -40,12 +48,16 @@ object AgoraUiMapper {
         decision: NextActionDecision,
         now: Instant,
         zoneId: ZoneId,
+        lowCapacity: Boolean = false,
+        lowCapacitySummary: LowCapacitySummary = LowCapacitySummary(),
     ): AgoraUiState {
         val running = activities.firstOrNull { it.instance.status == ActivityStatus.IN_PROGRESS }
         val recommendedId = running?.instance?.id ?: decision.recommended?.id
         val base = AgoraUiState(
             currentTime = now.atZone(zoneId).toLocalTime(),
             currentDate = now.atZone(zoneId).toLocalDate(),
+            lowCapacity = lowCapacity,
+            lowCapacitySummary = lowCapacitySummary,
         )
 
         if (recommendedId == null) {
