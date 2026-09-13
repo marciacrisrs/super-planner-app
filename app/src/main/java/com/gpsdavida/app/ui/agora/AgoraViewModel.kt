@@ -10,6 +10,7 @@ import com.superplanner.app.domain.usecase.DeferActivityInstance
 import com.superplanner.app.domain.usecase.ObserveExecutableDay
 import com.superplanner.app.domain.usecase.RecalculateRoute
 import com.superplanner.app.domain.usecase.SkipActivityInstance
+import com.superplanner.app.domain.usecase.StartActivityInstance
 import com.superplanner.app.ui.notifications.ActivityNotificationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
@@ -28,6 +29,7 @@ class AgoraViewModel @Inject constructor(
     observeExecutableDay: ObserveExecutableDay,
     private val chooseNextActivity: ChooseNextActivity,
     private val recalculateRoute: RecalculateRoute,
+    private val startActivity: StartActivityInstance,
     private val completeActivity: CompleteActivityInstance,
     private val skipActivity: SkipActivityInstance,
     private val deferActivity: DeferActivityInstance,
@@ -51,7 +53,8 @@ class AgoraViewModel @Inject constructor(
         mapped
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgoraUiState())
 
-    fun completeCurrent() { state.value.currentActivity?.let { viewModelScope.launch { completeActivity(it) } } }
-    fun skipCurrent() { state.value.currentActivity?.let { viewModelScope.launch { skipActivity(it) } } }
-    fun deferCurrent() { state.value.currentActivity?.let { viewModelScope.launch { deferActivity(it) } } }
+    fun startCurrent() { state.value.currentActivity?.let { activity -> viewModelScope.launch { startActivity(activity) } } }
+    fun completeCurrent() { state.value.currentActivity?.let { activity -> viewModelScope.launch { completeActivity(activity) } } }
+    fun skipCurrent() { state.value.currentActivity?.let { activity -> viewModelScope.launch { skipActivity(activity) } } }
+    fun deferCurrent() { state.value.currentActivity?.let { activity -> viewModelScope.launch { deferActivity(activity) } } }
 }
