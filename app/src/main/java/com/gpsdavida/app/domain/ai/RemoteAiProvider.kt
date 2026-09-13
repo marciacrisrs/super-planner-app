@@ -12,6 +12,7 @@ import java.time.Instant
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -34,7 +35,7 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
             val context = JSONObject().apply {
                 request.context.nowIso?.let { put("nowIso", it) }
                 request.context.activeActivityId?.let { put("activeActivityId", it) }
-                put("minimalRouteFacts", request.context.minimalRouteFacts)
+                put("minimalRouteFacts", JSONArray(request.context.minimalRouteFacts))
             }
             val body = JSONObject().apply {
                 put("message", request.message)
@@ -102,7 +103,7 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
     }
 }
 
-private fun org.json.JSONArray.toStringList(): List<String> = buildList {
+private fun JSONArray.toStringList(): List<String> = buildList {
     for (index in 0 until length()) add(getString(index))
 }
 
