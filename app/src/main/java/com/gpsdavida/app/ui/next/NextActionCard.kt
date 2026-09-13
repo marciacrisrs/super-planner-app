@@ -8,23 +8,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.superplanner.app.R
-import com.superplanner.app.ui.theme.SuperPlannerColors
 import com.superplanner.app.ui.theme.SuperPlannerCard
+import com.superplanner.app.ui.theme.SuperPlannerColors
 import com.superplanner.app.ui.theme.SuperPlannerMetadata
 import com.superplanner.app.ui.theme.SuperPlannerPrimaryButton
 import com.superplanner.app.ui.theme.SuperPlannerSecondaryActions
@@ -133,7 +131,7 @@ private fun NextLabel() {
 @Composable
 private fun EmptyContent() {
     Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Icon(Icons.Filled.Check, contentDescription = null, tint = SuperPlannerColors.Sage, modifier = Modifier.size(28.dp))
+        Icon(Icons.Outlined.CheckCircleOutline, contentDescription = null, tint = SuperPlannerColors.Sage, modifier = Modifier.size(28.dp))
         Text(stringResource(R.string.next_action_empty_title), style = MaterialTheme.typography.headlineSmall)
         Text(stringResource(R.string.next_action_empty_body), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
@@ -142,7 +140,7 @@ private fun EmptyContent() {
 @Composable
 private fun CompletedContent(title: String) {
     Row(modifier = Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        Icon(Icons.Filled.Check, contentDescription = null, tint = SuperPlannerColors.Success, modifier = Modifier.size(44.dp))
+        Icon(Icons.Outlined.CheckCircleOutline, contentDescription = null, tint = SuperPlannerColors.Success, modifier = Modifier.size(44.dp))
         Column {
             Text(stringResource(R.string.next_action_completed_label), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.Success)
             Text(title, style = MaterialTheme.typography.titleLarge)
