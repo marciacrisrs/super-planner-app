@@ -2,9 +2,8 @@ package com.superplanner.app.domain.planning
 
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.Flexibility
-import com.superplanner.app.domain.model.NextActionContext
 import java.time.Duration
-import java.time.LocalDate
+import java.time.Instant
 
 /** Immutable what-if snapshot. It never mutates the official planning state. */
 data class PlanningScenario(
@@ -18,6 +17,10 @@ data class PlanningScenario(
         require(name.isNotBlank()) { "Scenario name must not be blank" }
         require(changes.map { it.activityId }.distinct().size == changes.size) {
             "A scenario cannot change the same activity more than once"
+        }
+        val baseIds = base.activities.map { it.id.value }.toSet()
+        require(changes.filterIsInstance<ScenarioChange.Add>().none { it.activityId in baseIds }) {
+            "A scenario cannot add an activity that already exists in the base snapshot"
         }
     }
 
@@ -35,7 +38,7 @@ data class PlanningScenario(
                     null -> activity
                     is ScenarioChange.Replace -> change.applyTo(activity)
                     is ScenarioChange.Remove -> activity
-                    is ScenarioChange.Add -> activity
+                    is ScenarioChange.Add -> error("Add must not target an existing activity")
                 }
             }
             .toMutableList()
@@ -58,16 +61,20 @@ sealed interface ScenarioChange {
     data class Replace(
         override val activityId: String,
         val plannedDuration: Duration? = null,
-        val plannedStart: java.time.Instant? = null,
+        val plannedStart: Instant? = null,
         val flexibility: Flexibility? = null,
     ) : ScenarioChange {
-        fun applyTo(activity: ActivityInstance): ActivityInstance = activity.copy(
-            planned = activity.planned.copy(
-                start = plannedStart ?: activity.planned.start,
-                end = (plannedStart ?: activity.planned.start).plus(plannedDuration ?: activity.plannedDuration),
-            ),
-            flexibility = flexibility ?: activity.flexibility,
-        )
+        fun applyTo(activity: ActivityInstance): ActivityInstance {
+            val start = plannedStart ?: activity.planned.start
+            val duration = plannedDuration ?: activity.plannedDuration
+            return activity.copy(
+                planned = activity.planned.copy(
+                    start = start,
+                    end = start.plus(duration),
+                ),
+                flexibility = flexibility ?: activity.flexibility,
+            )
+        }
     }
 
     data class Remove(
@@ -92,7 +99,6 @@ data class ScenarioComparison(
             fixedCommitmentImpact.isNotEmpty() || priorityImpact.isNotEmpty()
 }
 
-/** Human-readable scenario impact categories. */
 enum class ScenarioImpact {
     CAPACITY,
     PRIORITY,
