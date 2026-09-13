@@ -10,8 +10,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -89,13 +90,19 @@ fun EventsListScreen(
         }
     }
 
+    val groupedEvents = events
+        .sortedBy { it.range.start }
+        .groupBy { event ->
+            event.range.start.atZone(ZoneId.systemDefault()).toLocalDate()
+        }
+
     SuperPlannerSoftBackground {
         Scaffold(containerColor = Color.Transparent) { padding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 EditorialEventsDecorations()
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    contentPadding = PaddingValues(
                         start = 20.dp,
                         top = padding.calculateTopPadding() + 28.dp,
                         end = 20.dp,
@@ -127,15 +134,10 @@ fun EventsListScreen(
                         )
                     }
 
-                    if (events.isEmpty()) {
+                    if (groupedEvents.isEmpty()) {
                         item { EventsEmptyState(onAdd = onAdd) }
                     } else {
-                        val grouped = remember(events) {
-                            events.sortedBy { it.range.start }.groupBy { event ->
-                                event.range.start.atZone(ZoneId.systemDefault()).toLocalDate()
-                            }
-                        }
-                        grouped.forEach { (date, dayEvents) ->
+                        groupedEvents.forEach { (date, dayEvents) ->
                             item { EventDayHeader(date) }
                             items(
                                 items = dayEvents,
