@@ -64,7 +64,7 @@ class SimulatePlanningScenario @Inject constructor(
             simulated = simulated,
             movedActivities = moved,
             newlyUnscheduled = newlyUnscheduled.toList(),
-            newlyScheduled = newlyScheduled,
+            newlyScheduled = newlyScheduled.toList(),
             fixedCommitmentImpact = fixedImpacted,
             priorityImpact = priorityImpact,
             capacityImpact = Duration.ofMillis(simulatedCapacity - baselineCapacity),
