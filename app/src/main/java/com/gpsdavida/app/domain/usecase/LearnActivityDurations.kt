@@ -24,3 +24,4 @@ class LearnActivityDurations @Inject constructor() {
                 id to median
             }
             .toMap()
+}
