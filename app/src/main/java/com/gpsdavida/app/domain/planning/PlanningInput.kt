@@ -2,13 +2,16 @@ package com.superplanner.app.domain.planning
 
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.NextActionContext
+import java.time.LocalDate
 
 /** Immutable snapshot consumed by a PlanningEngine. It is safe to reuse for recalculation. */
 data class PlanningInput(
     val activities: List<ActivityInstance>,
     val context: NextActionContext,
+    val date: LocalDate = context.now.atZone(context.zoneId).toLocalDate(),
     val recalculationReason: RecalculationReason = RecalculationReason.INITIAL,
     val previousRoute: RouteSnapshot? = null,
+    val delayedActivity: ActivityInstance? = null,
 ) {
     init {
         require(activities.map { it.id }.distinct().size == activities.size) {

@@ -14,9 +14,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,7 +26,6 @@ import com.superplanner.app.R
 import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.ui.agora.AgoraViewModel
 import com.superplanner.app.ui.next.NextActionCard
-import com.superplanner.app.ui.next.NextActionState
 import com.superplanner.app.ui.next.NextActionUiModel
 import com.superplanner.app.ui.tasks.labelRes
 import com.superplanner.app.ui.theme.SuperPlannerBackground
