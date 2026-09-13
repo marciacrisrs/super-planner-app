@@ -10,12 +10,21 @@ import javax.inject.Inject
 class RecordActivityExecution @Inject constructor(
     private val repository: ActivityExecutionRepository,
 ) {
-    suspend fun complete(
+    suspend fun start(
         activity: ActivityInstance,
         actualStart: Instant,
+    ) {
+        repository.save(activity.started(actualStart))
+    }
+
+    suspend fun complete(
+        activity: ActivityInstance,
         actualEnd: Instant,
     ) {
-        repository.save(activity.completed(TimeRange(actualStart, actualEnd)))
+        val actualStart = activity.actualStart
+            ?: repository.getById(activity.id)?.actualStart
+            ?: error("Cannot complete an activity without an actual start")
+        repository.save(activity.copy(status = com.superplanner.app.domain.model.ActivityStatus.IN_PROGRESS, actualStart = actualStart).completed(TimeRange(actualStart, actualEnd)))
     }
 
     suspend fun skip(activity: ActivityInstance) {
