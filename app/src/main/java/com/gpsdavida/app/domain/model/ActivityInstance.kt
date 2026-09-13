@@ -18,6 +18,7 @@ data class ActivityInstance(
     val status: ActivityStatus = ActivityStatus.PENDING,
     val dueAt: Instant? = null,
     val delayConsequence: DelayConsequence = DelayConsequence.NONE,
+    val responsibility: ResponsibilityContext = ResponsibilityContext(),
 ) {
     val plannedDuration: Duration get() = planned.duration
 
@@ -28,13 +29,11 @@ data class ActivityInstance(
     val durationVariance: Duration?
         get() = actualDuration?.minus(plannedDuration)
 
-    /** Marks the activity as actively executing at the supplied real-world instant. */
     fun started(at: Instant): ActivityInstance {
         require(status == ActivityStatus.PENDING) { "Only pending activities can be started" }
         return copy(actualStart = at, actual = null, status = ActivityStatus.IN_PROGRESS)
     }
 
-    /** Completes an active activity using the persisted real start and supplied real end. */
     fun completed(actualRange: TimeRange): ActivityInstance {
         require(status == ActivityStatus.IN_PROGRESS) { "Only in-progress activities can be completed" }
         require(actualStart != null) { "In-progress activities must have an actual start" }
