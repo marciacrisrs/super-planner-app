@@ -27,5 +27,6 @@ data class NextActionContext(
     val currentLocation: LocationId? = null,
     val travelTimes: List<TravelTime> = emptyList(),
     val defaultBuffer: Duration = Duration.ZERO,
+    val dailyCapacity: DailyCapacity? = null,
     val zoneId: ZoneId = ZoneId.systemDefault(),
 )

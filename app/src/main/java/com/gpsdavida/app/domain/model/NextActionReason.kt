@@ -11,4 +11,5 @@ enum class NextActionReason {
     DEPENDENCIES_SATISFIED,
     FLEXIBLE_SLOT,
     TRAVEL_FITS,
+    CAPACITY_AVAILABLE,
 }
