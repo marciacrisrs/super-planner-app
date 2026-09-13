@@ -10,6 +10,7 @@ import javax.inject.Inject
 /** Applies persisted execution state before creating the planning snapshot. */
 class BuildPlanningInput @Inject constructor(
     private val applyPersistedExecutions: ApplyPersistedExecutions,
+    private val learnActivityDurations: LearnActivityDurations,
 ) {
     operator fun invoke(
         activities: List<ActivityInstance>,
@@ -21,10 +22,11 @@ class BuildPlanningInput @Inject constructor(
         val delayedActivity = prepared.firstOrNull { activity ->
             activity.actual?.end?.isAfter(activity.planned.end) == true
         }
+        val learnedDurations = learnActivityDurations(persisted.values.toList())
 
         return PlanningInput(
             activities = prepared,
-            context = context,
+            context = context.copy(learnedDurations = learnedDurations),
             date = date,
             delayedActivity = delayedActivity,
         )
