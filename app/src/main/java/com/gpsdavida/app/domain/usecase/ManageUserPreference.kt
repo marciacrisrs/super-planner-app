@@ -1,4 +1,4 @@
-package com.gpsdavida.app.domain.usecase
+package com.superplanner.app.domain.usecase
 
 import com.superplanner.app.domain.model.PreferenceSuggestion
 import com.superplanner.app.domain.model.UserPreference
