@@ -15,7 +15,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +33,7 @@ import com.superplanner.app.R
 import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.ui.agora.AgoraViewModel
 import com.superplanner.app.ui.next.NextActionCard
+import com.superplanner.app.ui.next.NextActionState
 import com.superplanner.app.ui.next.NextActionUiModel
 import com.superplanner.app.ui.tasks.labelRes
 import com.superplanner.app.ui.theme.SuperPlannerBackground
@@ -40,18 +45,25 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
-/** Calm editorial home: one primary decision, one look-ahead, no vertical scrolling. */
+/** Calm execution-first home: one primary decision and one look-ahead. */
 @Composable
 fun HomeScreen(
     viewModel: AgoraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var startedActivityId by remember { mutableStateOf<String?>(null) }
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
     val greeting = when (state.currentTime.hour) {
         in 5..11 -> "Bom dia"
         in 12..17 -> "Boa tarde"
         else -> "Boa noite"
+    }
+
+    LaunchedEffect(state.currentActivity?.id) {
+        if (state.currentActivity?.id != startedActivityId) {
+            startedActivityId = null
+        }
     }
 
     SuperPlannerBackground {
@@ -66,24 +78,13 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.sp_logo_mark),
-                        contentDescription = "Super Planner",
-                        modifier = Modifier.size(42.dp),
-                        contentScale = ContentScale.Fit,
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(greeting, style = MaterialTheme.typography.headlineLarge, color = SuperPlannerColors.Ink)
+                    Text(
+                        state.currentDate.format(dateFormatter).replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SuperPlannerColors.InkSoft,
                     )
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(greeting, style = MaterialTheme.typography.headlineLarge, color = SuperPlannerColors.Ink)
-                        Text(
-                            state.currentDate.format(dateFormatter).replaceFirstChar { it.uppercase() },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = SuperPlannerColors.InkSoft,
-                        )
-                    }
                 }
                 Text("♡", style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Terracotta)
             }
@@ -117,11 +118,19 @@ fun HomeScreen(
                                 NextActionReason.CAPACITY_AVAILABLE -> stringResource(R.string.reason_capacity_available)
                             }
                         },
-                        state = state.state,
+                        state = if (startedActivityId == state.currentActivity?.id) {
+                            NextActionState.InProgress
+                        } else {
+                            state.state
+                        },
                     ),
-                    oneTapComplete = true,
+                    oneTapComplete = false,
+                    onStart = { state.currentActivity?.let { startedActivityId = it.id.value } },
                     onSnooze = viewModel::deferCurrent,
-                    onComplete = viewModel::completeCurrent,
+                    onComplete = {
+                        startedActivityId = null
+                        viewModel.completeCurrent()
+                    },
                     onSwap = viewModel::skipCurrent,
                 )
             }
