@@ -20,6 +20,7 @@ enum class Flexibility {
 
 enum class ActivityStatus {
     PENDING,
+    IN_PROGRESS,
     DONE,
     SKIPPED,
     DEFERRED,

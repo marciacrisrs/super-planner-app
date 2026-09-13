@@ -37,11 +37,12 @@ class DomainModelTest {
             flexibility = Flexibility.FLEXIBLE,
             planned = planned,
         )
+        val actualStart = Instant.parse("2026-08-15T14:10:00Z")
         val actual = TimeRange(
-            Instant.parse("2026-08-15T14:10:00Z"),
+            actualStart,
             Instant.parse("2026-08-15T15:25:00Z"),
         )
-        val done = pending.completed(actual)
+        val done = pending.started(actualStart).completed(actual)
         assertNull(pending.actualDuration)
         assertEquals(Duration.ofHours(1), done.plannedDuration)
         assertEquals(Duration.ofMinutes(75), done.actualDuration)

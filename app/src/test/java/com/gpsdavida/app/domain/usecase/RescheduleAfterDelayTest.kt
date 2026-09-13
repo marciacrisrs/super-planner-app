@@ -21,8 +21,11 @@ class RescheduleAfterDelayTest {
 
     @Test
     fun `delayed execution pushes affected flexible activity but preserves fixed activity`() {
+        val delayedStart = instant("09:00:00")
+        val delayedEnd = instant("10:30:00")
         val delayed = activity("delayed", "09:00:00", "10:00:00")
-            .completed(TimeRange(instant("09:00:00"), instant("10:30:00")))
+            .started(delayedStart)
+            .completed(TimeRange(delayedStart, delayedEnd))
         val flexible = activity("flexible", "10:00:00", "11:00:00")
         val fixed = activity("fixed", "11:30:00", "12:30:00", Flexibility.FIXED)
 
@@ -51,6 +54,7 @@ class RescheduleAfterDelayTest {
     @Test(expected = IllegalArgumentException::class)
     fun `on time completion cannot trigger rescheduling`() {
         val completed = activity("completed", "09:00:00", "10:00:00")
+            .started(instant("09:00:00"))
             .completed(TimeRange(instant("09:00:00"), instant("10:00:00")))
 
         reschedule(

@@ -86,9 +86,9 @@ class CapacityTradeoffTest {
 
     @Test
     fun `pending activities are considered while completed activities do not create overload`() {
-        val completed = activity("done", Duration.ofHours(4)).completed(
-            TimeRange(start, start.plus(Duration.ofHours(4))),
-        )
+        val completed = activity("done", Duration.ofHours(4))
+            .started(start)
+            .completed(TimeRange(start, start.plus(Duration.ofHours(4))))
         val pending = activity("pending", Duration.ofHours(2))
 
         val result = negotiator.analyze(listOf(completed, pending), capacity(hours = 2))

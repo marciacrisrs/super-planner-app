@@ -13,7 +13,7 @@ fun ActivityInstance.toExecutionEntity(): ActivityExecutionEntity = ActivityExec
     status = status.name,
     plannedStart = planned.start.toString(),
     plannedEnd = planned.end.toString(),
-    actualStart = actual?.start?.toString(),
+    actualStart = (actualStart ?: actual?.start)?.toString(),
     actualEnd = actual?.end?.toString(),
 )
 
@@ -21,6 +21,7 @@ fun ActivityExecutionEntity.toDomain(): ActivityExecution = ActivityExecution(
     activityInstanceId = ActivityInstanceId(activityInstanceId),
     status = ActivityStatus.valueOf(status),
     planned = TimeRange(Instant.parse(plannedStart), Instant.parse(plannedEnd)),
+    actualStart = actualStart?.let(Instant::parse),
     actual = if (actualStart != null && actualEnd != null) {
         TimeRange(Instant.parse(actualStart), Instant.parse(actualEnd))
     } else {

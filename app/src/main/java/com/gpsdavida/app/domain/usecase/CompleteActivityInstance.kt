@@ -8,8 +8,7 @@ class CompleteActivityInstance @Inject constructor(
     private val record: RecordActivityExecution,
     private val clock: Clock,
 ) {
-    suspend operator fun invoke(activity: ActivityInstance) {
-        val now = clock.instant()
-        record.complete(activity, activity.planned.start, now)
-    }
+    /** Completes an activity using the real end instant and returns the completed instance. */
+    suspend operator fun invoke(activity: ActivityInstance): ActivityInstance =
+        record.complete(activity, clock.instant())
 }
