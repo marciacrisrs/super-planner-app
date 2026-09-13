@@ -1,7 +1,6 @@
 package com.superplanner.app.domain.ai
 
 import com.superplanner.app.domain.model.ActivityInstanceId
-import com.superplanner.app.domain.model.NextActionExplanation
 import com.superplanner.app.domain.planning.DayReorganizationOperation
 import com.superplanner.app.domain.planning.DayReorganizationRequest
 import com.superplanner.app.domain.port.AiToolGateway
@@ -34,7 +33,6 @@ data class AiContext(
     val nowIso: String? = null,
     val activeActivityId: String? = null,
     val minimalRouteFacts: List<String> = emptyList(),
-    val nextActionExplanation: NextActionExplanation? = null,
 )
 
 data class AiProposal(
@@ -73,21 +71,17 @@ class RuleBasedAiProvider @Inject constructor() : AiProvider {
         val normalized = request.message.trim()
         return when {
             normalized.contains("por que", ignoreCase = true) || normalized.contains("por quê", ignoreCase = true) -> {
-                val evidence = request.context.nextActionExplanation?.facts
-                    ?.map { "${it.reason}: ${it.value}" }
-                    .orEmpty()
+                val evidence = request.context.minimalRouteFacts
                 if (evidence.isEmpty()) {
                     AiProposal(
                         command = AiCommand.MissingInformation(listOf("evidências da decisão atual")),
-                        explanation = request.context.nextActionExplanation?.fallbackMessage
-                            ?: "Não tenho evidências suficientes para explicar esta escolha.",
+                        explanation = "Não tenho evidências suficientes para explicar esta escolha.",
                         requiresConfirmation = false,
                     )
                 } else {
                     AiProposal(
                         command = AiCommand.ExplainNextActivity(
-                            activityId = request.context.nextActionExplanation?.activity?.id?.value
-                                ?: request.context.activeActivityId.orEmpty(),
+                            activityId = request.context.activeActivityId.orEmpty(),
                             evidence = evidence,
                         ),
                         explanation = "Vou explicar somente com base nas evidências estruturadas da decisão.",
