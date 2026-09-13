@@ -39,7 +39,9 @@ class ChooseNextActivity @Inject constructor() {
             .filter { it.planned.start <= context.now && context.now < it.planned.end }
             .minWithOrNull(currentComparator)
 
-        val executable = baseExecutable.filter { travelAndBufferFitBeforeStart(it, current, context) }
+        val executable = baseExecutable
+            .filter { capacityFits(it, activities, context, current) }
+            .filter { travelAndBufferFitBeforeStart(it, current, context) }
         val next = executable.asSequence()
             .filter { it.id != current?.id }
             .sortedWith(nextComparator(context))
@@ -68,6 +70,7 @@ class ChooseNextActivity @Inject constructor() {
         if (activity.energy == null || context.currentEnergy == null || activity.energy == context.currentEnergy) add(NextActionReason.ENERGY_MATCH)
         if (dependenciesSatisfied(activity, activities, context.dependencies)) add(NextActionReason.DEPENDENCIES_SATISFIED)
         if (activity.flexibility != Flexibility.FIXED) add(NextActionReason.FLEXIBLE_SLOT)
+        if (capacityFits(activity, activities, context, null)) add(NextActionReason.CAPACITY_AVAILABLE)
         if (travelDurationTo(activity, null, context).isZero() || travelAndBufferFitBeforeStart(activity, null, context)) add(NextActionReason.TRAVEL_FITS)
     }
 
@@ -91,6 +94,47 @@ class ChooseNextActivity @Inject constructor() {
         dependencies.filter { it.successor == activity.source }.all { dependency ->
             activities.any { it.source == dependency.predecessor && it.status == ActivityStatus.DONE }
         }
+
+    private fun capacityFits(
+        activity: ActivityInstance,
+        activities: List<ActivityInstance>,
+        context: NextActionContext,
+        current: ActivityInstance?,
+    ): Boolean {
+        val capacity = context.dailyCapacity ?: return true
+        val day = context.now.atZone(context.zoneId).toLocalDate()
+        val beforeTarget = activities
+            .filter { it.id != activity.id }
+            .filter { it.planned.start.atZone(context.zoneId).toLocalDate() == day }
+            .filter { it.status != ActivityStatus.SKIPPED && it.status != ActivityStatus.DEFERRED }
+            .filter { it.planned.start < activity.planned.start }
+            .sortedBy { it.planned.start }
+
+        val ordered = (beforeTarget + activity)
+            .distinctBy { it.id }
+            .sortedBy { it.planned.start }
+
+        var used = Duration.ZERO
+        var previous: ActivityInstance? = null
+        for (scheduled in ordered) {
+            val transition = if (previous == null) {
+                Duration.ZERO
+            } else {
+                travelDurationTo(scheduled, previous, context)
+            }
+            used = used
+                .plus(transition)
+                .plus(scheduled.plannedDuration)
+                .plus(scheduled.bufferAfter ?: context.defaultBuffer)
+            previous = scheduled
+        }
+
+        if (current != null && ordered.none { it.id == current.id }) {
+            used = used.plus(current.plannedDuration).plus(current.bufferAfter ?: context.defaultBuffer)
+        }
+
+        return capacity.remaining(used.minus(activity.plannedDuration).coerceAtLeast(Duration.ZERO)) >= activity.plannedDuration
+    }
 
     private fun travelAndBufferFitBeforeStart(activity: ActivityInstance, current: ActivityInstance?, context: NextActionContext): Boolean {
         if (activity.id == current?.id || activity.planned.start <= context.now) return true
@@ -123,3 +167,6 @@ class ChooseNextActivity @Inject constructor() {
         return kotlin.math.abs(distance.getValue(activityEnergy) - distance.getValue(currentEnergy))
     }
 }
+
+private fun Duration.coerceAtLeast(minimum: Duration): Duration =
+    if (this < minimum) minimum else this
