@@ -1,6 +1,7 @@
 package com.superplanner.app.domain.ai
 
 import com.superplanner.app.domain.port.AiToolGateway
+import com.superplanner.app.domain.port.AiToolResult
 import javax.inject.Inject
 
 /** Provider-independent boundary between conversational AI and Planner truth. */
