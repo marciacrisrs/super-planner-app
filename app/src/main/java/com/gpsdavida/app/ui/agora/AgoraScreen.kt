@@ -7,11 +7,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -35,10 +41,11 @@ fun AgoraScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var showCapacityDialog by remember { mutableStateOf(false) }
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
     val dateFmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
 
-    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity, state.state) {
+    LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, state.currentActivity, state.state, state.lowCapacity) {
         AgoraWidgetSnapshot.write(
             context = context,
             snapshot = AgoraWidgetSnapshot(
@@ -51,6 +58,33 @@ fun AgoraScreen(
         AgoraWidgetProvider.updateAll(context)
     }
 
+    if (showCapacityDialog) {
+        AlertDialog(
+            onDismissRequest = { showCapacityDialog = false },
+            title = { Text(stringResource(R.string.low_capacity_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        if (state.lowCapacity) R.string.low_capacity_dialog_active_body else R.string.low_capacity_dialog_body,
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setLowCapacity(!state.lowCapacity)
+                    showCapacityDialog = false
+                }) {
+                    Text(stringResource(if (state.lowCapacity) R.string.low_capacity_restore else R.string.low_capacity_enable))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCapacityDialog = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,18 +93,26 @@ fun AgoraScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(text = stringResource(R.string.nav_agora), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
+            Text(text = state.currentTime.format(timeFmt), style = MaterialTheme.typography.displaySmall, color = SuperPlannerColors.Ink)
+            Text(text = state.currentDate.format(dateFmt), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
+        }
+
+        OutlinedButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { showCapacityDialog = true },
+        ) {
+            Text(stringResource(if (state.lowCapacity) R.string.low_capacity_active_button else R.string.low_capacity_button))
+        }
+
+        if (state.lowCapacity) {
             Text(
-                text = stringResource(R.string.nav_agora),
-                style = MaterialTheme.typography.labelLarge,
-                color = SuperPlannerColors.TerracottaDark,
-            )
-            Text(
-                text = state.currentTime.format(timeFmt),
-                style = MaterialTheme.typography.displaySmall,
-                color = SuperPlannerColors.Ink,
-            )
-            Text(
-                text = state.currentDate.format(dateFmt),
+                text = stringResource(
+                    R.string.low_capacity_summary,
+                    state.lowCapacitySummary.preserved,
+                    state.lowCapacitySummary.moved,
+                    state.lowCapacitySummary.deferred,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = SuperPlannerColors.InkSoft,
             )
@@ -94,10 +136,7 @@ fun AgoraScreen(
         )
 
         if (state.nextUpcoming != null || state.laterUpcoming.isNotEmpty()) {
-            AgoraUpcomingSection(
-                next = state.nextUpcoming,
-                later = state.laterUpcoming,
-            )
+            AgoraUpcomingSection(next = state.nextUpcoming, later = state.laterUpcoming)
         }
     }
 }

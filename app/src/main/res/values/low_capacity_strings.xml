@@ -1,0 +1,10 @@
+<resources>
+    <string name="low_capacity_button">Hoje não vou dar conta de tudo</string>
+    <string name="low_capacity_active_button">Modo de baixa capacidade ativo</string>
+    <string name="low_capacity_dialog_title">Vamos aliviar o dia?</string>
+    <string name="low_capacity_dialog_body">Vou preservar compromissos e prioridades essenciais, reduzir o que for flexível e recalcular sua rota. Nada será marcado como fracasso.</string>
+    <string name="low_capacity_dialog_active_body">O dia está sendo planejado com capacidade reduzida. Você pode voltar ao modo normal a qualquer momento.</string>
+    <string name="low_capacity_enable">Aliviar o dia</string>
+    <string name="low_capacity_restore">Voltar ao normal</string>
+    <string name="low_capacity_summary">Preservadas: %1$d · Movidas: %2$d · Para depois: %3$d</string>
+</resources>

@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.superplanner.app.domain.model.ActivityStatus
+import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.NextActionContext
+import com.superplanner.app.domain.planning.LowCapacityPlanner
 import com.superplanner.app.domain.usecase.ChooseNextActivity
 import com.superplanner.app.domain.usecase.CompleteActivityInstance
 import com.superplanner.app.domain.usecase.DeferActivityInstance
@@ -42,25 +44,52 @@ class AgoraViewModel @Inject constructor(
         while (true) { delay(60_000L); emit(clock.instant()) }
     }
     private val recentlyCompleted = MutableStateFlow<com.superplanner.app.domain.model.ActivityInstance?>(null)
+    private val lowCapacityMode = MutableStateFlow(false)
 
-    val state: StateFlow<AgoraUiState> = combine(observeExecutableDay(), nowFlow, recentlyCompleted) { activities, now, completed ->
+    val state: StateFlow<AgoraUiState> = combine(observeExecutableDay(), nowFlow, recentlyCompleted, lowCapacityMode) { activities, now, completed, lowCapacity ->
+        val original = activities.map { it.instance }
+        val dailyCapacity: DailyCapacity? = lowCapacity.let { active -> if (active) LowCapacityPlanner.capacity() else null }
         val recalculated = recalculateRoute(
-            activities.map { it.instance },
+            original,
             now.atZone(clock.zone).toLocalDate(),
             zoneId = clock.zone,
             now = now,
             delayedActivity = completed,
+            dailyCapacity = dailyCapacity,
         )
-        val decision = chooseNextActivity(recalculated.activities, NextActionContext(now = now, zoneId = clock.zone))
+        val decision = chooseNextActivity(
+            recalculated.activities,
+            NextActionContext(now = now, zoneId = clock.zone, dailyCapacity = dailyCapacity),
+        )
+        val preserved = recalculated.activities.count {
+            it.flexibility.name == "FIXED" || it.priority.weight == 0
+        }
+        val moved = recalculated.activities.count { current ->
+            original.firstOrNull { it.id == current.id }?.planned != current.planned
+        }
+        val summary = LowCapacitySummary(
+            preserved = preserved,
+            moved = moved,
+            deferred = recalculated.conflicts.size,
+        )
+        val mappedActivities = activities.map { daily ->
+            recalculated.activities.firstOrNull { it.id == daily.instance.id }?.let { daily.copy(instance = it) } ?: daily
+        }
         val mapped = AgoraUiMapper.map(
-            activities.map { daily -> recalculated.activities.firstOrNull { it.id == daily.instance.id }?.let { daily.copy(instance = it) } ?: daily },
+            mappedActivities,
             decision,
             now,
             clock.zone,
+            lowCapacity = lowCapacity,
+            lowCapacitySummary = summary,
         )
         decision.recommended?.let { ActivityNotificationScheduler.schedule(getApplication(), it) }
         mapped
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgoraUiState())
+
+    fun setLowCapacity(enabled: Boolean) {
+        lowCapacityMode.value = enabled
+    }
 
     fun startCurrent() {
         state.value.currentActivity?.takeIf { it.status == ActivityStatus.PENDING }?.let { activity ->
