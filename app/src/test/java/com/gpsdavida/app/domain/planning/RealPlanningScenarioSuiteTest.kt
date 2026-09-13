@@ -84,6 +84,63 @@ class RealPlanningScenarioSuiteTest {
     }
 
     @Test
+    fun `official route never schedules beyond declared daily capacity`() {
+        val result = engine(PlanningInput(
+            activities = listOf(
+                activity("first", "09:00", "10:00", Priority.REQUIRED),
+                activity("second", "10:00", "11:00", Priority.IMPORTANT),
+                activity("third", "11:00", "12:00", Priority.DESIRABLE),
+            ),
+            context = NextActionContext(
+                now = start,
+                zoneId = ZoneOffset.UTC,
+                dailyCapacity = DailyCapacity(Duration.ofHours(2), utilizationLimit = 1.0),
+            ),
+            date = date,
+        ))
+
+        assertEquals(listOf("first", "second"), ids(result))
+        assertEquals(1, result.unscheduled.size)
+        assertEquals("third", result.unscheduled.single().activity.id.value)
+        assertEquals(listOf(PlanningReason.CAPACITY_EXCEEDED), result.unscheduled.single().reasons)
+    }
+
+    @Test
+    fun `learned duration changes the official planned slot when enough evidence exists`() {
+        val result = engine(PlanningInput(
+            activities = listOf(activity("study", "09:00", "09:30", Priority.IMPORTANT)),
+            context = NextActionContext(
+                now = start,
+                zoneId = ZoneOffset.UTC,
+                learnedDurations = mapOf(ActivityInstanceId("study") to Duration.ofHours(1)),
+                dailyCapacity = DailyCapacity(Duration.ofHours(1), utilizationLimit = 1.0),
+            ),
+            date = date,
+        ))
+
+        val study = result.route.single().activity
+        assertEquals(Duration.ofHours(1), study.plannedDuration)
+        assertTrue(study.planned.end == start.plus(Duration.ofHours(1)))
+    }
+
+    @Test
+    fun `learned duration can make a previously fitting route conflict with capacity`() {
+        val result = engine(PlanningInput(
+            activities = listOf(activity("study", "09:00", "09:30", Priority.IMPORTANT)),
+            context = NextActionContext(
+                now = start,
+                zoneId = ZoneOffset.UTC,
+                learnedDurations = mapOf(ActivityInstanceId("study") to Duration.ofHours(1)),
+                dailyCapacity = DailyCapacity(Duration.ofMinutes(45), utilizationLimit = 1.0),
+            ),
+            date = date,
+        ))
+
+        assertTrue(result.route.isEmpty())
+        assertEquals(PlanningReason.CAPACITY_EXCEEDED, result.unscheduled.single().reasons.single())
+    }
+
+    @Test
     fun `completed work is not scheduled again when a day is resumed`() {
         val result = plan(listOf(
             activity("done", "09:00", "10:00").copy(status = ActivityStatus.DONE),
