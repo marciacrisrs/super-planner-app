@@ -1,6 +1,7 @@
 package com.superplanner.app.domain.usecase
 
 import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.DailySchedule
 import com.superplanner.app.domain.model.NextActionContext
 import com.superplanner.app.domain.model.ScheduleConflict
@@ -27,6 +28,7 @@ class RecalculateRoute @Inject constructor(
         zoneId: ZoneId = ZoneId.systemDefault(),
         delayedActivity: ActivityInstance? = null,
         now: Instant? = null,
+        dailyCapacity: DailyCapacity? = null,
     ): DailySchedule {
         val current = now ?: activities.firstOrNull()?.planned?.start ?: Instant.EPOCH
         val result = planningEngine(
@@ -38,16 +40,11 @@ class RecalculateRoute @Inject constructor(
                     dependencies = dependencies,
                     travelTimes = travelTimes,
                     defaultBuffer = defaultBuffer,
+                    dailyCapacity = dailyCapacity,
                     zoneId = zoneId,
                 ),
                 date = date,
-                recalculationReason = if (delayedActivity != null) {
-                    RecalculationReason.EXECUTION_CHANGED
-                } else if (now != null) {
-                    RecalculationReason.TIME_ADVANCED
-                } else {
-                    RecalculationReason.ACTIVITY_CHANGED
-                },
+                recalculationReason = if (delayedActivity != null) RecalculationReason.EXECUTION_CHANGED else if (now != null) RecalculationReason.TIME_ADVANCED else RecalculationReason.ACTIVITY_CHANGED,
                 delayedActivity = delayedActivity,
             ),
         )
@@ -57,8 +54,7 @@ class RecalculateRoute @Inject constructor(
             conflicts = result.unscheduled.map { item ->
                 ScheduleConflict(
                     activity = item.activity,
-                    reason = item.reasons.firstOrNull()?.toScheduleConflictReason()
-                        ?: ScheduleConflictReason.NO_AVAILABLE_WINDOW,
+                    reason = item.reasons.firstOrNull()?.toScheduleConflictReason() ?: ScheduleConflictReason.NO_AVAILABLE_WINDOW,
                 )
             },
         )
