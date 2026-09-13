@@ -8,8 +8,10 @@ import com.superplanner.app.domain.port.AvailabilityRepository
 import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 
 /** Builds the executable day from the PlanningEngine using persisted execution state. */
 class ObserveExecutableDay @Inject constructor(
@@ -60,13 +62,12 @@ class ObserveExecutableDay @Inject constructor(
             )
             val result = planningEngine(planningInput)
             val titlesById = materialized.associate { it.instance.id to it.title }
-            val scheduled = result.route.map { it.activity }
-            scheduled.map { instance ->
+            result.route.map { step ->
                 DailyActivity(
-                    title = titlesById[instance.id].orEmpty(),
-                    instance = instance,
+                    title = titlesById[step.activity.id].orEmpty(),
+                    instance = step.activity,
                 )
             }
-        }
+        }.flowOn(Dispatchers.Default)
     }
 }
