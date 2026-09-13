@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +44,7 @@ import java.util.Locale
 /** Calm execution-first home: one primary decision and one look-ahead. */
 @Composable
 fun HomeScreen(
+    onOpenAbout: () -> Unit,
     viewModel: AgoraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -71,7 +76,13 @@ fun HomeScreen(
                         color = SuperPlannerColors.InkSoft,
                     )
                 }
-                Text("♡", style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Terracotta)
+                IconButton(onClick = onOpenAbout) {
+                    Icon(
+                        Icons.Outlined.Info,
+                        contentDescription = "Sobre",
+                        tint = SuperPlannerColors.Terracotta,
+                    )
+                }
             }
 
             Column(
