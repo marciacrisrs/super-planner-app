@@ -1,6 +1,12 @@
 package com.superplanner.app.domain.planning
 
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.NextActionContext
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.model.TimeRange
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Test
@@ -8,7 +14,17 @@ import java.time.Instant
 
 class PlanningEngineContractTest {
     private val input = PlanningInput(
-        activities = emptyList(),
+        activities = mutableListOf(
+            ActivityInstance(
+                id = ActivityInstanceId("activity-1"),
+                source = ActivitySource.FromTask(TaskId("task-1")),
+                flexibility = Flexibility.FLEXIBLE,
+                planned = TimeRange(
+                    Instant.parse("2026-09-13T09:00:00Z"),
+                    Instant.parse("2026-09-13T09:30:00Z"),
+                ),
+            ),
+        ),
         context = NextActionContext(now = Instant.parse("2026-09-13T12:00:00Z")),
     )
 
