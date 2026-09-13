@@ -20,17 +20,20 @@ import org.junit.Test
 class ActivityExecutionFlowsTest {
     private val plannedStart = Instant.parse("2026-01-01T09:00:00Z")
     private val plannedEnd = Instant.parse("2026-01-01T10:00:00Z")
-    private val fixedClock = Clock.fixed(Instant.parse("2026-01-01T10:15:00Z"), ZoneOffset.UTC)
+    private val actualStart = Instant.parse("2026-01-01T09:35:00Z")
+    private val actualEnd = Instant.parse("2026-01-01T10:15:00Z")
+    private val fixedClock = Clock.fixed(actualEnd, ZoneOffset.UTC)
     private val repository = RecordingExecutionRepository()
     private val record = RecordActivityExecution(repository)
 
     @Test
-    fun `complete flow persists execution with clock end time`() = runTest {
-        CompleteActivityInstance(record, fixedClock)(activity())
+    fun `start then complete flow persists real execution times`() = runTest {
+        StartActivityInstance(record, Clock.fixed(actualStart, ZoneOffset.UTC))(activity())
+        CompleteActivityInstance(record, fixedClock)(repository.saved!!)
 
         assertEquals(ActivityStatus.DONE, repository.saved!!.status)
-        assertEquals(plannedStart, repository.saved!!.actual!!.start)
-        assertEquals(fixedClock.instant(), repository.saved!!.actual!!.end)
+        assertEquals(actualStart, repository.saved!!.actualStart)
+        assertEquals(TimeRange(actualStart, actualEnd), repository.saved!!.actual)
     }
 
     @Test
@@ -62,7 +65,7 @@ class ActivityExecutionFlowsTest {
         }
 
         override suspend fun getById(id: ActivityInstanceId): ActivityExecution? = saved?.let {
-            ActivityExecution(it.id, it.status, it.planned, it.actual)
+            ActivityExecution(it.id, it.status, it.planned, it.actualStart, it.actual)
         }
 
         override fun observeAll(): Flow<List<ActivityExecution>> = flowOf(emptyList())
