@@ -53,18 +53,18 @@ fun OnboardingScreen(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
                 Image(
                     painter = painterResource(R.drawable.sp_illustration_compass),
                     contentDescription = "Bússola do Super Planner",
-                    modifier = Modifier.size(190.dp),
+                    modifier = Modifier.size(180.dp),
                     contentScale = ContentScale.Fit,
                 )
                 Image(
-                    painter = painterResource(R.drawable.sp_logo_full),
+                    painter = painterResource(R.drawable.sp_logo_text),
                     contentDescription = "Super Planner",
-                    modifier = Modifier.size(width = 210.dp, height = 88.dp),
+                    modifier = Modifier.size(width = 190.dp, height = 76.dp),
                     contentScale = ContentScale.Fit,
                 )
             }
@@ -75,10 +75,10 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = SuperPlannerColors.Canvas,
-                        shape = RoundedCornerShape(24.dp),
+                        color = SuperPlannerColors.Surface.copy(alpha = 0.90f),
+                        shape = RoundedCornerShape(28.dp),
                     )
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = 22.dp, vertical = 18.dp),
             ) {
                 Text(
                     "Primeira rota",
