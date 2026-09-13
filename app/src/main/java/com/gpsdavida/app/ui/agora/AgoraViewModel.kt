@@ -6,12 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.NextActionContext
+import com.superplanner.app.domain.model.RouteFeedbackReason
 import com.superplanner.app.domain.planning.LowCapacityPlanner
 import com.superplanner.app.domain.usecase.ChooseNextActivity
 import com.superplanner.app.domain.usecase.CompleteActivityInstance
 import com.superplanner.app.domain.usecase.DeferActivityInstance
 import com.superplanner.app.domain.usecase.ObserveExecutableDay
 import com.superplanner.app.domain.usecase.RecalculateRoute
+import com.superplanner.app.domain.usecase.RecordRouteFeedback
 import com.superplanner.app.domain.usecase.SkipActivityInstance
 import com.superplanner.app.domain.usecase.StartActivityInstance
 import com.superplanner.app.ui.notifications.ActivityNotificationScheduler
@@ -37,6 +39,7 @@ class AgoraViewModel @Inject constructor(
     private val completeActivity: CompleteActivityInstance,
     private val skipActivity: SkipActivityInstance,
     private val deferActivity: DeferActivityInstance,
+    private val recordRouteFeedback: RecordRouteFeedback,
     private val clock: Clock,
 ) : AndroidViewModel(application) {
     private val nowFlow = flow {
@@ -89,6 +92,14 @@ class AgoraViewModel @Inject constructor(
 
     fun setLowCapacity(enabled: Boolean) {
         lowCapacityMode.value = enabled
+    }
+
+    fun recordCurrentFeedback(reason: RouteFeedbackReason) {
+        state.value.currentActivity?.let { activity ->
+            viewModelScope.launch {
+                recordRouteFeedback(activity.id, reason)
+            }
+        }
     }
 
     fun startCurrent() {
