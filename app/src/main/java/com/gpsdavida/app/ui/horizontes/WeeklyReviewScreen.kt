@@ -9,61 +9,63 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
-import com.superplanner.app.domain.model.WeeklyDaySummary
-import com.superplanner.app.domain.usecase.ObserveWeeklyPlanning
-import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalDate
-import javax.inject.Inject
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import com.superplanner.app.domain.model.ReviewSuggestion
+import com.superplanner.app.ui.review.WeeklyReviewViewModelV2
 
 @Composable
-fun WeeklyReviewScreen(viewModel: WeeklyReviewViewModel = hiltViewModel()) {
+fun WeeklyReviewScreen(viewModel: WeeklyReviewViewModelV2 = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LazyColumn(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { Text("Revisão semanal", style = MaterialTheme.typography.headlineSmall) }
+    val decisions = remember { mutableStateMapOf<String, Boolean>() }
+
+    LazyColumn(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
-            Card(Modifier.fillMaxWidth()) {
-                Row(Modifier.padding(18.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Metric("Planejado", "${state.plannedMinutes} min")
-                    Metric("Realizado", "${state.actualMinutes} min")
-                    Metric("Concluído", "${state.completedCount}")
-                }
-            }
+            Text("Revisão da semana", style = MaterialTheme.typography.headlineSmall)
+            Text("Veja o que avançou, o que está ficando para trás e escolha o próximo ajuste.", style = MaterialTheme.typography.bodyMedium)
         }
-        item { Text("Atenção", style = MaterialTheme.typography.titleLarge) }
-        state.conflicts.forEach { conflict -> item { Card(Modifier.fillMaxWidth()) { Text("Conflito em $conflict", Modifier.padding(16.dp)) } } }
-        item { Text("Resumo da semana", style = MaterialTheme.typography.titleLarge) }
-        state.days.forEach { day -> item { ReviewDay(day) } }
+        item { ReviewSection("Prioridades que avançaram", state.advancedPriorities) }
+        item { ReviewSection("Ficou repetidamente para trás", state.repeatedlyDeferred) }
+        item { ReviewSection("O que mudar na próxima semana", state.nextWeekChanges) }
+        item { ReviewSection("O que merece atenção", state.neglectedAreas) }
+        state.suggestions.forEach { suggestion ->
+            item { SuggestionCard(suggestion, decisions[suggestion.id]) { accepted -> decisions[suggestion.id] = accepted } }
+        }
     }
 }
 
 @Composable
-private fun Metric(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) { Text(value, style = MaterialTheme.typography.titleMedium); Text(label, style = MaterialTheme.typography.bodySmall) }
+private fun ReviewSection(title: String, items: List<String>) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            if (items.isEmpty()) Text("Nada relevante para reorganizar agora.", style = MaterialTheme.typography.bodyMedium)
+            items.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
+        }
+    }
 }
 
 @Composable
-private fun ReviewDay(day: WeeklyDaySummary) {
-    Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(day.date.toString(), style = MaterialTheme.typography.titleMedium); Text("${day.plannedCount} atividades · ${day.plannedDuration.toMinutes()} min · ${day.completedCount} concluídas") } }
-}
-
-@HiltViewModel
-class WeeklyReviewViewModel @Inject constructor(
-    observe: ObserveWeeklyPlanning,
-    clock: java.time.Clock,
-) : ViewModel() {
-    data class State(val plannedMinutes: Long = 0, val actualMinutes: Long = 0, val completedCount: Int = 0, val conflicts: List<String> = emptyList(), val days: List<WeeklyDaySummary> = emptyList())
-    val state: StateFlow<State> = observe(LocalDate.now(clock).with(java.time.DayOfWeek.MONDAY)).map { planning -> State(planning.plannedDuration.toMinutes(), planning.actualDuration.toMinutes(), planning.days.sumOf { it.completedCount }, planning.days.filter { it.conflictCount > 0 }.map { it.date.toString() }, planning.days) }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), State())
+private fun SuggestionCard(suggestion: ReviewSuggestion, decision: Boolean?, onDecision: (Boolean) -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(suggestion.title, style = MaterialTheme.typography.titleMedium)
+            Text(suggestion.explanation, style = MaterialTheme.typography.bodyMedium)
+            if (decision == null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = { onDecision(true) }) { Text(suggestion.actionLabel) }
+                    TextButton(onClick = { onDecision(false) }) { Text("Não agora") }
+                }
+            } else {
+                Text(if (decision) "Sugestão aceita." else "Sugestão descartada.", style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
 }
