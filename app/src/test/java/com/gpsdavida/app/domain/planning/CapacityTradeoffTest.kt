@@ -3,6 +3,7 @@ package com.superplanner.app.domain.planning
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.DailyCapacity
 import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.Priority
@@ -79,8 +80,8 @@ class CapacityTradeoffTest {
             choice = TradeoffChoice(option.id),
         )
 
-        assertEquals("PENDING", result.first { it.id == ActivityInstanceId("activity-study") }.status.name)
-        assertEquals("DEFERRED", result.first { it.id == ActivityInstanceId("activity-house") }.status.name)
+        assertEquals(ActivityStatus.PENDING, result.first { it.id == ActivityInstanceId("activity-study") }.status)
+        assertEquals(ActivityStatus.DEFERRED, result.first { it.id == ActivityInstanceId("activity-house") }.status)
     }
 
     @Test
