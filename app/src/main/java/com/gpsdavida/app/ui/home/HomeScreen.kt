@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,7 +33,6 @@ import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.ui.agora.AgoraViewModel
 import com.superplanner.app.ui.next.NextActionCard
 import com.superplanner.app.ui.next.NextActionUiModel
-import com.superplanner.app.ui.tasks.labelRes
 import com.superplanner.app.ui.theme.SuperPlannerBackground
 import com.superplanner.app.ui.theme.SuperPlannerCard
 import com.superplanner.app.ui.theme.SuperPlannerColors
@@ -45,6 +46,7 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     onOpenAbout: () -> Unit,
+    onOpenAiCapture: () -> Unit,
     viewModel: AgoraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -83,6 +85,15 @@ fun HomeScreen(
                         tint = SuperPlannerColors.Terracotta,
                     )
                 }
+            }
+
+            Button(
+                onClick = onOpenAiCapture,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Outlined.AutoAwesome, contentDescription = null)
+                Spacer(modifier = Modifier.size(8.dp))
+                Text("Diga o que você precisa fazer")
             }
 
             Column(
