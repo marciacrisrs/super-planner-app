@@ -1,0 +1,15 @@
+package com.superplanner.app.domain.model
+
+@JvmInline value class EventId(val value: String)
+@JvmInline value class TaskId(val value: String)
+@JvmInline value class HabitId(val value: String)
+@JvmInline value class RoutineId(val value: String)
+@JvmInline value class RoutineStepId(val value: String)
+@JvmInline value class AvailabilityId(val value: String)
+@JvmInline value class GoalId(val value: String)
+@JvmInline value class ProjectId(val value: String)
+@JvmInline value class ProjectStepId(val value: String)
+@JvmInline value class InboxItemId(val value: String)
+@JvmInline value class ActivityInstanceId(val value: String)
+@JvmInline value class DependencyId(val value: String)
+@JvmInline value class LocationId(val value: String)
