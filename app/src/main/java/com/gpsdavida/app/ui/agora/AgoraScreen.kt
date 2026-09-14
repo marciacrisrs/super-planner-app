@@ -37,9 +37,7 @@ import java.time.format.FormatStyle
 import java.util.Locale
 
 @Composable
-fun AgoraScreen(
-    viewModel: AgoraViewModel = hiltViewModel(),
-) {
+fun AgoraScreen(viewModel: AgoraViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val currentActivity = state.currentActivity
@@ -49,20 +47,9 @@ fun AgoraScreen(
     val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
     val dateFmt = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale("pt", "BR"))
 
-    LaunchedEffect(currentActivity?.id) {
-        feedbackGivenFor = null
-    }
-
+    LaunchedEffect(currentActivity?.id) { feedbackGivenFor = null }
     LaunchedEffect(state.title, state.scheduledTime, state.durationMinutes, currentActivity, state.state, state.lowCapacity) {
-        AgoraWidgetSnapshot.write(
-            context = context,
-            snapshot = AgoraWidgetSnapshot(
-                title = state.title,
-                scheduledTime = state.scheduledTime?.format(timeFmt).orEmpty(),
-                durationMinutes = state.durationMinutes?.toInt() ?: 0,
-                isEmpty = currentActivity == null,
-            ),
-        )
+        AgoraWidgetSnapshot.write(context, AgoraWidgetSnapshot(state.title, state.scheduledTime?.format(timeFmt).orEmpty(), state.durationMinutes?.toInt() ?: 0, currentActivity == null))
         AgoraWidgetProvider.updateAll(context)
     }
 
@@ -70,26 +57,13 @@ fun AgoraScreen(
         AlertDialog(
             onDismissRequest = { showCapacityDialog = false },
             title = { Text(stringResource(R.string.low_capacity_dialog_title)) },
-            text = {
-                Text(
-                    stringResource(
-                        if (state.lowCapacity) R.string.low_capacity_dialog_active_body else R.string.low_capacity_dialog_body,
-                    ),
-                )
-            },
+            text = { Text(stringResource(if (state.lowCapacity) R.string.low_capacity_dialog_active_body else R.string.low_capacity_dialog_body)) },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.setLowCapacity(!state.lowCapacity)
-                    showCapacityDialog = false
-                }) {
+                TextButton(onClick = { viewModel.setLowCapacity(!state.lowCapacity); showCapacityDialog = false }) {
                     Text(stringResource(if (state.lowCapacity) R.string.low_capacity_restore else R.string.low_capacity_enable))
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showCapacityDialog = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
+            dismissButton = { TextButton(onClick = { showCapacityDialog = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 
@@ -100,81 +74,32 @@ fun AgoraScreen(
             title = { Text(stringResource(R.string.agora_feedback_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FeedbackOption(stringResource(R.string.agora_feedback_helpful), RouteFeedbackReason.HELPFUL, viewModel) {
-                        showFeedbackDialog = false
-                        feedbackGivenFor = feedbackActivityId
-                    }
-                    FeedbackOption(stringResource(R.string.agora_feedback_other), RouteFeedbackReason.WANTED_OTHER, viewModel) {
-                        showFeedbackDialog = false
-                        feedbackGivenFor = feedbackActivityId
-                    }
-                    FeedbackOption(stringResource(R.string.agora_feedback_duration), RouteFeedbackReason.DURATION_WRONG, viewModel) {
-                        showFeedbackDialog = false
-                        feedbackGivenFor = feedbackActivityId
-                    }
-                    FeedbackOption(stringResource(R.string.agora_feedback_time), RouteFeedbackReason.TIME_WRONG, viewModel) {
-                        showFeedbackDialog = false
-                        feedbackGivenFor = feedbackActivityId
-                    }
-                    FeedbackOption(stringResource(R.string.agora_feedback_wrong), RouteFeedbackReason.PLANNER_WRONG, viewModel) {
-                        showFeedbackDialog = false
-                        feedbackGivenFor = feedbackActivityId
-                    }
+                    FeedbackOption(stringResource(R.string.agora_feedback_helpful), RouteFeedbackReason.HELPFUL, viewModel) { showFeedbackDialog = false; feedbackGivenFor = feedbackActivityId }
+                    FeedbackOption(stringResource(R.string.agora_feedback_other), RouteFeedbackReason.WANTED_OTHER, viewModel) { showFeedbackDialog = false; feedbackGivenFor = feedbackActivityId }
+                    FeedbackOption(stringResource(R.string.agora_feedback_duration), RouteFeedbackReason.DURATION_WRONG, viewModel) { showFeedbackDialog = false; feedbackGivenFor = feedbackActivityId }
+                    FeedbackOption(stringResource(R.string.agora_feedback_time), RouteFeedbackReason.TIME_WRONG, viewModel) { showFeedbackDialog = false; feedbackGivenFor = feedbackActivityId }
+                    FeedbackOption(stringResource(R.string.agora_feedback_wrong), RouteFeedbackReason.PLANNER_WRONG, viewModel) { showFeedbackDialog = false; feedbackGivenFor = feedbackActivityId }
                 }
             },
             confirmButton = {},
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-    ) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(text = stringResource(R.string.nav_agora), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
-            Text(text = state.currentTime.format(timeFmt), style = MaterialTheme.typography.displaySmall, color = SuperPlannerColors.Ink)
-            Text(text = state.currentDate.format(dateFmt), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
+            Text(stringResource(R.string.nav_agora), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
+            Text(state.currentTime.format(timeFmt), style = MaterialTheme.typography.displaySmall, color = SuperPlannerColors.Ink)
+            Text(state.currentDate.format(dateFmt), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
         }
-
-        CapacityContextCard(
-            remainingMinutes = state.capacityRemainingMinutes,
-            nextWindowMinutes = state.nextWindowMinutes,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { showCapacityDialog = true },
-        ) {
+        CapacityContextCard(state.capacityRemainingMinutes, state.nextWindowMinutes, Modifier.fillMaxWidth())
+        OutlinedButton(Modifier.fillMaxWidth(), onClick = { showCapacityDialog = true }) {
             Text(stringResource(if (state.lowCapacity) R.string.low_capacity_active_button else R.string.low_capacity_button))
         }
-
-        if (state.lowCapacity) {
-            Text(
-                text = stringResource(
-                    R.string.low_capacity_summary,
-                    state.lowCapacitySummary.preserved,
-                    state.lowCapacitySummary.moved,
-                    state.lowCapacitySummary.deferred,
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = SuperPlannerColors.InkSoft,
-            )
-        }
+        if (state.lowCapacity) Text(stringResource(R.string.low_capacity_summary, state.lowCapacitySummary.preserved, state.lowCapacitySummary.moved, state.lowCapacitySummary.deferred), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
 
         NextActionCard(
             modifier = Modifier.fillMaxWidth(),
-            model = NextActionUiModel(
-                title = state.title,
-                durationMinutes = state.durationMinutes,
-                scheduledTime = state.scheduledTime,
-                priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
-                explanation = state.explanation,
-                state = state.state,
-            ),
+            model = NextActionUiModel(state.title, state.durationMinutes, state.scheduledTime, state.priority?.let { stringResource(it.labelRes()) }, state.explanation, state.state),
             oneTapComplete = false,
             onStart = viewModel::startCurrent,
             onSnooze = viewModel::deferCurrent,
@@ -183,40 +108,16 @@ fun AgoraScreen(
         )
 
         if (currentActivity != null && feedbackGivenFor != currentActivity.id.value) {
-            OutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { showFeedbackDialog = true },
-            ) {
-                Text(stringResource(R.string.agora_feedback_title))
-            }
+            OutlinedButton(Modifier.fillMaxWidth(), onClick = { showFeedbackDialog = true }) { Text(stringResource(R.string.agora_feedback_title)) }
         } else if (feedbackGivenFor == currentActivity?.id?.value) {
-            Text(
-                text = stringResource(R.string.agora_feedback_recorded),
-                style = MaterialTheme.typography.bodySmall,
-                color = SuperPlannerColors.InkSoft,
-            )
+            Text(stringResource(R.string.agora_feedback_recorded), style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
         }
-
-        if (state.nextUpcoming != null || state.laterUpcoming.isNotEmpty()) {
-            AgoraUpcomingSection(next = state.nextUpcoming, later = state.laterUpcoming)
-        }
+        if (state.nextUpcoming != null || state.laterUpcoming.isNotEmpty()) AgoraUpcomingSection(state.nextUpcoming, state.laterUpcoming)
+        AgoraRecoveryCard(hasCurrentActivity = currentActivity != null, onReplan = viewModel::requestReplan, modifier = Modifier.fillMaxWidth())
     }
 }
 
 @Composable
-private fun FeedbackOption(
-    label: String,
-    reason: RouteFeedbackReason,
-    viewModel: AgoraViewModel,
-    onRecorded: () -> Unit,
-) {
-    OutlinedButton(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = {
-            viewModel.recordCurrentFeedback(reason)
-            onRecorded()
-        },
-    ) {
-        Text(label)
-    }
+private fun FeedbackOption(label: String, reason: RouteFeedbackReason, viewModel: AgoraViewModel, onRecorded: () -> Unit) {
+    OutlinedButton(Modifier.fillMaxWidth(), onClick = { viewModel.recordCurrentFeedback(reason); onRecorded() }) { Text(label) }
 }
