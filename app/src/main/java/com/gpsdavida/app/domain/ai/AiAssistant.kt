@@ -13,14 +13,36 @@ import javax.inject.Inject
 class AiAssistant @Inject constructor(
     private val provider: AiProvider,
     private val tools: AiToolGateway,
+    private val telemetry: AiTelemetry,
 ) {
     suspend fun propose(request: AiRequest): AiProposal = provider.interpret(request)
 
     suspend fun execute(proposal: AiProposal, confirmation: AiConfirmation = AiConfirmation.NotConfirmed): AiExecution {
+        val commandType = commandTypeOf(proposal.command)
         if (proposal.requiresConfirmation && confirmation !is AiConfirmation.Confirmed) {
             return AiExecution.AwaitingConfirmation(proposal)
         }
-        return AiExecution.Executed(tools.execute(proposal.command))
+        if (confirmation is AiConfirmation.Confirmed) {
+            telemetry.proposalConfirmed(commandType)
+        }
+        return when (val result = tools.execute(proposal.command)) {
+            is AiToolResult.Success -> {
+                telemetry.executionSucceeded(commandType)
+                AiExecution.Executed(result)
+            }
+            is AiToolResult.Rejected -> {
+                telemetry.executionRejected(commandType)
+                AiExecution.Executed(result)
+            }
+        }
+    }
+
+    private fun commandTypeOf(command: AiCommand): String = when (command) {
+        is AiCommand.CreateActivityDraft -> "CREATE_ACTIVITY_DRAFT"
+        is AiCommand.ExplainNextActivity -> "EXPLAIN_NEXT_ACTIVITY"
+        is AiCommand.ReorganizeDay -> "REORGANIZE_DAY"
+        is AiCommand.MissingInformation -> "MISSING_INFORMATION"
+        AiCommand.RecalculateRoute -> "RECALCULATE_ROUTE"
     }
 }
 
