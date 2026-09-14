@@ -4,8 +4,6 @@ import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.DailyActivity
 import com.superplanner.app.domain.port.ActivityExecutionRepository
 import com.superplanner.app.domain.port.AvailabilityRepository
-import com.superplanner.app.domain.port.DependencyRepository
-import com.superplanner.app.domain.port.UserPreferenceRepository
 import com.superplanner.app.domain.usecase.LearnActivityDurations
 import java.time.Clock
 import java.time.Instant
@@ -16,8 +14,6 @@ import javax.inject.Inject
 class PlannerAiContextBuilder @Inject constructor(
     private val clock: Clock,
     private val availabilityRepository: AvailabilityRepository,
-    private val dependencyRepository: DependencyRepository,
-    private val userPreferenceRepository: UserPreferenceRepository,
     private val executions: ActivityExecutionRepository,
     private val learnActivityDurations: LearnActivityDurations,
 ) {
@@ -28,10 +24,7 @@ class PlannerAiContextBuilder @Inject constructor(
     ): AiContext {
         val zone = clock.zone
         val localNow = now.atZone(zone)
-        val today = localNow.toLocalDate()
         val availability = availabilityRepository.observeForDay(localNow.dayOfWeek).first()
-        val dependencies = dependencyRepository.observeAll().first()
-        val preferences = userPreferenceRepository.observeActive().first()
         val learnedDurations = learnActivityDurations(executions.observeAll().first())
 
         val pending = activities
@@ -41,7 +34,7 @@ class PlannerAiContextBuilder @Inject constructor(
             .toList()
 
         val facts = buildList {
-            add("fact.date=$today")
+            add("fact.date=${localNow.toLocalDate()}")
             add("fact.time=${localNow.toLocalTime().withSecond(0).withNano(0)}")
 
             activities
@@ -64,14 +57,6 @@ class PlannerAiContextBuilder @Inject constructor(
 
             availability.forEach { rule ->
                 add("fact.availability=${rule.kind};${rule.window.start}-${rule.window.end}")
-            }
-
-            dependencies.take(12).forEach { dependency ->
-                add("fact.dependency=${dependency.predecessor}->${dependency.successor}")
-            }
-
-            preferences.take(8).forEach { preference ->
-                add("preference.confirmed=${preference.title};value=${preference.value}")
             }
 
             pending.firstOrNull { it.instance.planned.start > now }?.let { next ->
