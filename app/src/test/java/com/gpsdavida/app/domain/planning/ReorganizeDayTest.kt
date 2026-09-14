@@ -53,6 +53,30 @@ class ReorganizeDayTest {
         )
     }
 
+    @Test
+    fun `fixed activity cannot be delayed implicitly`() {
+        val fixed = activity("appointment").copy(flexibility = Flexibility.FIXED)
+        val input = PlanningInput(
+            activities = listOf(fixed),
+            context = NextActionContext(now = start),
+        )
+
+        val exception = runCatching {
+            ReorganizeDay(AdaptiveRouteRecalculator(RecordingEngine)).execute(
+                input,
+                DayReorganizationRequest(
+                    operation = DayReorganizationOperation.DelayActivity(fixed.id, 30),
+                    now = start,
+                ),
+            )
+        }.exceptionOrNull()
+
+        assertEquals(
+            "Fixed activities require an explicit user-approved change before they can move",
+            exception?.message,
+        )
+    }
+
     private fun activity(name: String) = ActivityInstance(
         id = ActivityInstanceId("activity-$name"),
         source = ActivitySource.FromTask(TaskId("task-$name")),
