@@ -64,43 +64,30 @@ internal object OrganizeWeekGatewayProtocol {
         put("logistics", request.logistics.toJsonArray(::logisticJson))
         put("preferences", request.preferences.toJsonArray(::preferenceJson))
         put("aiTips", JSONArray(request.aiTips))
+        request.capacity?.let { put("capacity", capacityJson(it)) }
     }
 
     fun parseResponse(json: JSONObject): OrganizeWeekResponse {
         val summary = json.getJSONObject("summary")
         val proposedItems = json.getJSONArray("proposedItems").toObjectList { item ->
             OrganizeWeekProposedItem(
-                id = item.getString("id"),
-                title = item.getString("title"),
-                date = item.getString("date"),
-                startTime = item.getString("startTime"),
-                endTime = item.getString("endTime"),
-                source = item.getString("source"),
-                fixed = item.optBoolean("fixed", false),
-                reason = item.optString("reason").takeIf(String::isNotBlank),
+                id = item.getString("id"), title = item.getString("title"), date = item.getString("date"),
+                startTime = item.getString("startTime"), endTime = item.getString("endTime"), source = item.getString("source"),
+                fixed = item.optBoolean("fixed", false), reason = item.optString("reason").takeIf(String::isNotBlank),
             )
         }
         val conflicts = json.getJSONArray("conflicts").toObjectList { item ->
             OrganizeWeekConflict(
-                id = item.getString("id"),
-                title = item.getString("title"),
-                affectedItemIds = item.getJSONArray("affectedItemIds").toStringList(),
-                reason = item.getString("reason"),
+                id = item.getString("id"), title = item.getString("title"),
+                affectedItemIds = item.getJSONArray("affectedItemIds").toStringList(), reason = item.getString("reason"),
                 severity = item.getString("severity"),
             )
         }
         val opportunities = json.getJSONArray("opportunities").toObjectList { item ->
-            OrganizeWeekOpportunity(
-                id = item.getString("id"),
-                title = item.getString("title"),
-                reason = item.getString("reason"),
-            )
+            OrganizeWeekOpportunity(id = item.getString("id"), title = item.getString("title"), reason = item.getString("reason"))
         }
         val explanations = json.getJSONArray("explanations").toObjectList { item ->
-            OrganizeWeekExplanation(
-                itemId = item.optString("itemId").takeIf(String::isNotBlank),
-                message = item.getString("message"),
-            )
+            OrganizeWeekExplanation(itemId = item.optString("itemId").takeIf(String::isNotBlank), message = item.getString("message"))
         }
 
         return OrganizeWeekResponse(
@@ -110,57 +97,46 @@ internal object OrganizeWeekGatewayProtocol {
                 commuteMinutesConsidered = summary.getInt("commuteMinutesConsidered"),
                 preparationMinutesConsidered = summary.getInt("preparationMinutesConsidered"),
                 aiSuggestionsConsidered = summary.getInt("aiSuggestionsConsidered"),
-                conflictsFound = summary.getInt("conflictsFound"),
-                opportunitiesFound = summary.getInt("opportunitiesFound"),
+                conflictsFound = summary.getInt("conflictsFound"), opportunitiesFound = summary.getInt("opportunitiesFound"),
             ),
-            proposedItems = proposedItems,
-            conflicts = conflicts,
-            opportunities = opportunities,
-            explanations = explanations,
-            model = json.optString("model"),
+            proposedItems = proposedItems, conflicts = conflicts, opportunities = opportunities,
+            explanations = explanations, model = json.optString("model"),
         )
     }
 
     private fun planItemJson(item: OrganizeWeekPlanItem) = JSONObject().apply {
-        put("id", item.id)
-        put("title", item.title)
-        put("date", item.date)
-        putOptional("startTime", item.startTime)
-        putOptional("endTime", item.endTime)
-        putOptional("durationMinutes", item.durationMinutes)
-        putOptional("priority", item.priority)
-        putOptional("kind", item.kind)
-        put("required", item.required)
+        put("id", item.id); put("title", item.title); put("date", item.date)
+        putOptional("startTime", item.startTime); putOptional("endTime", item.endTime)
+        putOptional("durationMinutes", item.durationMinutes); putOptional("priority", item.priority)
+        putOptional("kind", item.kind); put("required", item.required)
+    }
+
+    private fun capacityJson(capacity: OrganizeWeekCapacity) = JSONObject().apply {
+        put("load", capacity.load)
+        put("totalCapacityMinutes", capacity.totalCapacityMinutes)
+        put("totalDesiredMinutes", capacity.totalDesiredMinutes)
+        put("totalRemainingMinutes", capacity.totalRemainingMinutes)
+        put("days", capacity.days.toJsonArray { day ->
+            JSONObject().apply {
+                put("date", day.date); put("load", day.load)
+                put("schedulableMinutes", day.schedulableMinutes)
+                put("desiredMinutes", day.desiredMinutes); put("remainingMinutes", day.remainingMinutes)
+            }
+        })
+        put("reasons", JSONArray(capacity.reasons))
     }
 
     private fun logisticJson(item: OrganizeWeekLogisticConstraint) = JSONObject().apply {
-        put("type", item.type)
-        put("minutes", item.minutes)
-        putOptional("beforeItemId", item.beforeItemId)
-        putOptional("afterItemId", item.afterItemId)
-        putOptional("origin", item.origin)
-        putOptional("destination", item.destination)
+        put("type", item.type); put("minutes", item.minutes); putOptional("beforeItemId", item.beforeItemId)
+        putOptional("afterItemId", item.afterItemId); putOptional("origin", item.origin); putOptional("destination", item.destination)
         put("required", item.required)
     }
 
-    private fun preferenceJson(item: OrganizeWeekPreference) = JSONObject().apply {
-        put("key", item.key)
-        put("value", item.value)
-    }
+    private fun preferenceJson(item: OrganizeWeekPreference) = JSONObject().apply { put("key", item.key); put("value", item.value) }
 
-    private fun JSONObject.putOptional(key: String, value: Any?) {
-        if (value != null) put(key, value)
-    }
+    private fun JSONObject.putOptional(key: String, value: Any?) { if (value != null) put(key, value) }
 
-    private fun <T> List<T>.toJsonArray(mapper: (T) -> JSONObject): JSONArray = JSONArray().also { array ->
-        forEach { array.put(mapper(it)) }
-    }
-
-    private fun <T> JSONArray.toObjectList(mapper: (JSONObject) -> T): List<T> = buildList {
-        for (index in 0 until length()) add(mapper(getJSONObject(index)))
-    }
-
-    private fun JSONArray.toStringList(): List<String> = buildList {
-        for (index in 0 until length()) add(getString(index))
-    }
+    private fun <T> List<T>.toJsonArray(mapper: (T) -> JSONObject): JSONArray = JSONArray().also { array -> forEach { array.put(mapper(it)) } }
+    private fun <T> JSONArray.toObjectList(mapper: (JSONObject) -> T): List<T> = buildList { for (index in 0 until length()) add(mapper(getJSONObject(index))) }
+    private fun JSONArray.toStringList(): List<String> = buildList { for (index in 0 until length()) add(getString(index)) }
 }
