@@ -36,8 +36,6 @@ fun OnboardingScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var intent by remember { mutableStateOf("") }
-    var wakeTime by remember { mutableStateOf("07:00") }
-    var sleepTime by remember { mutableStateOf("23:00") }
     var fixedTitle by remember { mutableStateOf("") }
     var fixedStart by remember { mutableStateOf("09:00") }
     var fixedEnd by remember { mutableStateOf("18:00") }
@@ -78,12 +76,10 @@ fun OnboardingScreen(
                 }
 
                 1 -> StepContent(
-                    title = "Como é o seu dia de verdade?",
-                    explanation = "Use horários aproximados. Eles ajudam a evitar sugestões que não cabem na sua rotina.",
+                    title = "Quanto tempo costuma estar disponível?",
+                    explanation = "Uma janela aproximada ajuda a evitar sugestões que não cabem na sua realidade.",
                 ) {
-                    TimePair("Acordo", wakeTime) { wakeTime = it }
-                    TimePair("Durmo", sleepTime) { sleepTime = it }
-                    TimePair("Tenho tempo a partir de", availabilityStart) { availabilityStart = it }
+                    TimePair("A partir de", availabilityStart) { availabilityStart = it }
                     TimePair("Até", availabilityEnd) { availabilityEnd = it }
                 }
 
@@ -121,8 +117,6 @@ fun OnboardingScreen(
                         } else {
                             viewModel.createFirstRoute(
                                 intent = intent,
-                                wakeTime = wakeTime,
-                                sleepTime = sleepTime,
                                 fixedTitle = fixedTitle,
                                 fixedStart = fixedStart,
                                 fixedEnd = fixedEnd,
