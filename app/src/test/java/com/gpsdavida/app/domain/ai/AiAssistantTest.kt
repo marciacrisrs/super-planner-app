@@ -153,6 +153,7 @@ class AiAssistantTest {
                 nextReasons = listOf(NextActionReason.HIGHER_PRIORITY, NextActionReason.CAPACITY_AVAILABLE),
             ),
         )
+        val evidence = listOf("priority: high", "capacity: available")
         val assistant = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
             override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
         })
@@ -160,14 +161,19 @@ class AiAssistantTest {
         val proposal = assistant.propose(
             AiRequest(
                 message = "por que estudar agora?",
-                context = AiContext(nextActionExplanation = domainExplanation),
+                context = AiContext(
+                    activeActivityId = "study",
+                    minimalRouteFacts = evidence,
+                ),
             ),
         )
 
         val command = proposal.command as AiCommand.ExplainNextActivity
         assertEquals("study", command.activityId)
         assertEquals(2, command.evidence.size)
-        assertTrue(command.evidence.all { it.contains(":" ) })
+        assertEquals(evidence, command.evidence)
+        assertTrue(proposal.explanation.isNotBlank())
+        assertTrue(domainExplanation.reasons.isNotEmpty())
         assertTrue(!proposal.requiresConfirmation)
     }
 
