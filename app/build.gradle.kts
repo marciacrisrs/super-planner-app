@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kover)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -82,4 +84,35 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "**.BuildConfig",
+                    "**.Manifest",
+                    "**.R",
+                    "**.R$*",
+                    "**.SuperPlannerApp",
+                    "**.MainActivity",
+                    "dagger.hilt.**",
+                    "hilt_aggregated_deps.**",
+                    "**.*Hilt_*",
+                    "**.*_HiltModules*",
+                    "**.*_Factory",
+                    "**.*_MembersInjector",
+                    "**.ui.**",
+                    "**.presentation.**",
+                    "**.*ComposableSingletons*",
+                )
+            }
+        }
+        verify {
+            rule {
+                minBound(80)
+            }
+        }
+    }
 }
