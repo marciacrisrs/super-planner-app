@@ -6,7 +6,6 @@ import com.superplanner.app.domain.model.TaskId
 import com.superplanner.app.domain.port.TaskRepository
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
@@ -34,6 +33,9 @@ class CreateTaskFromNaturalLanguageDraft @Inject constructor(
             )
         }
         val duration = draft.plannedDuration ?: Duration.ZERO
+        val startAt = draft.date?.let { date ->
+            draft.startTime?.let { time -> date.atTime(time).atZone(zoneId).toInstant() }
+        }
         val due = draft.date?.let { date ->
             val time = draft.startTime ?: java.time.LocalTime.MAX
             date.atTime(time).atZone(zoneId).toInstant()
@@ -45,6 +47,7 @@ class CreateTaskFromNaturalLanguageDraft @Inject constructor(
             priority = draft.priority,
             due = due,
             energy = draft.energy,
+            fixedStartAt = startAt,
         )
         tasks.save(task)
         return CreateTaskFromNaturalLanguageResult.Created(task)
