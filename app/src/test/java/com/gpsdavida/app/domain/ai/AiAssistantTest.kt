@@ -23,7 +23,7 @@ class AiAssistantTest {
     fun `material proposal requires explicit confirmation before any tool execution`() = runTest {
         var executions = 0
         val gateway = object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult {
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult {
                 executions++
                 return AiToolResult.Success(emptyList())
             }
@@ -54,7 +54,7 @@ class AiAssistantTest {
     @Test
     fun `provider can be replaced without changing assistant`() = runTest {
         val gateway = object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = AiToolResult.Success(emptyList())
         }
         val first = object : AiProvider {
             override suspend fun interpret(request: AiRequest) = AiProposal(
@@ -77,7 +77,7 @@ class AiAssistantTest {
     @Test
     fun `natural language is converted to structured draft without persisting it`() = runTest {
         val gateway = object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = AiToolResult.Success(emptyList())
         }
         val assistant = AiAssistant(RuleBasedAiProvider(), gateway)
 
@@ -98,7 +98,7 @@ class AiAssistantTest {
     @Test
     fun `late request becomes a structured reorganization operation`() = runTest {
         val assistant = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = AiToolResult.Success(emptyList())
         })
 
         val proposal = assistant.propose(
@@ -122,7 +122,7 @@ class AiAssistantTest {
     @Test
     fun `reorganization asks for missing information instead of guessing`() = runTest {
         val assistant = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = AiToolResult.Success(emptyList())
         })
 
         val proposal = assistant.propose(
@@ -155,7 +155,7 @@ class AiAssistantTest {
         )
         val evidence = listOf("priority: high", "capacity: available")
         val assistant = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = AiToolResult.Success(emptyList())
         })
 
         val proposal = assistant.propose(
@@ -180,7 +180,7 @@ class AiAssistantTest {
     @Test
     fun `why question declines to explain without evidence`() = runTest {
         val assistant = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult = AiToolResult.Success(emptyList())
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = AiToolResult.Success(emptyList())
         })
 
         val proposal = assistant.propose(
@@ -195,7 +195,7 @@ class AiAssistantTest {
     fun `free text never reaches tool execution before confirmation`() = runTest {
         var received: AiCommand? = null
         val gateway = object : AiToolGateway {
-            override suspend fun execute(command: AiCommand): AiToolResult {
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult {
                 received = command
                 return AiToolResult.Success(emptyList())
             }

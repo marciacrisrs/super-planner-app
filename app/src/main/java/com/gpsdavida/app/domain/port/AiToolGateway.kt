@@ -3,7 +3,11 @@ package com.superplanner.app.domain.port
 import com.superplanner.app.domain.ai.AiCommand
 
 interface AiToolGateway {
-    suspend fun execute(command: AiCommand): AiToolResult
+    /**
+     * Executes a command only when the caller explicitly confirms the proposal.
+     * Defaults to false so new callers cannot accidentally authorize mutations.
+     */
+    suspend fun execute(command: AiCommand, confirmed: Boolean = false): AiToolResult
 }
 
 sealed interface AiToolResult {
