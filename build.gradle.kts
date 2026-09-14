@@ -44,12 +44,14 @@ tasks.register("resolveAndLockAll") {
             "Run this task with --write-locks"
         }
     }
+    // Generate lock state from normal build/verification resolution only.
+    // koverVerify is intentionally excluded: it is a quality gate and must not
+    // block dependency-lock generation when coverage is below the CI threshold.
     dependsOn(
         ":app:detekt",
         ":app:lintDebug",
         ":app:testDebugUnitTest",
         ":app:koverXmlReport",
-        ":app:koverVerify",
         ":app:assembleDebug",
     )
 }
