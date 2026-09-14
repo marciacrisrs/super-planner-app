@@ -9,15 +9,21 @@ The planner should acknowledge reality instead of treating a changed plan as fai
 ## Principles
 
 - A completed, skipped, delayed, or newly started activity is a change in reality, not a failure.
-- Replanning is explicit: the app may suggest a new route, but does not silently rewrite the agenda.
-- Recovery should preserve fixed commitments and user priorities.
-- Undo is available immediately after reversible changes where the existing domain action supports it.
-- The user can continue with the current suggestion, choose another option, or replan.
+- Replanning is explicit: the app may recompute a suggestion, but does not silently rewrite the agenda.
+- Recovery preserves fixed commitments and user priorities through the existing deterministic route rules.
+- Replanning is a user-triggered refresh of the current route, not an automatic mutation.
+- The user can continue with the current suggestion, choose another option, or request a fresh suggestion.
+
+## Implementation
+
+- `AgoraViewModel.requestReplan()` increments an internal refresh token.
+- The existing route calculation is rerun with the current observed day and current time.
+- `AgoraRecoveryCard` makes the recovery path visible in Agora.
+- No new scheduling rule or mutation path is introduced.
 
 ## Acceptance criteria
 
-- The Agora screen offers a clear recovery action when the current recommendation is no longer useful.
-- Replanning remains a proposal and requires explicit user confirmation before mutation.
-- The user can undo a locally applied deferral when the underlying action is reversible.
+- Agora offers a clear recovery action when the current recommendation is no longer useful.
+- Replanning remains a proposal and requires explicit user confirmation before any future mutation flow.
 - Copy avoids blame (`atrasada`, `falhou`, `deveria`) and focuses on the current reality.
 - No automatic agenda mutation is introduced by this wave.
