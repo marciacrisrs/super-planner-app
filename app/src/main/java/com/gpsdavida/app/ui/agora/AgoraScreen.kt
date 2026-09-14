@@ -115,6 +115,7 @@ fun AgoraScreen(viewModel: AgoraViewModel = hiltViewModel()) {
             onSnooze = viewModel::deferCurrent,
             onComplete = viewModel::completeCurrent,
             onSwap = viewModel::skipCurrent,
+            onEmptyAction = viewModel::requestReplan,
             modifier = Modifier.fillMaxWidth(),
         )
 
