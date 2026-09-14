@@ -44,6 +44,7 @@ import com.superplanner.app.ui.horizontes.HorizonsScreen
 import com.superplanner.app.ui.horizontes.WeeklyReviewScreen
 import com.superplanner.app.ui.meudia.MeuDiaScreen
 import com.superplanner.app.ui.planos.AdvancedPlansScreen
+import com.superplanner.app.ui.planejamento.OrganizeWeekScreen
 import com.superplanner.app.ui.planejamento.PlanningScreen
 import com.superplanner.app.ui.routines.RoutineFormScreen
 import com.superplanner.app.ui.routines.RoutinesListScreen
@@ -74,15 +75,13 @@ fun SuperPlannerNavHost() {
     ) { padding ->
         NavHost(navController, SuperPlannerRoutes.AGORA, Modifier.padding(padding).swipeBetweenMainTabs(navController, currentRoute)) {
             composable(SuperPlannerRoutes.AGORA) {
-                HomeScreen(
-                    onOpenAbout = { navController.navigate(SuperPlannerRoutes.ABOUT) },
-                    onOpenAiCapture = { navController.navigate(SuperPlannerRoutes.AI_CAPTURE) },
-                )
+                HomeScreen(onOpenAbout = { navController.navigate(SuperPlannerRoutes.ABOUT) }, onOpenAiCapture = { navController.navigate(SuperPlannerRoutes.AI_CAPTURE) })
             }
             composable(SuperPlannerRoutes.ABOUT) { AboutScreen(onBack = { navController.popBackStack() }) }
             composable(SuperPlannerRoutes.AI_CAPTURE) { AiCaptureScreen(onBack = { navController.popBackStack() }) }
             composable(SuperPlannerRoutes.MEU_DIA) { MeuDiaScreen({ navController.navigate(SuperPlannerRoutes.eventEditor()) }, { navController.navigate(SuperPlannerRoutes.eventEditor(it)) }, { navController.navigate(SuperPlannerRoutes.taskEditor(it)) }, { navController.navigate(SuperPlannerRoutes.habitEditor(it)) }, { navController.navigate(SuperPlannerRoutes.AVAILABILITY) }, { navController.navigate(SuperPlannerRoutes.WEEK) }) }
-            composable(SuperPlannerRoutes.WEEK) { WeekScreen(onOpenDay = { date -> navController.navigate(SuperPlannerRoutes.weekDay(date)) }) }
+            composable(SuperPlannerRoutes.WEEK) { WeekScreen(onOpenDay = { date -> navController.navigate(SuperPlannerRoutes.weekDay(date)) }, onOrganizeWeek = { navController.navigate(SuperPlannerRoutes.ORGANIZE_WEEK) }) }
+            composable(SuperPlannerRoutes.ORGANIZE_WEEK) { OrganizeWeekScreen(onBack = { navController.popBackStack() }) }
             composable(SuperPlannerRoutes.WEEK_DAY, arguments = listOf(navArgument("date") { type = NavType.StringType })) { entry -> WeekDayScreen(LocalDate.parse(entry.arguments?.getString("date"))) }
             composable(SuperPlannerRoutes.PLANNING) { PlanningScreen(onOpenHorizons = { navController.navigate(SuperPlannerRoutes.HORIZONS) }, onOpenReview = { navController.navigate(SuperPlannerRoutes.REVIEW) }, onOpenFinance = { navController.navigate(SuperPlannerRoutes.FINANCE) }, onOpenLifeAreas = { navController.navigate(SuperPlannerRoutes.LIFE_AREAS) }, onOpenDayCheckpoint = { navController.navigate(SuperPlannerRoutes.DAY_CHECKPOINT) }, onOpenPlans = { navController.navigate(SuperPlannerRoutes.PLANS) }, onOpenRoutines = { navController.navigate(SuperPlannerRoutes.ROUTINES) }) }
             composable(SuperPlannerRoutes.HORIZONS) { HorizonsScreen() }
