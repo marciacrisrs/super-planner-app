@@ -43,10 +43,11 @@ fun OnboardingScreen(
     var fixedEnd by remember { mutableStateOf("18:00") }
     var availabilityStart by remember { mutableStateOf("07:00") }
     var availabilityEnd by remember { mutableStateOf("21:00") }
-    var recurringActivity by remember { mutableStateOf("") }
     var step by remember { mutableStateOf(0) }
 
-    LaunchedEffect(state.finished) { if (state.finished) onFinished() }
+    LaunchedEffect(state.finished) {
+        if (state.finished) onFinished()
+    }
 
     SuperPlannerBackground {
         Column(
@@ -57,58 +58,92 @@ fun OnboardingScreen(
                 .padding(horizontal = SuperPlannerSpacing.Page, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            Text("Sua primeira rota", style = MaterialTheme.typography.headlineLarge, color = SuperPlannerColors.Ink)
-            Text("Vamos configurar só o necessário. O restante pode entrar depois.", color = SuperPlannerColors.InkSoft)
-            Text("${step + 1} de 6", style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
+            Text("Vamos começar pelo que importa", style = MaterialTheme.typography.headlineLarge, color = SuperPlannerColors.Ink)
+            Text("Em poucos passos, você dá ao planner contexto suficiente para sugerir o que pode fazer agora. Depois, você ajusta o restante.", color = SuperPlannerColors.InkSoft)
+            Text("${step + 1} de 3", style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
 
             when (step) {
-                0 -> StepContent("O que você quer conseguir organizar primeiro?", "Isso dá uma direção para o planner priorizar o que realmente importa.") {
-                    OutlinedTextField(intent, { intent = it }, label = { Text("Minha prioridade agora") }, placeholder = { Text("Ex.: organizar meu trabalho") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                0 -> StepContent(
+                    title = "O que você quer colocar em movimento?",
+                    explanation = "Conte uma coisa que é importante para você neste momento. Isso orienta as primeiras sugestões.",
+                ) {
+                    OutlinedTextField(
+                        value = intent,
+                        onValueChange = { intent = it },
+                        label = { Text("Quero avançar em") },
+                        placeholder = { Text("Ex.: organizar meu trabalho") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
                 }
-                1 -> StepContent("Quando seu dia começa e termina?", "Esses horários ajudam a não planejar tarefas fora da sua vida real.") {
+
+                1 -> StepContent(
+                    title = "Como é o seu dia de verdade?",
+                    explanation = "Use horários aproximados. Eles ajudam a evitar sugestões que não cabem na sua rotina.",
+                ) {
                     TimePair("Acordo", wakeTime) { wakeTime = it }
                     TimePair("Durmo", sleepTime) { sleepTime = it }
+                    TimePair("Tenho tempo a partir de", availabilityStart) { availabilityStart = it }
+                    TimePair("Até", availabilityEnd) { availabilityEnd = it }
                 }
-                2 -> StepContent("Você tem algum compromisso fixo importante?", "Compromissos fixos viram âncoras para o restante do dia. Você pode pular.") {
-                    OutlinedTextField(fixedTitle, { fixedTitle = it }, label = { Text("Compromisso") }, placeholder = { Text("Ex.: trabalho") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    TimePair("Começa", fixedStart) { fixedStart = it }
-                    TimePair("Termina", fixedEnd) { fixedEnd = it }
-                }
-                3 -> StepContent("Quando você normalmente está disponível?", "O planner usa essa janela para decidir o que realmente cabe.") {
-                    TimePair("Disponível a partir de", availabilityStart) { availabilityStart = it }
-                    TimePair("Disponível até", availabilityEnd) { availabilityEnd = it }
-                }
-                4 -> StepContent("Existe algo que você faz com frequência?", "Uma atividade recorrente evita que você precise cadastrar tudo manualmente depois. Você pode pular.") {
-                    OutlinedTextField(recurringActivity, { recurringActivity = it }, label = { Text("Atividade recorrente") }, placeholder = { Text("Ex.: caminhar") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                }
-                5 -> StepContent("Tudo pronto para o primeiro dia", "Vamos usar essas informações para montar uma rota inicial. Você poderá ajustar tudo depois.") {
-                    SummaryRow("Prioridade", intent.ifBlank { "Não definida" })
-                    SummaryRow("Acorda / dorme", "$wakeTime / $sleepTime")
-                    SummaryRow("Compromisso", fixedTitle.ifBlank { "Nenhum" })
-                    SummaryRow("Disponibilidade", "$availabilityStart–$availabilityEnd")
-                    SummaryRow("Recorrente", recurringActivity.ifBlank { "Nenhuma" })
+
+                2 -> StepContent(
+                    title = "Tem alguma âncora importante hoje?",
+                    explanation = "Se quiser, adicione um compromisso que não pode ser deslocado. Você também pode deixar para depois.",
+                ) {
+                    OutlinedTextField(
+                        value = fixedTitle,
+                        onValueChange = { fixedTitle = it },
+                        label = { Text("Compromisso fixo") },
+                        placeholder = { Text("Ex.: trabalho") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                    if (fixedTitle.isNotBlank()) {
+                        TimePair("Começa", fixedStart) { fixedStart = it }
+                        TimePair("Termina", fixedEnd) { fixedEnd = it }
+                    }
                 }
             }
 
-            if (step < 5) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    TextButton(onClick = { step += 1 }, modifier = Modifier.weight(1f)) { Text("Pular") }
-                    SuperPlannerPrimaryButton(text = "Continuar", onClick = { step += 1 }, modifier = Modifier.weight(1f))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                TextButton(
+                    onClick = if (step < 2) ({ step += 1 }) else viewModel::skip,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(if (step < 2) "Pular" else "Começar sem isso")
                 }
-            } else {
                 SuperPlannerPrimaryButton(
-                    text = "Criar minha primeira rota",
-                    onClick = { viewModel.createFirstRoute(intent, wakeTime, sleepTime, fixedTitle, fixedStart, fixedEnd, availabilityStart, availabilityEnd, recurringActivity) },
-                    modifier = Modifier.fillMaxWidth(),
+                    text = if (step < 2) "Continuar" else "Criar meu primeiro dia",
+                    onClick = {
+                        if (step < 2) {
+                            step += 1
+                        } else {
+                            viewModel.createFirstRoute(
+                                intent = intent,
+                                wakeTime = wakeTime,
+                                sleepTime = sleepTime,
+                                fixedTitle = fixedTitle,
+                                fixedStart = fixedStart,
+                                fixedEnd = fixedEnd,
+                                availabilityStart = availabilityStart,
+                                availabilityEnd = availabilityEnd,
+                            )
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = viewModel::skip, modifier = Modifier.fillMaxWidth()) { Text("Pular por enquanto") }
             }
         }
     }
 }
 
 @Composable
-private fun StepContent(title: String, explanation: String, content: @Composable () -> Unit) {
+private fun StepContent(
+    title: String,
+    explanation: String,
+    content: @Composable () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,13 +159,12 @@ private fun StepContent(title: String, explanation: String, content: @Composable
 
 @Composable
 private fun TimePair(label: String, value: String, onValueChange: (String) -> Unit) {
-    OutlinedTextField(value, onValueChange, label = { Text(label) }, placeholder = { Text("HH:mm") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-}
-
-@Composable
-private fun SummaryRow(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = SuperPlannerColors.InkSoft)
-        Text(value, style = MaterialTheme.typography.bodyLarge, color = SuperPlannerColors.Ink)
-    }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        placeholder = { Text("HH:mm") },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+    )
 }
