@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kover) apply false
     alias(libs.plugins.detekt) apply false
     id("org.sonarqube") version "7.4.0.8496"
+    id("org.cyclonedx.bom") version "3.3.0"
 }
 
 subprojects {
