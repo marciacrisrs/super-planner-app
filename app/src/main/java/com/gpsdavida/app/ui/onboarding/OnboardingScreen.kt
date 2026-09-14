@@ -43,100 +43,43 @@ fun OnboardingScreen(
     var availabilityEnd by remember { mutableStateOf("21:00") }
     var step by remember { mutableStateOf(0) }
 
-    LaunchedEffect(state.finished) {
-        if (state.finished) onFinished()
-    }
+    LaunchedEffect(state.finished) { if (state.finished) onFinished() }
 
     SuperPlannerBackground {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = SuperPlannerSpacing.Page, vertical = 24.dp),
+            modifier = Modifier.fillMaxSize().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = SuperPlannerSpacing.Page, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
             Text("Vamos começar pelo que importa", style = MaterialTheme.typography.headlineLarge, color = SuperPlannerColors.Ink)
             Text("Em poucos passos, você dá ao planner contexto suficiente para sugerir o que pode fazer agora. Depois, você ajusta o restante.", color = SuperPlannerColors.InkSoft)
             Text("${step + 1} de 3", style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
-
             when (step) {
-                0 -> StepContent(
-                    title = "O que você quer colocar em movimento?",
-                    explanation = "Conte uma coisa que é importante para você neste momento. Isso orienta as primeiras sugestões.",
-                ) {
-                    OutlinedTextField(
-                        value = intent,
-                        onValueChange = { intent = it },
-                        label = { Text("Quero avançar em") },
-                        placeholder = { Text("Ex.: organizar meu trabalho") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
+                0 -> StepContent("O que você quer colocar em movimento?", "Conte uma coisa que é importante para você neste momento. Isso orienta as primeiras sugestões.") {
+                    OutlinedTextField(value = intent, onValueChange = { intent = it }, label = { Text("Quero avançar em") }, placeholder = { Text("Ex.: organizar meu trabalho") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 }
-
-                1 -> StepContent(
-                    title = "Quanto tempo costuma estar disponível?",
-                    explanation = "Uma janela aproximada ajuda a evitar sugestões que não cabem na sua realidade.",
-                ) {
+                1 -> StepContent("Quanto tempo costuma estar disponível?", "Uma janela aproximada ajuda a evitar sugestões que não cabem na sua realidade.") {
                     TimePair("A partir de", availabilityStart) { availabilityStart = it }
                     TimePair("Até", availabilityEnd) { availabilityEnd = it }
                 }
-
-                2 -> StepContent(
-                    title = "Tem alguma âncora importante hoje?",
-                    explanation = "Se quiser, adicione um compromisso que não pode ser deslocado. Você também pode deixar para depois.",
-                ) {
-                    OutlinedTextField(
-                        value = fixedTitle,
-                        onValueChange = { fixedTitle = it },
-                        label = { Text("Compromisso fixo") },
-                        placeholder = { Text("Ex.: trabalho") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
+                2 -> StepContent("Tem alguma âncora importante hoje?", "Se quiser, adicione um compromisso que não pode ser deslocado. Você também pode começar sem isso.") {
+                    OutlinedTextField(value = fixedTitle, onValueChange = { fixedTitle = it }, label = { Text("Compromisso fixo") }, placeholder = { Text("Ex.: trabalho") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                     if (fixedTitle.isNotBlank()) {
                         TimePair("Começa", fixedStart) { fixedStart = it }
                         TimePair("Termina", fixedEnd) { fixedEnd = it }
                     }
                 }
             }
-
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 TextButton(
                     onClick = {
-                        if (step < 2) {
-                            step += 1
-                        } else {
-                            viewModel.createFirstRoute(
-                                intent = intent,
-                                fixedTitle = "",
-                                fixedStart = fixedStart,
-                                fixedEnd = fixedEnd,
-                                availabilityStart = availabilityStart,
-                                availabilityEnd = availabilityEnd,
-                            )
-                        }
+                        if (step < 2) step += 1 else viewModel.createFirstRoute(intent, "", "", fixedTitle, fixedStart, fixedEnd, availabilityStart, availabilityEnd)
                     },
                     modifier = Modifier.weight(1f),
-                ) {
-                    Text("Pular")
-                }
+                ) { Text(if (step < 2) "Pular" else "Começar sem isso") }
                 SuperPlannerPrimaryButton(
                     text = if (step < 2) "Continuar" else "Criar meu primeiro dia",
                     onClick = {
-                        if (step < 2) {
-                            step += 1
-                        } else {
-                            viewModel.createFirstRoute(
-                                intent = intent,
-                                fixedTitle = fixedTitle,
-                                fixedStart = fixedStart,
-                                fixedEnd = fixedEnd,
-                                availabilityStart = availabilityStart,
-                                availabilityEnd = availabilityEnd,
-                            )
-                        }
+                        if (step < 2) step += 1 else viewModel.createFirstRoute(intent, "", "", fixedTitle, fixedStart, fixedEnd, availabilityStart, availabilityEnd)
                     },
                     modifier = Modifier.weight(1f),
                 )
@@ -146,18 +89,8 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun StepContent(
-    title: String,
-    explanation: String,
-    content: @Composable () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(SuperPlannerColors.Surface, MaterialTheme.shapes.extraLarge)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+private fun StepContent(title: String, explanation: String, content: @Composable () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().background(SuperPlannerColors.Surface, MaterialTheme.shapes.extraLarge).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(title, style = MaterialTheme.typography.titleLarge, color = SuperPlannerColors.Ink)
         Text(explanation, style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
         content()
@@ -166,12 +99,5 @@ private fun StepContent(
 
 @Composable
 private fun TimePair(label: String, value: String, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        placeholder = { Text("HH:mm") },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
-    )
+    OutlinedTextField(value = value, onValueChange = onValueChange, label = { Text(label) }, placeholder = { Text("HH:mm") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 }
