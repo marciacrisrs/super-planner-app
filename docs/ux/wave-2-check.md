@@ -1,0 +1,1 @@
+Wave 2 check: Agora is suggestion-first, alternatives are explicit, and system-owned wording was removed from the recommendation explanation.
