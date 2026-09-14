@@ -71,11 +71,28 @@ object NaturalLanguageActivityParser {
     }
 
     private fun parseDuration(text: String): Duration? {
-        Regex("(?i)(\\d+)\\s*(?:h|hora|horas)").find(text)?.let {
+        // An explicit "por ..." duration has precedence so a clock such as "às 18h"
+        // is never interpreted as an 18-hour duration.
+        Regex("(?i)\\bpor\\s+(\\d+)\\s*(?:h|hora|horas)\\b").find(text)?.let {
             return Duration.ofHours(it.groupValues[1].toLong())
         }
-        Regex("(?i)(\\d+)\\s*(?:min|minuto|minutos)").find(text)?.let {
+        Regex("(?i)\\bpor\\s+(\\d+)\\s*(?:min|minuto|minutos)\\b").find(text)?.let {
             return Duration.ofMinutes(it.groupValues[1].toLong())
+        }
+        if (text.contains("por uma hora", ignoreCase = true)) return Duration.ofHours(1)
+        if (text.contains("por meia hora", ignoreCase = true)) return Duration.ofMinutes(30)
+
+        // If the input contains an explicit clock time, the numeric hour belongs to
+        // startTime rather than plannedDuration. Generic numeric durations remain
+        // supported when no clock expression is present.
+        val hasExplicitClock = Regex("(?i)\\b(?:às|as)\\s*\\d{1,2}(?::\\d{2})?\\s*h?").containsMatchIn(text)
+        if (!hasExplicitClock) {
+            Regex("(?i)(\\d+)\\s*(?:h|hora|horas)\\b").find(text)?.let {
+                return Duration.ofHours(it.groupValues[1].toLong())
+            }
+            Regex("(?i)(\\d+)\\s*(?:min|minuto|minutos)\\b").find(text)?.let {
+                return Duration.ofMinutes(it.groupValues[1].toLong())
+            }
         }
         if (text.contains("uma hora", ignoreCase = true)) return Duration.ofHours(1)
         if (text.contains("meia hora", ignoreCase = true)) return Duration.ofMinutes(30)
