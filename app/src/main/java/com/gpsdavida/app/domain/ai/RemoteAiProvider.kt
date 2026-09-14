@@ -55,14 +55,17 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
             }
 
             require(responseBody.isNotBlank()) { "AI gateway returned an empty response [requestId=$requestId]" }
-            mapProposal(JSONObject(responseBody).getJSONObject("proposal"), request)
+            val response = JSONObject(responseBody)
+            val proposal = response.optJSONObject("proposal")
+                ?: error("AI gateway response is missing proposal [requestId=$requestId]")
+            AiGatewayProposalValidator.validate(proposal)
+            mapProposal(proposal, request)
         } finally {
             connection.disconnect()
         }
     }
 
     private fun mapProposal(json: JSONObject, request: AiRequest): AiProposal {
-        require(json.optString("schemaVersion") == AI_PROPOSAL_SCHEMA_VERSION) { "Unsupported AI proposal schema" }
         val commandType = json.getString("commandType")
         val explanation = json.getString("explanation")
         val requiresConfirmation = json.getBoolean("requiresConfirmation")
@@ -114,11 +117,11 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         val startTime = payload.optString("startTime").takeIf(String::isNotBlank)?.let(LocalTime::parse)
         val priority = payload.optString("priority")
             .takeIf(String::isNotBlank)
-            ?.let { runCatching { Priority.valueOf(it) }.getOrNull() }
+            ?.let { Priority.valueOf(it) }
             ?: Priority.IMPORTANT
         val energy = payload.optString("energy")
             .takeIf(String::isNotBlank)
-            ?.let { runCatching { Energy.valueOf(it) }.getOrNull() }
+            ?.let { Energy.valueOf(it) }
 
         val parserDraft = NaturalLanguageActivityParser.parse(request.message, today)
         val missing = buildSet {
