@@ -11,4 +11,5 @@ data class TaskEntity(
     val priority: String,
     val dueEpochMilli: Long?,
     val completedAtEpochMilli: Long?,
+    val fixedStartEpochMilli: Long?,
 )
