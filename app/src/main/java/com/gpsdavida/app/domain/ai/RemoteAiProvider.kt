@@ -17,7 +17,9 @@ import org.json.JSONObject
 import javax.inject.Inject
 
 /** Remote provider. The LLM is accessed only through the Super Planner AI Gateway. */
-class RemoteAiProvider @Inject constructor() : AiProvider {
+class RemoteAiProvider @Inject constructor(
+    private val telemetry: AiTelemetry,
+) : AiProvider {
     override suspend fun interpret(request: AiRequest): AiProposal = withContext(Dispatchers.IO) {
         val endpoint = BuildConfig.AI_GATEWAY_URL.trim().trimEnd('/')
         require(endpoint.isNotEmpty()) { "AI gateway is not configured" }
@@ -54,7 +56,9 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
             val proposal = response.optJSONObject("proposal")
                 ?: error("AI gateway response is missing proposal [requestId=$requestId]")
             AiGatewayProposalValidator.validate(proposal)
-            mapProposal(proposal, request)
+            val mapped = mapProposal(proposal, request)
+            telemetry.remoteSucceeded(commandTypeOf(mapped.command))
+            mapped
         } finally {
             connection.disconnect()
         }
@@ -105,6 +109,14 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
 
         return AiProposal(command, explanation, requiresConfirmation)
     }
+
+    private fun commandTypeOf(command: AiCommand): String = when (command) {
+        is AiCommand.CreateActivityDraft -> "CREATE_ACTIVITY_DRAFT"
+        is AiCommand.ExplainNextActivity -> "EXPLAIN_NEXT_ACTIVITY"
+        is AiCommand.ReorganizeDay -> "REORGANIZE_DAY"
+        is AiCommand.MissingInformation -> "MISSING_INFORMATION"
+        AiCommand.RecalculateRoute -> "RECALCULATE_ROUTE"
+    }
 }
 
 private fun JSONArray.toStringList(): List<String> = buildList {
@@ -115,11 +127,21 @@ private fun JSONArray.toStringList(): List<String> = buildList {
 class HybridAiProvider @Inject constructor(
     private val remote: RemoteAiProvider,
     private val local: RuleBasedAiProvider,
+    private val telemetry: AiTelemetry,
 ) : AiProvider {
     override suspend fun interpret(request: AiRequest): AiProposal {
-        if (BuildConfig.AI_GATEWAY_URL.isBlank()) return local.interpret(request)
+        if (BuildConfig.AI_GATEWAY_URL.isBlank()) {
+            telemetry.localFallback("gateway_not_configured")
+            return local.interpret(request)
+        }
         return runCatching { remote.interpret(request) }.getOrElse { error ->
-            if (AiFallbackPolicy.shouldFallback(error)) local.interpret(request) else throw error
+            if (AiFallbackPolicy.shouldFallback(error)) {
+                telemetry.localFallback(error::class.simpleName ?: "transport_error")
+                local.interpret(request)
+            } else {
+                telemetry.remoteRejected(error::class.simpleName ?: "contract_error")
+                throw error
+            }
         }
     }
 }
