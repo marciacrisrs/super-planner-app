@@ -139,6 +139,12 @@ fun AgoraScreen(
             Text(text = state.currentDate.format(dateFmt), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
         }
 
+        CapacityContextCard(
+            remainingMinutes = state.capacityRemainingMinutes,
+            nextWindowMinutes = state.nextWindowMinutes,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
         OutlinedButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = { showCapacityDialog = true },
