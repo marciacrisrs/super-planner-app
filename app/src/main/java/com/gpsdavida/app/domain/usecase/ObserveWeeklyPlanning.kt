@@ -39,7 +39,7 @@ class ObserveWeeklyPlanning @Inject constructor(
     operator fun invoke(
         startDate: LocalDate,
         zoneId: ZoneId = clock.zone,
-    ): Flow<WeeklyPlanning> = combine(
+    ): Flow<WeeklyPlanning> = combine(listOf(
         events.observeAll(),
         tasks.observeAll(),
         habits.observeAll(),
@@ -47,17 +47,17 @@ class ObserveWeeklyPlanning @Inject constructor(
         executions.observeAll(),
         availability.observeAll(),
         weeklyOverrides.observe(),
-    ) { eventList, taskList, habitList, routineList, executionList, availabilityList, overrides ->
+    )) { values ->
         buildWeeklyPlanning(
             startDate = startDate,
             zoneId = zoneId,
-            eventList = eventList,
-            taskList = taskList,
-            habitList = habitList,
-            routineList = routineList,
-            executionList = executionList,
-            availabilityList = availabilityList,
-            overrides = overrides,
+            eventList = values[0] as List<com.superplanner.app.domain.model.Event>,
+            taskList = values[1] as List<com.superplanner.app.domain.model.Task>,
+            habitList = values[2] as List<com.superplanner.app.domain.model.Habit>,
+            routineList = values[3] as List<com.superplanner.app.domain.model.Routine>,
+            executionList = values[4] as List<ActivityExecution>,
+            availabilityList = values[5] as List<Availability>,
+            overrides = values[6] as List<WeeklyPlanOverride>,
         )
     }
 
@@ -97,9 +97,7 @@ class ObserveWeeklyPlanning @Inject constructor(
                 val override = overrideById[instance.id.value]
                 if (override != null && LocalDate.parse(override.date) != date) return@mapNotNull null
                 val effectiveInstance = override?.let { saved ->
-                    instance.copy(
-                        planned = com.superplanner.app.domain.model.TimeRange(saved.start, saved.end),
-                    )
+                    instance.copy(planned = com.superplanner.app.domain.model.TimeRange(saved.start, saved.end))
                 } ?: instance
                 WeeklyActivity(
                     date = date,
