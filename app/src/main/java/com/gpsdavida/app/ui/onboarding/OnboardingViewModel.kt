@@ -7,8 +7,6 @@ import com.superplanner.app.domain.model.AvailabilityId
 import com.superplanner.app.domain.model.AvailabilityKind
 import com.superplanner.app.domain.model.Event
 import com.superplanner.app.domain.model.EventId
-import com.superplanner.app.domain.model.Habit
-import com.superplanner.app.domain.model.HabitId
 import com.superplanner.app.domain.model.LocalTimeWindow
 import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.domain.model.Task
@@ -16,7 +14,6 @@ import com.superplanner.app.domain.model.TaskId
 import com.superplanner.app.domain.model.TimeRange
 import com.superplanner.app.domain.port.AvailabilityRepository
 import com.superplanner.app.domain.port.EventRepository
-import com.superplanner.app.domain.port.HabitRepository
 import com.superplanner.app.domain.port.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
@@ -38,7 +35,6 @@ data class OnboardingState(
 class OnboardingViewModel @Inject constructor(
     private val events: EventRepository,
     private val tasks: TaskRepository,
-    private val habits: HabitRepository,
     private val availability: AvailabilityRepository,
     private val clock: Clock,
 ) : ViewModel() {
@@ -54,15 +50,12 @@ class OnboardingViewModel @Inject constructor(
         fixedEnd: String,
         availabilityStart: String,
         availabilityEnd: String,
-        recurringActivity: String,
     ) {
         viewModelScope.launch {
             val today = LocalDate.now(clock)
             val zone = clock.zone
             val availableFrom = parseTime(availabilityStart, LocalTime.of(7, 0))
             val availableUntil = parseTime(availabilityEnd, LocalTime.of(21, 0))
-            val wake = parseTime(wakeTime, availableFrom)
-            val sleep = parseTime(sleepTime, availableUntil)
 
             if (intent.isNotBlank()) {
                 tasks.save(
@@ -88,18 +81,6 @@ class OnboardingViewModel @Inject constructor(
                             today.atTime(start).atZone(zone).toInstant(),
                             today.atTime(safeEnd).atZone(zone).toInstant(),
                         ),
-                    ),
-                )
-            }
-
-            if (recurringActivity.isNotBlank()) {
-                habits.save(
-                    Habit(
-                        id = HabitId(UUID.randomUUID().toString()),
-                        title = recurringActivity.trim(),
-                        plannedDuration = Duration.ofMinutes(20),
-                        daysOfWeek = setOf(today.dayOfWeek),
-                        window = LocalTimeWindow(wake, sleep),
                     ),
                 )
             }
