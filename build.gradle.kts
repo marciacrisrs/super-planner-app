@@ -10,16 +10,14 @@ plugins {
     id("org.cyclonedx.bom") version "3.3.0"
 }
 
-allprojects {
+subprojects {
     dependencyLocking {
         lockAllConfigurations()
         lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
     }
-}
 
-subprojects {
-    pluginManager.withPlugin("dev.detekt") {
-        extensions.configure<dev.detekt.gradle.extensions.DetektExtension> {
+    pluginManager.withPlugin("io.gitlab.arturbosch.detekt") {
+        extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
             config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
             buildUponDefaultConfig = true
         }
