@@ -26,6 +26,19 @@ class NaturalLanguageActivityParserTest {
     }
 
     @Test
+    fun `does not interpret clock hour as activity duration`() {
+        val draft = NaturalLanguageActivityParser.parse(
+            "Quero estudar francês amanhã às 18h por uma hora",
+            today,
+        )
+
+        assertEquals(Duration.ofHours(1), draft.plannedDuration)
+        assertEquals(today.plusDays(1), draft.date)
+        assertEquals(LocalTime.of(18, 0), draft.startTime)
+        assertTrue(draft.missingFields.isEmpty())
+    }
+
+    @Test
     fun `extracts daily recurrence without inventing duration`() {
         val draft = NaturalLanguageActivityParser.parse("estudar inglês todo dia", today)
 

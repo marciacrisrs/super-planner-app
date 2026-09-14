@@ -26,5 +26,6 @@ abstract class RepositoryModule {
     @Binds @Singleton abstract fun bindFinanceRepository(impl: RoomFinanceRepository): FinanceRepository
     @Binds @Singleton abstract fun bindLifeAreaRepository(impl: RoomLifeAreaRepository): LifeAreaRepository
     @Binds @Singleton abstract fun bindPlanRepository(impl: RoomPlanRepository): PlanRepository
+    @Binds @Singleton abstract fun bindWeeklyPlanOverrideRepository(impl: WeeklyPlanOverrideStore): WeeklyPlanOverrideRepository
     @Binds @Singleton abstract fun bindPlanningEngine(impl: DefaultPlanningEngine): PlanningEngine
 }

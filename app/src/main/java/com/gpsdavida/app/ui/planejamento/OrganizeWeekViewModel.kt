@@ -8,6 +8,7 @@ import com.superplanner.app.domain.ai.OrganizeWeekRequest
 import com.superplanner.app.domain.ai.OrganizeWeekResponse
 import com.superplanner.app.domain.model.WeeklyActivityKind
 import com.superplanner.app.domain.model.WeeklyPlanning
+import com.superplanner.app.domain.usecase.ApplyWeekOrganization
 import com.superplanner.app.domain.usecase.ObserveWeeklyPlanning
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
@@ -31,6 +32,7 @@ sealed interface OrganizeWeekState {
 class OrganizeWeekViewModel @Inject constructor(
     private val observeWeeklyPlanning: ObserveWeeklyPlanning,
     private val gateway: OrganizeWeekGatewayClient,
+    private val applyWeekOrganization: ApplyWeekOrganization,
     private val clock: Clock,
 ) : ViewModel() {
     private val _state = MutableStateFlow<OrganizeWeekState>(OrganizeWeekState.Idle)
@@ -51,8 +53,15 @@ class OrganizeWeekViewModel @Inject constructor(
 
     fun apply() {
         val current = _state.value
-        if (current is OrganizeWeekState.Ready) {
-            _state.value = OrganizeWeekState.Applied(current.response, current.week)
+        if (current !is OrganizeWeekState.Ready) return
+        viewModelScope.launch {
+            runCatching {
+                applyWeekOrganization(current.week, current.response, clock.zone)
+            }.onSuccess {
+                _state.value = OrganizeWeekState.Applied(current.response, current.week)
+            }.onFailure { error ->
+                _state.value = OrganizeWeekState.Error(error.message ?: "Não foi possível aplicar a organização.")
+            }
         }
     }
 
@@ -77,7 +86,7 @@ class OrganizeWeekViewModel @Inject constructor(
             startTime = instance.planned.start.atZone(clock.zone).toLocalTime().toString(),
             endTime = instance.planned.end.atZone(clock.zone).toLocalTime().toString(),
             durationMinutes = instance.plannedDuration.toMinutes().toInt(),
-            priority = instance.priority?.name,
+            priority = instance.priority.name,
             kind = kind.name,
             required = instance.flexibility == com.superplanner.app.domain.model.Flexibility.FIXED,
         )

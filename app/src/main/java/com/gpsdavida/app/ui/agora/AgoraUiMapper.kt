@@ -174,7 +174,7 @@ object AgoraUiMapper {
     ): String? {
         next ?: return null
         return when {
-            current.priority.weight < next.priority.weight ->
+            current.priority.weight > next.priority.weight ->
                 "Esta opção fica para depois para dar espaço à prioridade mais alta."
             current.planned.start <= now && next.planned.start > now ->
                 "Esta opção pode ficar para depois enquanto outra cabe melhor neste momento."
