@@ -100,12 +100,13 @@ class ObserveWeeklyPlanning @Inject constructor(
             )
         }
 
+        val weekDates = baseDays.map { it.date }.toSet()
         val byId = baseDays.flatMap { it.activities }.associateBy { it.instance.id.value }
         val overriddenIds = overrides.map { it.activityId }.toSet()
         val relocated = overrides.mapNotNull { override ->
             val activity = byId[override.activityId] ?: return@mapNotNull null
             val targetDate = LocalDate.parse(override.date)
-            if (targetDate !in baseDays.map { it.date }) return@mapNotNull null
+            if (targetDate !in weekDates) return@mapNotNull null
             activity to WeeklyActivity(
                 date = targetDate,
                 title = activity.title,
@@ -117,10 +118,19 @@ class ObserveWeeklyPlanning @Inject constructor(
         }.associateBy { it.first.instance.id.value }
 
         val days = baseDays.map { day ->
-            val movedOut = day.activities.filter { it.instance.id.value in overriddenIds && relocated[it.instance.id.value]?.second?.date != day.date }
-            val movedIn = relocated.values.filter { it.date == day.date }.map { it }
-            val retained = day.activities.filterNot { activity -> movedOut.any { it.instance.id == activity.instance.id } }
-            val finalActivities = (retained + movedIn).distinctBy { it.instance.id }.sortedBy { it.instance.planned.start }
+            val movedOut = day.activities.filter { activity ->
+                activity.instance.id.value in overriddenIds &&
+                    relocated[activity.instance.id.value]?.second?.date != day.date
+            }
+            val movedIn = relocated.values
+                .map { it.second }
+                .filter { it.date == day.date }
+            val retained = day.activities.filterNot { activity ->
+                movedOut.any { it.instance.id == activity.instance.id }
+            }
+            val finalActivities = (retained + movedIn)
+                .distinctBy { it.instance.id }
+                .sortedBy { it.instance.planned.start }
             day.copy(
                 activities = finalActivities,
                 plannedDuration = finalActivities.fold(java.time.Duration.ZERO) { total, item -> total.plus(item.instance.plannedDuration) },
