@@ -54,17 +54,23 @@ class MaterializeDailyActivities @Inject constructor() {
     }
 
     private fun Task.toDailyActivity(date: LocalDate, zoneId: ZoneId): DailyActivity {
-        val anchor = due?.atZone(zoneId)?.toLocalTime() ?: LocalTime.of(9, 0)
+        val explicitStart = fixedStartAt?.atZone(zoneId)?.toLocalDate()?.let { startDate ->
+            if (startDate == date) fixedStartAt else null
+        }
+        val anchor = explicitStart?.atZone(zoneId)?.toLocalTime()
+            ?: due?.atZone(zoneId)?.toLocalTime()
+            ?: LocalTime.of(9, 0)
         val start = date.atTime(anchor).atZone(zoneId).toInstant()
         return DailyActivity(
             title = title,
             instance = ActivityInstance(
                 id = ActivityInstanceIds.forTask(id, date),
                 source = ActivitySource.FromTask(id),
-                flexibility = Flexibility.FLEXIBLE,
+                flexibility = if (explicitStart != null) Flexibility.FIXED else Flexibility.FLEXIBLE,
                 planned = TimeRange(start, start.plus(plannedDuration)),
                 priority = priority,
                 energy = energy,
+                dueAt = due,
             ),
         )
     }
