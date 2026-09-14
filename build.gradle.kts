@@ -16,9 +16,9 @@ subprojects {
         lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
     }
 
-    // AGP/KSP create implementation-detail configurations at configuration time.
-    // They are not project dependencies and must not participate in dependency locking.
-    configurations.matching { it.name.startsWith("_agp_internal_") }.configureEach {
+    // Gradle/AGP/KSP create implementation-detail configurations prefixed with "_".
+    // They are not project dependency surfaces and must not participate in locking.
+    configurations.matching { it.name.startsWith("_") }.configureEach {
         resolutionStrategy.deactivateDependencyLocking()
     }
 
@@ -42,7 +42,7 @@ tasks.register("resolveAndLockAll") {
     doLast {
         allprojects.forEach { project ->
             project.configurations
-                .filter { it.isCanBeResolved && !it.name.startsWith("_agp_internal_") }
+                .filter { it.isCanBeResolved && !it.name.startsWith("_") }
                 .forEach { it.resolve() }
         }
     }
