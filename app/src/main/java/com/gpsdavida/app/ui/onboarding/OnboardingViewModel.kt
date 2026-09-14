@@ -7,6 +7,7 @@ import com.superplanner.app.domain.model.AvailabilityId
 import com.superplanner.app.domain.model.AvailabilityKind
 import com.superplanner.app.domain.model.Event
 import com.superplanner.app.domain.model.EventId
+import com.superplanner.app.domain.model.LocalTimeWindow
 import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.domain.model.Task
 import com.superplanner.app.domain.model.TaskId
@@ -88,7 +89,7 @@ class OnboardingViewModel @Inject constructor(
                 Availability(
                     id = AvailabilityId(UUID.randomUUID().toString()),
                     dayOfWeek = today.dayOfWeek,
-                    window = com.superplanner.app.domain.model.LocalTimeWindow(availableFrom, availableUntil),
+                    window = LocalTimeWindow(availableFrom, availableUntil),
                     kind = AvailabilityKind.FREE,
                 ),
             )
