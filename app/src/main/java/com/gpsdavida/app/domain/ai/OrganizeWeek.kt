@@ -10,6 +10,24 @@ data class OrganizeWeekRequest(
     val logistics: List<OrganizeWeekLogisticConstraint> = emptyList(),
     val preferences: List<OrganizeWeekPreference> = emptyList(),
     val aiTips: List<String> = emptyList(),
+    val capacity: OrganizeWeekCapacity? = null,
+)
+
+data class OrganizeWeekCapacity(
+    val load: String,
+    val totalCapacityMinutes: Int,
+    val totalDesiredMinutes: Int,
+    val totalRemainingMinutes: Int,
+    val days: List<OrganizeWeekDayCapacity> = emptyList(),
+    val reasons: List<String> = emptyList(),
+)
+
+data class OrganizeWeekDayCapacity(
+    val date: String,
+    val load: String,
+    val schedulableMinutes: Int,
+    val desiredMinutes: Int,
+    val remainingMinutes: Int,
 )
 
 data class OrganizeWeekPlanItem(
