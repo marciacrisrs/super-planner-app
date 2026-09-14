@@ -17,10 +17,12 @@ subprojects {
     }
 
     // Gradle/AGP/KSP create implementation-detail configurations that must not
-    // participate in dependency locking. This includes internal '_' configs and
-    // Android dependency metadata configurations used to build variant metadata.
+    // participate in dependency locking. This includes internal '_' configs,
+    // Android dependency metadata configurations and the JDK image configuration.
     configurations.matching {
-        it.name.startsWith("_") || it.name.endsWith("DependenciesMetadata")
+        it.name.startsWith("_") ||
+            it.name.endsWith("DependenciesMetadata") ||
+            it.name == "androidJdkImage"
     }.configureEach {
         resolutionStrategy.deactivateDependencyLocking()
     }
@@ -35,24 +37,21 @@ subprojects {
 
 tasks.register("resolveAndLockAll") {
     group = "dependency management"
-    description = "Resolves all lockable configurations and writes Gradle dependency lockfiles."
-    notCompatibleWithConfigurationCache("Resolves configurations dynamically to persist dependency locks")
+    description = "Generates dependency locks through Gradle's normal task resolution."
+    notCompatibleWithConfigurationCache("Generates dependency locks through normal task resolution")
     doFirst {
         require(gradle.startParameter.isWriteDependencyLocks) {
             "Run this task with --write-locks"
         }
     }
-    doLast {
-        allprojects.forEach { project ->
-            project.configurations
-                .filter {
-                    it.isCanBeResolved &&
-                        !it.name.startsWith("_") &&
-                        !it.name.endsWith("DependenciesMetadata")
-                }
-                .forEach { it.resolve() }
-        }
-    }
+    dependsOn(
+        ":app:detekt",
+        ":app:lintDebug",
+        ":app:testDebugUnitTest",
+        ":app:koverXmlReport",
+        ":app:koverVerify",
+        ":app:assembleDebug",
+    )
 }
 
 sonar {
