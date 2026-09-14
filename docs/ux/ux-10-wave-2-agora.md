@@ -1,20 +1,34 @@
-# UX 10 — Wave 2 Agora
+# UX 10 — Wave 2: Agora
 
-## User outcome
+## Objective
 
-The person opens Agora and can quickly decide what makes sense to do now.
+Transform Agora from a task display into the product's primary decision moment: help the person understand what fits now, offer a coherent suggestion, explain it briefly, and preserve the person's choice.
 
-## Acceptance criteria
+## Implemented in this wave
 
-- One recommendation has clear visual priority.
-- The experience communicates that it is a suggestion, not an instruction.
-- Duration and timing context are immediately scannable.
-- The reason is concise and causal.
-- Alternatives are discoverable without competing with the primary choice.
-- Skip/defer actions remain low-friction and non-punitive.
-- Empty and completed states provide a useful next step rather than a dead end.
-- Fixed commitments remain distinguishable from suggested work.
+- Reframed the next-action card as **a suggestion**, not an instruction.
+- Changed visible action language from `Trocar próxima ação` to `Ver outra opção`.
+- Changed `Começar` to `Fazer agora` to reduce the sense of a workflow command.
+- Changed `Adiar` to `Deixar para depois` to make the action neutral and non-punitive.
+- Rewrote recommendation explanations to avoid first-person system agency such as `Escolhi agora...`.
+- Centralized feedback copy in string resources.
+- Made the empty state explicitly communicate that pending work can exist without a good option fitting right now.
+- Kept planning decisions and domain behavior unchanged; this wave is presentation and interaction language, not a planning-engine rewrite.
 
-## Core test
+## UX contract
 
-A new user should be able to identify the suggested next action, its duration, the relevant upcoming commitment and the reason for the suggestion without opening another screen.
+The Agora should answer, in order:
+
+1. **O que posso fazer agora?**
+2. **Quanto tempo isso leva?**
+3. **Por que isso faz sentido agora?**
+4. **Posso escolher outra coisa?**
+5. **Posso deixar para depois?**
+
+The system suggests; the person decides.
+
+## Quality gate
+
+A Wave 2 implementation is considered complete when the screen can communicate a useful next choice without implying that the planner has authority over the person's decision.
+
+Next wave: **capacity / what fits** — make available capacity and constraints understandable before the recommendation is acted on.
