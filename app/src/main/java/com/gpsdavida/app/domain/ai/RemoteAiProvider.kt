@@ -14,6 +14,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -26,36 +27,58 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         val endpoint = BuildConfig.AI_GATEWAY_URL.trim().trimEnd('/')
         require(endpoint.isNotEmpty()) { "AI gateway is not configured" }
 
+        val requestId = UUID.randomUUID().toString()
         val connection = (URL("$endpoint/v1/ai/propose").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = 8_000
             readTimeout = 20_000
             doOutput = true
-            setRequestProperty("Content-Type", "application/json")
+            setRequestProperty("Content-Type", "application/json; charset=utf-8")
             setRequestProperty("Accept", "application/json")
+            setRequestProperty("Cache-Control", "no-store")
+            setRequestProperty("X-Request-Id", requestId)
+            setRequestProperty("X-AI-Schema-Version", AI_PROPOSAL_SCHEMA_VERSION)
         }
 
         try {
-            val context = JSONObject().apply {
-                request.context.nowIso?.let { put("nowIso", it) }
-                request.context.activeActivityId?.let { put("activeActivityId", it) }
-                put("minimalRouteFacts", JSONArray(request.context.minimalRouteFacts))
-            }
-            val body = JSONObject().apply {
-                put("message", request.message)
-                put("context", context)
-            }
-
+            val body = buildRequestBody(request)
             connection.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
 
             val status = connection.responseCode
             val stream = if (status in 200..299) connection.inputStream else connection.errorStream
-            val responseBody = BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).use { it.readText() }
-            if (status !in 200..299) error("AI gateway returned HTTP $status")
+            val responseBody = stream?.let {
+                BufferedReader(InputStreamReader(it, Charsets.UTF_8)).use { reader -> reader.readText() }
+            }.orEmpty()
 
+            if (status !in 200..299) {
+                val gatewayError = runCatching {
+                    JSONObject(responseBody).optString("error").takeIf(String::isNotBlank)
+                }.getOrNull()
+                error(
+                    buildString {
+                        append("AI gateway returned HTTP ")
+                        append(status)
+                        gatewayError?.let { append(": ").append(it) }
+                    },
+                )
+            }
+
+            require(responseBody.isNotBlank()) { "AI gateway returned an empty response" }
             mapProposal(JSONObject(responseBody).getJSONObject("proposal"), request)
         } finally {
             connection.disconnect()
+        }
+    }
+
+    private fun buildRequestBody(request: AiRequest): JSONObject {
+        val context = JSONObject().apply {
+            request.context.nowIso?.let { put("nowIso", it) }
+            request.context.activeActivityId?.let { put("activeActivityId", it) }
+            put("minimalRouteFacts", JSONArray(request.context.minimalRouteFacts))
+        }
+        return JSONObject().apply {
+            put("message", request.message)
+            put("context", context)
         }
     }
 
