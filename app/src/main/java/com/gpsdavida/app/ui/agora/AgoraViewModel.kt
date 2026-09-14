@@ -19,6 +19,7 @@ import com.superplanner.app.domain.usecase.StartActivityInstance
 import com.superplanner.app.ui.notifications.ActivityNotificationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
+import java.time.Duration
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,6 +76,13 @@ class AgoraViewModel @Inject constructor(
             moved = moved,
             deferred = recalculated.conflicts.size,
         )
+        val capacityBudget = (dailyCapacity ?: DailyCapacity(Duration.ofHours(8))).schedulable
+        val usedCapacity = recalculated.activities
+            .filter { it.status != ActivityStatus.DONE }
+            .fold(Duration.ZERO) { total, activity -> total.plus(activity.plannedDuration) }
+        val capacityRemainingMinutes = capacityBudget.minus(usedCapacity)
+            .toMinutes()
+            .coerceAtLeast(0)
         val mappedActivities = activities.map { daily ->
             recalculated.activities.firstOrNull { it.id == daily.instance.id }?.let { daily.copy(instance = it) } ?: daily
         }
@@ -85,6 +93,7 @@ class AgoraViewModel @Inject constructor(
             clock.zone,
             lowCapacity = lowCapacity,
             lowCapacitySummary = summary,
+            capacityRemainingMinutes = capacityRemainingMinutes,
         )
         decision.recommended?.let { ActivityNotificationScheduler.schedule(getApplication(), it) }
         mapped
