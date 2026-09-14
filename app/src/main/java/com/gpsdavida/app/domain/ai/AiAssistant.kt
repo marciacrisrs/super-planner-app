@@ -13,7 +13,7 @@ import javax.inject.Inject
 class AiAssistant @Inject constructor(
     private val provider: AiProvider,
     private val tools: AiToolGateway,
-    private val telemetry: AiTelemetry,
+    private val telemetry: AiTelemetry = NoOpAiTelemetry,
 ) {
     suspend fun propose(request: AiRequest): AiProposal = provider.interpret(request)
 
