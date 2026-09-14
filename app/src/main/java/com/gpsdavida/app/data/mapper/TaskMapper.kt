@@ -15,6 +15,7 @@ fun TaskEntity.toDomain(): Task =
         priority = Priority.valueOf(priority),
         due = dueEpochMilli?.let(Instant::ofEpochMilli),
         completedAt = completedAtEpochMilli?.let(Instant::ofEpochMilli),
+        fixedStartAt = fixedStartEpochMilli?.let(Instant::ofEpochMilli),
     )
 
 fun Task.toEntity(): TaskEntity =
@@ -25,4 +26,5 @@ fun Task.toEntity(): TaskEntity =
         priority = priority.name,
         dueEpochMilli = due?.toEpochMilli(),
         completedAtEpochMilli = completedAt?.toEpochMilli(),
+        fixedStartEpochMilli = fixedStartAt?.toEpochMilli(),
     )
