@@ -2,6 +2,7 @@ package com.superplanner.app.domain.planning
 
 import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.model.DailyCapacity
+import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.TimeRange
 import java.time.Duration
 import java.time.Instant
@@ -71,11 +72,16 @@ class ReorganizeDay(
         operation: DayReorganizationOperation.DelayActivity,
     ): PlanningInput {
         require(operation.minutes > 0) { "Delay must be positive" }
+        val activity = input.activities.firstOrNull { it.id == operation.activityId }
+            ?: error("Unknown activity: ${operation.activityId.value}")
+        require(activity.flexibility != Flexibility.FIXED) {
+            "Fixed activities require an explicit user-approved change before they can move"
+        }
         val shift = Duration.ofMinutes(operation.minutes)
         return input.copy(
-            activities = input.activities.map { activity ->
-                if (activity.id != operation.activityId) activity
-                else activity.copy(planned = activity.planned.shiftedBy(shift))
+            activities = input.activities.map { current ->
+                if (current.id != operation.activityId) current
+                else current.copy(planned = current.planned.shiftedBy(shift))
             },
         )
     }
