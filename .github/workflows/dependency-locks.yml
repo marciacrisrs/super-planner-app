@@ -32,7 +32,7 @@ jobs:
       - name: Generate dependency lock state
         run: |
           chmod +x gradlew
-          ./gradlew detekt lintDebug testDebugUnitTest koverXmlReport koverVerify assembleDebug --write-locks --stacktrace --no-daemon
+          ./gradlew resolveAndLockAll --write-locks --stacktrace --no-daemon
 
       - name: Commit generated lockfiles
         run: |
