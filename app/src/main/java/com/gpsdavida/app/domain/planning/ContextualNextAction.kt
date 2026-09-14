@@ -52,7 +52,10 @@ class ContextualNextActionSelector {
     ): ContextualNextAction {
         val rejected = mutableListOf<RejectedNextAction>()
         val feasible = candidates.filter { candidate ->
-            val available = minDuration(context.availableUntil.minus(context.now), context.capacityRemaining)
+            val available = minDuration(
+                Duration.between(context.now, context.availableUntil),
+                context.capacityRemaining,
+            )
             when {
                 candidate.availableFrom.isAfter(context.now) -> {
                     rejected += RejectedNextAction(candidate.id, "atividade ainda não está disponível")
