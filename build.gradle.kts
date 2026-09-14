@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kover) apply false
     alias(libs.plugins.detekt) apply false
+    id("org.sonarqube") version "7.4.0.8496"
 }
 
 subprojects {
@@ -15,6 +16,25 @@ subprojects {
             buildUponDefaultConfig = true
         }
     }
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "marciacrisrs_super-planner-app")
+        property("sonar.organization", "marciacrisrs")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.sourceEncoding", "UTF-8")
+        property("sonar.kotlin.detekt.reportPaths", "$rootDir/app/build/reports/detekt/detekt.xml")
+        property("sonar.androidLint.reportPaths", "$rootDir/app/build/reports/lint-results-debug.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", "$rootDir/app/build/reports/kover/report.xml")
+        property("sonar.junit.reportPaths", "$rootDir/app/build/test-results/testDebugUnitTest")
+        property("sonar.coverage.exclusions", "**/BuildConfig.*,**/R.*,**/*Hilt_*,**/*_HiltModules*.*,**/*_Factory.*,**/*_MembersInjector*.*,**/ui/**,**/di/**")
+        property("sonar.qualitygate.wait", "true")
+    }
+}
+
+tasks.named("sonar") {
+    dependsOn(":app:detekt", ":app:lintDebug", ":app:testDebugUnitTest", ":app:koverXmlReport")
 }
 
 tasks.register("verifyCi") {
