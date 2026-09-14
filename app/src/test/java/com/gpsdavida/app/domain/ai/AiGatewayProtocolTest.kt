@@ -21,14 +21,16 @@ class AiGatewayProtocolTest {
 
         val json = AiGatewayProtocol.buildRequestBody(request)
         val context = json.getJSONObject("context")
+        val jsonKeys = (0 until json.names().length()).map { json.names().getString(it) }.toSet()
+        val contextKeys = (0 until context.names().length()).map { context.names().getString(it) }.toSet()
 
         assertEquals("1", json.getString("schemaVersion"))
         assertEquals(request.message, json.getString("message"))
         assertEquals("2026-09-13T21:00:00-03:00", context.getString("nowIso"))
         assertEquals("activity-123", context.getString("activeActivityId"))
         assertEquals(2, context.getJSONArray("minimalRouteFacts").length())
-        assertEquals(setOf("schemaVersion", "message", "context"), json.keySet())
-        assertEquals(setOf("nowIso", "activeActivityId", "minimalRouteFacts"), context.keySet())
+        assertEquals(setOf("schemaVersion", "message", "context"), jsonKeys)
+        assertEquals(setOf("nowIso", "activeActivityId", "minimalRouteFacts"), contextKeys)
         assertFalse(json.toString().contains("password", ignoreCase = true))
         assertFalse(json.toString().contains("api_key", ignoreCase = true))
     }
