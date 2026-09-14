@@ -96,7 +96,7 @@ fun AgoraScreen(viewModel: AgoraViewModel = hiltViewModel()) {
             nextWindowMinutes = state.nextWindowMinutes,
             modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedButton(Modifier.fillMaxWidth(), onClick = { showCapacityDialog = true }) {
+        OutlinedButton(onClick = { showCapacityDialog = true }, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(if (state.lowCapacity) R.string.low_capacity_active_button else R.string.low_capacity_button))
         }
         if (state.lowCapacity) Text(stringResource(R.string.low_capacity_summary, state.lowCapacitySummary.preserved, state.lowCapacitySummary.moved, state.lowCapacitySummary.deferred), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
@@ -119,7 +119,7 @@ fun AgoraScreen(viewModel: AgoraViewModel = hiltViewModel()) {
         )
 
         if (currentActivity != null && feedbackGivenFor != currentActivity.id.value) {
-            OutlinedButton(Modifier.fillMaxWidth(), onClick = { showFeedbackDialog = true }) { Text(stringResource(R.string.agora_feedback_title)) }
+            OutlinedButton(onClick = { showFeedbackDialog = true }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.agora_feedback_title)) }
         } else if (feedbackGivenFor == currentActivity?.id?.value) {
             Text(stringResource(R.string.agora_feedback_recorded), style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
         }
@@ -134,5 +134,5 @@ fun AgoraScreen(viewModel: AgoraViewModel = hiltViewModel()) {
 
 @Composable
 private fun FeedbackOption(label: String, reason: RouteFeedbackReason, viewModel: AgoraViewModel, onRecorded: () -> Unit) {
-    OutlinedButton(Modifier.fillMaxWidth(), onClick = { viewModel.recordCurrentFeedback(reason); onRecorded() }) { Text(label) }
+    OutlinedButton(onClick = { viewModel.recordCurrentFeedback(reason); onRecorded() }, modifier = Modifier.fillMaxWidth()) { Text(label) }
 }
