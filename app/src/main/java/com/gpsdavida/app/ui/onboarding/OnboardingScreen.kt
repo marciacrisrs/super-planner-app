@@ -104,10 +104,23 @@ fun OnboardingScreen(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 TextButton(
-                    onClick = if (step < 2) ({ step += 1 }) else viewModel::skip,
+                    onClick = {
+                        if (step < 2) {
+                            step += 1
+                        } else {
+                            viewModel.createFirstRoute(
+                                intent = intent,
+                                fixedTitle = "",
+                                fixedStart = fixedStart,
+                                fixedEnd = fixedEnd,
+                                availabilityStart = availabilityStart,
+                                availabilityEnd = availabilityEnd,
+                            )
+                        }
+                    },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text(if (step < 2) "Pular" else "Começar sem isso")
+                    Text("Pular")
                 }
                 SuperPlannerPrimaryButton(
                     text = if (step < 2) "Continuar" else "Criar meu primeiro dia",
