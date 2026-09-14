@@ -1,7 +1,9 @@
-package com.superplanner.app.di
+package com.gpsdavida.app.di
 
-import com.superplanner.app.data.DefaultAiToolGateway
+import com.gpsdavida.app.data.DefaultAiToolGateway
+import com.gpsdavida.app.data.LogcatAiTelemetry
 import com.superplanner.app.domain.ai.AiProvider
+import com.superplanner.app.domain.ai.AiTelemetry
 import com.superplanner.app.domain.ai.HybridAiProvider
 import com.superplanner.app.domain.port.AiToolGateway
 import dagger.Binds
@@ -20,4 +22,8 @@ abstract class AiModule {
     @Binds
     @Singleton
     abstract fun bindAiToolGateway(implementation: DefaultAiToolGateway): AiToolGateway
+
+    @Binds
+    @Singleton
+    abstract fun bindAiTelemetry(implementation: LogcatAiTelemetry): AiTelemetry
 }
