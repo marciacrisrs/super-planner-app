@@ -28,7 +28,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
 
-      - name: Build, lint, test and verify coverage
+      - name: Build, lint, Detekt, test and verify coverage
         run: |
           chmod +x gradlew
-          ./gradlew lintDebug test koverXmlReport koverVerify assembleDebug --stacktrace --no-daemon
+          ./gradlew detekt lintDebug test koverXmlReport koverVerify assembleDebug --stacktrace --no-daemon
