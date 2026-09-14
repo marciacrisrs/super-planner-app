@@ -1,7 +1,7 @@
 package com.gpsdavida.app.di
 
-import com.gpsdavida.app.data.DefaultAiToolGateway
-import com.gpsdavida.app.data.LogcatAiTelemetry
+import com.superplanner.app.data.DefaultAiToolGateway
+import com.superplanner.app.data.LogcatAiTelemetry
 import com.superplanner.app.domain.ai.AiProvider
 import com.superplanner.app.domain.ai.AiTelemetry
 import com.superplanner.app.domain.ai.HybridAiProvider
