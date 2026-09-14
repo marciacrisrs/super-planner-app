@@ -1,6 +1,8 @@
 package com.superplanner.app.domain.usecase
 
 import com.superplanner.app.domain.ai.NaturalLanguageActivityParser
+import com.superplanner.app.domain.model.Flexibility
+import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.domain.model.Task
 import com.superplanner.app.domain.model.TaskId
 import com.superplanner.app.domain.port.TaskRepository
@@ -44,18 +46,26 @@ class NaturalLanguageToScheduleFixedStartTest {
         assertEquals(expectedStart, created.task.fixedStartAt)
         assertEquals(Duration.ofHours(1), created.task.plannedDuration)
 
+        val flexibleTask = Task(
+            id = TaskId("flexible-before-fixed"),
+            title = "Ler",
+            plannedDuration = Duration.ofHours(1),
+            priority = Priority.IMPORTANT,
+            due = targetDate.atTime(17, 0).atZone(zone).toInstant(),
+        )
+
         val dailyActivities = materialize(
             events = emptyList(),
-            tasks = listOf(created.task),
+            tasks = listOf(created.task, flexibleTask),
             habits = emptyList(),
             routines = emptyList(),
             date = targetDate,
             zoneId = zone,
         )
 
-        val materialized = dailyActivities.single().instance
-        assertEquals(expectedStart, materialized.planned.start)
-        assertEquals(com.superplanner.app.domain.model.Flexibility.FIXED, materialized.flexibility)
+        val fixedMaterialized = dailyActivities.first { it.title == "francês" }.instance
+        assertEquals(expectedStart, fixedMaterialized.planned.start)
+        assertEquals(Flexibility.FIXED, fixedMaterialized.flexibility)
 
         val schedule = scheduler(
             activities = dailyActivities.map { it.instance },
@@ -63,10 +73,13 @@ class NaturalLanguageToScheduleFixedStartTest {
             zoneId = zone,
         )
 
-        val scheduled = schedule.activities.single()
         assertTrue(schedule.conflicts.isEmpty())
-        assertEquals(expectedStart, scheduled.planned.start)
-        assertEquals(expectedStart.plus(Duration.ofHours(1)), scheduled.planned.end)
+        val scheduledFixed = schedule.activities.first { it.title == "francês" }
+        val scheduledFlexible = schedule.activities.first { it.title == "Ler" }
+        assertEquals(expectedStart, scheduledFixed.planned.start)
+        assertEquals(expectedStart.plus(Duration.ofHours(1)), scheduledFixed.planned.end)
+        assertEquals(targetDate.atTime(17, 0).atZone(zone).toInstant(), scheduledFlexible.planned.start)
+        assertEquals(Flexibility.FIXED, scheduledFixed.flexibility)
     }
 
     private class InMemoryTaskRepository : TaskRepository {
