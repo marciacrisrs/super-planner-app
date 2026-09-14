@@ -49,10 +49,11 @@ class AgoraViewModel @Inject constructor(
     }
     private val recentlyCompleted = MutableStateFlow<com.superplanner.app.domain.model.ActivityInstance?>(null)
     private val lowCapacityMode = MutableStateFlow(false)
+    private val replanRequested = MutableStateFlow(0L)
 
-    val state: StateFlow<AgoraUiState> = combine(observeExecutableDay(), nowFlow, recentlyCompleted, lowCapacityMode) { activities, now, completed, lowCapacity ->
+    val state: StateFlow<AgoraUiState> = combine(observeExecutableDay(), nowFlow, recentlyCompleted, lowCapacityMode, replanRequested) { activities, now, completed, lowCapacity, _ ->
         val original = activities.map { it.instance }
-        val dailyCapacity: DailyCapacity? = lowCapacity.let { active -> if (active) LowCapacityPlanner.capacity() else null }
+        val dailyCapacity: DailyCapacity? = if (lowCapacity) LowCapacityPlanner.capacity() else null
         val recalculated = recalculateRoute(
             original,
             now.atZone(clock.zone).toLocalDate(),
@@ -80,9 +81,7 @@ class AgoraViewModel @Inject constructor(
         val usedCapacity = recalculated.activities
             .filter { it.status != ActivityStatus.DONE }
             .fold(Duration.ZERO) { total, activity -> total.plus(activity.plannedDuration) }
-        val capacityRemainingMinutes = capacityBudget.minus(usedCapacity)
-            .toMinutes()
-            .coerceAtLeast(0)
+        val capacityRemainingMinutes = capacityBudget.minus(usedCapacity).toMinutes().coerceAtLeast(0)
         val mappedActivities = activities.map { daily ->
             recalculated.activities.firstOrNull { it.id == daily.instance.id }?.let { daily.copy(instance = it) } ?: daily
         }
@@ -99,41 +98,29 @@ class AgoraViewModel @Inject constructor(
         mapped
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AgoraUiState())
 
-    fun setLowCapacity(enabled: Boolean) {
-        lowCapacityMode.value = enabled
-    }
+    fun setLowCapacity(enabled: Boolean) { lowCapacityMode.value = enabled }
+
+    fun requestReplan() { replanRequested.value += 1 }
 
     fun recordCurrentFeedback(reason: RouteFeedbackReason) {
-        state.value.currentActivity?.let { activity ->
-            viewModelScope.launch {
-                recordRouteFeedback(activity.id, reason)
-            }
-        }
+        state.value.currentActivity?.let { activity -> viewModelScope.launch { recordRouteFeedback(activity.id, reason) } }
     }
 
     fun startCurrent() {
-        state.value.currentActivity?.takeIf { it.status == ActivityStatus.PENDING }?.let { activity ->
-            viewModelScope.launch { startActivity(activity) }
-        }
+        state.value.currentActivity?.takeIf { it.status == ActivityStatus.PENDING }?.let { activity -> viewModelScope.launch { startActivity(activity) } }
     }
 
     fun completeCurrent() {
         state.value.currentActivity?.takeIf { it.status == ActivityStatus.IN_PROGRESS }?.let { activity ->
-            viewModelScope.launch {
-                recentlyCompleted.value = completeActivity(activity)
-            }
+            viewModelScope.launch { recentlyCompleted.value = completeActivity(activity) }
         }
     }
 
     fun skipCurrent() {
-        state.value.currentActivity?.takeIf { it.status == ActivityStatus.PENDING }?.let { activity ->
-            viewModelScope.launch { skipActivity(activity) }
-        }
+        state.value.currentActivity?.takeIf { it.status == ActivityStatus.PENDING }?.let { activity -> viewModelScope.launch { skipActivity(activity) } }
     }
 
     fun deferCurrent() {
-        state.value.currentActivity?.takeIf { it.status == ActivityStatus.PENDING }?.let { activity ->
-            viewModelScope.launch { deferActivity(activity) }
-        }
+        state.value.currentActivity?.takeIf { it.status == ActivityStatus.PENDING }?.let { activity -> viewModelScope.launch { deferActivity(activity) } }
     }
 }
