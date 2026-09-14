@@ -173,7 +173,7 @@ class AiAssistantTest {
         assertEquals(2, command.evidence.size)
         assertEquals(evidence, command.evidence)
         assertTrue(proposal.explanation.isNotBlank())
-        assertTrue(domainExplanation.reasons.isNotEmpty())
+        assertTrue(domainExplanation.facts.isNotEmpty())
         assertTrue(!proposal.requiresConfirmation)
     }
 
