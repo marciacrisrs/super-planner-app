@@ -33,7 +33,7 @@ class AgoraExplainabilityTest {
         val state = AgoraUiMapper.map(listOf(current), decision, now, zone)
 
         assertEquals(
-            "Escolhi agora porque tem prioridade mais alta e já pode ser feita.",
+            "Uma boa opção para agora: tem prioridade mais alta e já pode ser feita.",
             state.explanation,
         )
     }
@@ -46,7 +46,7 @@ class AgoraExplainabilityTest {
 
         val state = AgoraUiMapper.map(listOf(current, next), decision, now, zone)
 
-        assertTrue(state.nextUpcoming?.explanation?.contains("prioridade maior") == true)
+        assertTrue(state.nextUpcoming?.explanation?.contains("outra cabe melhor") == true)
         assertEquals(NextActionState.Ready, state.state)
     }
 
