@@ -16,9 +16,12 @@ subprojects {
         lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
     }
 
-    // Gradle/AGP/KSP create implementation-detail configurations that are not
-    // project dependency surfaces and must not participate in locking.
-    configurations.matching { it.name.startsWith("_") || it.name == "androidJdkImage" }.configureEach {
+    // Gradle/AGP/KSP create implementation-detail configurations that must not
+    // participate in dependency locking. This includes internal '_' configs and
+    // Android dependency metadata configurations used to build variant metadata.
+    configurations.matching {
+        it.name.startsWith("_") || it.name.endsWith("DependenciesMetadata")
+    }.configureEach {
         resolutionStrategy.deactivateDependencyLocking()
     }
 
@@ -42,7 +45,11 @@ tasks.register("resolveAndLockAll") {
     doLast {
         allprojects.forEach { project ->
             project.configurations
-                .filter { it.isCanBeResolved && !it.name.startsWith("_") && it.name != "androidJdkImage" }
+                .filter {
+                    it.isCanBeResolved &&
+                        !it.name.startsWith("_") &&
+                        !it.name.endsWith("DependenciesMetadata")
+                }
                 .forEach { it.resolve() }
         }
     }
