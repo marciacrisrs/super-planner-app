@@ -1,4 +1,4 @@
-package com.superplanner.app.domain.planning
+package com.gpsdavida.app.domain.planning
 
 import java.time.Duration
 import org.junit.Assert.assertEquals
@@ -72,7 +72,7 @@ class WeeklyCapacityAssessmentTest {
         val result = estimator.estimateWeek(
             listOf(
                 CapacityEstimateInput("2026-09-14", Duration.ofHours(10), work = Duration.ofHours(4), desiredActivities = Duration.ofHours(1)),
-                CapacityEstimateInput("2026-09-15", Duration.ofHours(10), work = Duration.ofHours(4), desiredActivities = Duration.ofHours(5)),
+                CapacityEstimateInput("2026-09-15", Duration.ofHours(10), work = Duration.ofHours(4), desiredActivities = Duration.ofHours(7)),
             ),
         )
 
