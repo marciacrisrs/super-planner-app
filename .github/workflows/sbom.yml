@@ -27,7 +27,7 @@ jobs:
           java-version: '17'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v6
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
@@ -36,6 +36,9 @@ jobs:
 
       - name: Grant execute permission
         run: chmod +x gradlew
+
+      - name: Generate dependency lock state
+        run: ./gradlew resolveAndLockAll --write-locks --stacktrace --no-daemon
 
       - name: Generate CycloneDX SBOM
         run: ./gradlew cyclonedxBom --stacktrace --no-daemon
