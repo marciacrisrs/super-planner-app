@@ -20,8 +20,9 @@ class AiAssistant @Inject constructor(
     suspend fun execute(proposal: AiProposal, confirmation: AiConfirmation = AiConfirmation.NotConfirmed): AiExecution {
         val commandType = commandTypeOf(proposal.command)
         val explicitlyConfirmed = confirmation is AiConfirmation.Confirmed
-        if (proposal.requiresConfirmation && !explicitlyConfirmed) {
-            return AiExecution.AwaitingConfirmation(proposal)
+        val requiresConfirmation = proposal.requiresConfirmation || requiresExplicitConfirmation(proposal.command)
+        if (requiresConfirmation && !explicitlyConfirmed) {
+            return AiExecution.AwaitingConfirmation(proposal.copy(requiresConfirmation = true))
         }
         if (explicitlyConfirmed) telemetry.proposalConfirmed(commandType)
         return when (val result = tools.execute(proposal.command, confirmed = explicitlyConfirmed)) {
@@ -34,6 +35,14 @@ class AiAssistant @Inject constructor(
                 AiExecution.Executed(result)
             }
         }
+    }
+
+    private fun requiresExplicitConfirmation(command: AiCommand): Boolean = when (command) {
+        is AiCommand.CreateActivityDraft,
+        is AiCommand.ReorganizeDay -> true
+        is AiCommand.ExplainNextActivity,
+        is AiCommand.MissingInformation,
+        AiCommand.RecalculateRoute -> false
     }
 
     private fun commandTypeOf(command: AiCommand): String = when (command) {
