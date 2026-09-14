@@ -7,6 +7,7 @@ import com.superplanner.app.domain.model.NextActionDecision
 import com.superplanner.app.domain.model.NextActionReason
 import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.ui.next.NextActionState
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -40,6 +41,8 @@ data class AgoraUiState(
     val explanation: String? = null,
     val lowCapacity: Boolean = false,
     val lowCapacitySummary: LowCapacitySummary = LowCapacitySummary(),
+    val capacityRemainingMinutes: Long? = null,
+    val nextWindowMinutes: Long? = null,
 )
 
 object AgoraUiMapper {
@@ -50,6 +53,7 @@ object AgoraUiMapper {
         zoneId: ZoneId,
         lowCapacity: Boolean = false,
         lowCapacitySummary: LowCapacitySummary = LowCapacitySummary(),
+        capacityRemainingMinutes: Long? = null,
     ): AgoraUiState {
         val running = activities.firstOrNull { it.instance.status == ActivityStatus.IN_PROGRESS }
         val recommendedId = running?.instance?.id ?: decision.recommended?.id
@@ -58,6 +62,7 @@ object AgoraUiMapper {
             currentDate = now.atZone(zoneId).toLocalDate(),
             lowCapacity = lowCapacity,
             lowCapacitySummary = lowCapacitySummary,
+            capacityRemainingMinutes = capacityRemainingMinutes,
         )
 
         if (recommendedId == null) {
@@ -73,6 +78,11 @@ object AgoraUiMapper {
             decision.recommendedReasons
         }
         val nextForUpcoming = if (running == null) decision.next else null
+        val nextWindowMinutes = decision.next
+            ?.planned
+            ?.start
+            ?.let { Duration.between(now, it).toMinutes() }
+            ?.takeIf { it > 0 }
         val (nextUpcoming, laterUpcoming) = buildUpcoming(
             activities = activities,
             recommended = recommended,
@@ -88,6 +98,7 @@ object AgoraUiMapper {
             priority = recommended.priority,
             nextUpcoming = nextUpcoming,
             laterUpcoming = laterUpcoming,
+            nextWindowMinutes = nextWindowMinutes,
             state = when (recommended.status) {
                 ActivityStatus.IN_PROGRESS -> NextActionState.InProgress
                 ActivityStatus.DONE -> NextActionState.Completed
