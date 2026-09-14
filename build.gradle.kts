@@ -6,3 +6,13 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.kover) apply false
 }
+
+tasks.register("verifyCi") {
+    group = "verification"
+    description = "Checks de CI antes do release (lint, testes e cobertura)"
+    dependsOn(
+        ":app:lintDebug",
+        ":app:testDebugUnitTest",
+        ":app:koverVerify",
+    )
+}
