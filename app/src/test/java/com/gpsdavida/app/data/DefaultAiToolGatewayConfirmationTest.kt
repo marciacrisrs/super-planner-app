@@ -18,16 +18,21 @@ class DefaultAiToolGatewayConfirmationTest {
     fun `create command is rejected by gateway without explicit confirmation`() = runTest {
         var saves = 0
         val repository = object : TaskRepository {
+            override fun observeAll(): Flow<List<com.superplanner.app.domain.model.Task>> = flowOf(emptyList())
+            override suspend fun getById(id: com.superplanner.app.domain.model.TaskId): com.superplanner.app.domain.model.Task? = null
             override suspend fun save(task: com.superplanner.app.domain.model.Task) { saves++ }
-            override fun observe(): Flow<List<com.superplanner.app.domain.model.Task>> = flowOf(emptyList())
+            override suspend fun delete(id: com.superplanner.app.domain.model.TaskId) = Unit
         }
         val gateway = DefaultAiToolGateway(CreateTaskFromNaturalLanguageDraft(repository))
         val draft = NaturalLanguageActivityDraft(
+            sourceText = "estudar francês amanhã por uma hora",
             title = "estudar francês",
             plannedDuration = java.time.Duration.ofHours(1),
-            priority = Priority.IMPORTANT,
             date = LocalDate.of(2026, 9, 15),
             startTime = null,
+            recurrence = null,
+            priority = Priority.IMPORTANT,
+            energy = null,
             missingFields = emptySet(),
         )
 
