@@ -49,12 +49,13 @@ fun NextActionCard(
     onSnooze: () -> Unit = {},
     onComplete: () -> Unit = {},
     onSwap: () -> Unit = {},
+    onEmptyAction: () -> Unit = {},
     oneTapComplete: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     SuperPlannerCard(modifier = modifier.fillMaxWidth()) {
         when (model.state) {
-            NextActionState.Empty -> EmptyContent()
+            NextActionState.Empty -> EmptyContent(onEmptyAction)
             NextActionState.Completed -> CompletedContent(model.title)
             NextActionState.Ready, NextActionState.InProgress -> ReadyContent(model, onStart, onSnooze, onComplete, onSwap, oneTapComplete)
         }
@@ -81,18 +82,10 @@ private fun ReadyContent(
                 Text(model.title, style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Ink)
                 MetadataRow(model)
                 model.explanation?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = SuperPlannerColors.Ink,
-                    )
+                    Text(text = it, style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.Ink)
                 }
                 if (model.reasonLabels.isNotEmpty()) {
-                    Text(
-                        text = model.reasonLabels.take(3).joinToString(" · "),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = SuperPlannerColors.InkSoft,
-                    )
+                    Text(text = model.reasonLabels.take(3).joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
                 }
             }
             Image(
@@ -102,7 +95,6 @@ private fun ReadyContent(
                 contentScale = ContentScale.Fit,
             )
         }
-
         Spacer(modifier = Modifier.size(1.dp))
         SuperPlannerPrimaryButton(
             text = stringResource(if (oneTapComplete || model.state == NextActionState.InProgress) R.string.next_action_complete else R.string.next_action_start),
@@ -140,11 +132,12 @@ private fun NextLabel() {
 }
 
 @Composable
-private fun EmptyContent() {
+private fun EmptyContent(onAction: () -> Unit) {
     Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Icon(Icons.Outlined.CheckCircleOutline, contentDescription = null, tint = SuperPlannerColors.Sage, modifier = Modifier.size(28.dp))
         Text(stringResource(R.string.next_action_empty_title), style = MaterialTheme.typography.headlineSmall)
         Text(stringResource(R.string.next_action_empty_body), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        SuperPlannerPrimaryButton(text = stringResource(R.string.next_action_empty_action), onClick = onAction)
     }
 }
 
@@ -154,7 +147,10 @@ private fun CompletedContent(title: String) {
         Icon(Icons.Outlined.CheckCircleOutline, contentDescription = null, tint = SuperPlannerColors.Success, modifier = Modifier.size(44.dp))
         Column {
             Text(stringResource(R.string.next_action_completed_label), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.Success)
-            Text(title, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = title.ifBlank { stringResource(R.string.next_action_completed_body) },
+                style = MaterialTheme.typography.titleLarge,
+            )
         }
     }
 }
