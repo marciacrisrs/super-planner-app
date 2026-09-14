@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test:
-    name: Build, test and coverage
+    name: Build, lint, test and coverage
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -28,7 +28,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
 
-      - name: Build, test and verify coverage
+      - name: Build, lint, test and verify coverage
         run: |
           chmod +x gradlew
-          ./gradlew test koverXmlReport koverVerify assembleDebug --stacktrace --no-daemon
+          ./gradlew lintDebug test koverXmlReport koverVerify assembleDebug --stacktrace --no-daemon
