@@ -41,7 +41,7 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         }
 
         try {
-            val body = buildRequestBody(request)
+            val body = AiGatewayProtocol.buildRequestBody(request)
             connection.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
 
             val status = connection.responseCode
@@ -51,34 +51,13 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
             }.orEmpty()
 
             if (status !in 200..299) {
-                val gatewayError = runCatching {
-                    JSONObject(responseBody).optString("error").takeIf(String::isNotBlank)
-                }.getOrNull()
-                error(
-                    buildString {
-                        append("AI gateway returned HTTP ")
-                        append(status)
-                        gatewayError?.let { append(": ").append(it) }
-                    },
-                )
+                error("AI gateway returned HTTP $status: ${AiGatewayProtocol.parseError(responseBody, requestId)}")
             }
 
-            require(responseBody.isNotBlank()) { "AI gateway returned an empty response" }
+            require(responseBody.isNotBlank()) { "AI gateway returned an empty response [requestId=$requestId]" }
             mapProposal(JSONObject(responseBody).getJSONObject("proposal"), request)
         } finally {
             connection.disconnect()
-        }
-    }
-
-    private fun buildRequestBody(request: AiRequest): JSONObject {
-        val context = JSONObject().apply {
-            request.context.nowIso?.let { put("nowIso", it) }
-            request.context.activeActivityId?.let { put("activeActivityId", it) }
-            put("minimalRouteFacts", JSONArray(request.context.minimalRouteFacts))
-        }
-        return JSONObject().apply {
-            put("message", request.message)
-            put("context", context)
         }
     }
 
@@ -160,8 +139,6 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         )
     }
 }
-
-private const val AI_PROPOSAL_SCHEMA_VERSION = "1"
 
 private fun JSONArray.toStringList(): List<String> = buildList {
     for (index in 0 until length()) add(getString(index))
