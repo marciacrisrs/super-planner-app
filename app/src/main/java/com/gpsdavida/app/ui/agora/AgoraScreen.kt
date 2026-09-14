@@ -91,33 +91,48 @@ fun AgoraScreen(viewModel: AgoraViewModel = hiltViewModel()) {
             Text(state.currentTime.format(timeFmt), style = MaterialTheme.typography.displaySmall, color = SuperPlannerColors.Ink)
             Text(state.currentDate.format(dateFmt), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
         }
-        CapacityContextCard(state.capacityRemainingMinutes, state.nextWindowMinutes, Modifier.fillMaxWidth())
-        OutlinedButton(Modifier.fillMaxWidth(), onClick = { showCapacityDialog = true }) {
+        CapacityContextCard(
+            remainingMinutes = state.capacityRemainingMinutes,
+            nextWindowMinutes = state.nextWindowMinutes,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedButton(onClick = { showCapacityDialog = true }, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(if (state.lowCapacity) R.string.low_capacity_active_button else R.string.low_capacity_button))
         }
         if (state.lowCapacity) Text(stringResource(R.string.low_capacity_summary, state.lowCapacitySummary.preserved, state.lowCapacitySummary.moved, state.lowCapacitySummary.deferred), style = MaterialTheme.typography.bodyMedium, color = SuperPlannerColors.InkSoft)
 
         NextActionCard(
-            modifier = Modifier.fillMaxWidth(),
-            model = NextActionUiModel(state.title, state.durationMinutes, state.scheduledTime, state.priority?.let { stringResource(it.labelRes()) }, state.explanation, state.state),
+            model = NextActionUiModel(
+                title = state.title,
+                durationMinutes = state.durationMinutes,
+                scheduledTime = state.scheduledTime,
+                priorityLabel = state.priority?.let { stringResource(it.labelRes()) },
+                explanation = state.explanation,
+                state = state.state,
+            ),
             oneTapComplete = false,
             onStart = viewModel::startCurrent,
             onSnooze = viewModel::deferCurrent,
             onComplete = viewModel::completeCurrent,
             onSwap = viewModel::skipCurrent,
+            modifier = Modifier.fillMaxWidth(),
         )
 
         if (currentActivity != null && feedbackGivenFor != currentActivity.id.value) {
-            OutlinedButton(Modifier.fillMaxWidth(), onClick = { showFeedbackDialog = true }) { Text(stringResource(R.string.agora_feedback_title)) }
+            OutlinedButton(onClick = { showFeedbackDialog = true }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.agora_feedback_title)) }
         } else if (feedbackGivenFor == currentActivity?.id?.value) {
             Text(stringResource(R.string.agora_feedback_recorded), style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
         }
         if (state.nextUpcoming != null || state.laterUpcoming.isNotEmpty()) AgoraUpcomingSection(state.nextUpcoming, state.laterUpcoming)
-        AgoraRecoveryCard(hasCurrentActivity = currentActivity != null, onReplan = viewModel::requestReplan, modifier = Modifier.fillMaxWidth())
+        AgoraRecoveryCard(
+            hasCurrentActivity = currentActivity != null,
+            onReplan = viewModel::requestReplan,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
 @Composable
 private fun FeedbackOption(label: String, reason: RouteFeedbackReason, viewModel: AgoraViewModel, onRecorded: () -> Unit) {
-    OutlinedButton(Modifier.fillMaxWidth(), onClick = { viewModel.recordCurrentFeedback(reason); onRecorded() }) { Text(label) }
+    OutlinedButton(onClick = { viewModel.recordCurrentFeedback(reason); onRecorded() }, modifier = Modifier.fillMaxWidth()) { Text(label) }
 }
