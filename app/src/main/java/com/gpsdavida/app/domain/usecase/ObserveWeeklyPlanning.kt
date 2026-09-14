@@ -36,17 +36,9 @@ class ObserveWeeklyPlanning @Inject constructor(
     private val generateDailySchedule: GenerateDailySchedule,
     private val clock: Clock,
 ) {
-    operator fun invoke(
-        startDate: LocalDate,
-        zoneId: ZoneId = clock.zone,
-    ): Flow<WeeklyPlanning> = combine(listOf(
-        events.observeAll(),
-        tasks.observeAll(),
-        habits.observeAll(),
-        routines.observeAll(),
-        executions.observeAll(),
-        availability.observeAll(),
-        weeklyOverrides.observe(),
+    operator fun invoke(startDate: LocalDate, zoneId: ZoneId = clock.zone): Flow<WeeklyPlanning> = combine(listOf(
+        events.observeAll(), tasks.observeAll(), habits.observeAll(), routines.observeAll(),
+        executions.observeAll(), availability.observeAll(), weeklyOverrides.observe(),
     )) { values ->
         buildWeeklyPlanning(
             startDate = startDate,
@@ -72,39 +64,24 @@ class ObserveWeeklyPlanning @Inject constructor(
         availabilityList: List<Availability>,
         overrides: List<WeeklyPlanOverride>,
     ): WeeklyPlanning {
-        val overrideById = overrides.associateBy { it.activityId }
-        val days = (0L..6L).map { offset ->
+        val baseDays = (0L..6L).map { offset ->
             val date = startDate.plusDays(offset)
             val materialized = materialize(
                 events = eventList,
                 tasks = taskList,
-                habits = habitList.map { habit ->
-                    com.superplanner.app.domain.model.HabitDay(habit = habit, date = date, completedAt = null)
-                },
+                habits = habitList.map { habit -> com.superplanner.app.domain.model.HabitDay(habit, date, null) },
                 routines = routineList,
                 date = date,
                 zoneId = zoneId,
             )
             val schedule = generateDailySchedule(
-                activities = materialized.map { it.instance },
-                date = date,
-                availability = availabilityList,
-                zoneId = zoneId,
+                activities = materialized.map { it.instance }, date = date,
+                availability = availabilityList, zoneId = zoneId,
             )
             val titlesById = materialized.associateBy { it.instance.id }
-            val weeklyActivities = schedule.activities.mapNotNull { instance ->
+            val activities = schedule.activities.mapNotNull { instance ->
                 val source = titlesById[instance.id] ?: return@mapNotNull null
-                val override = overrideById[instance.id.value]
-                if (override != null && LocalDate.parse(override.date) != date) return@mapNotNull null
-                val effectiveInstance = override?.let { saved ->
-                    instance.copy(planned = com.superplanner.app.domain.model.TimeRange(saved.start, saved.end))
-                } ?: instance
-                WeeklyActivity(
-                    date = date,
-                    title = source.title,
-                    kind = effectiveInstance.kind(),
-                    instance = effectiveInstance,
-                )
+                WeeklyActivity(date, source.title, instance.kind(), instance)
             }
             val dayExecutions = executionList.filter { execution ->
                 execution.actual?.start?.atZone(zoneId)?.toLocalDate() == date ||
@@ -112,17 +89,44 @@ class ObserveWeeklyPlanning @Inject constructor(
             }
             WeeklyDaySummary(
                 date = date,
-                activities = weeklyActivities,
-                plannedDuration = weeklyActivities.fold(java.time.Duration.ZERO) { total, item -> total.plus(item.instance.plannedDuration) },
+                activities = activities,
+                plannedDuration = activities.fold(java.time.Duration.ZERO) { total, item -> total.plus(item.instance.plannedDuration) },
                 actualDuration = dayExecutions.fold(java.time.Duration.ZERO) { total, execution ->
                     total.plus(execution.actual?.duration ?: java.time.Duration.ZERO)
                 },
-                plannedCount = weeklyActivities.size,
+                plannedCount = activities.size,
                 completedCount = dayExecutions.count { it.status == ActivityStatus.DONE },
                 conflictCount = schedule.conflicts.size,
             )
         }
 
+        val byId = baseDays.flatMap { it.activities }.associateBy { it.instance.id.value }
+        val overriddenIds = overrides.map { it.activityId }.toSet()
+        val relocated = overrides.mapNotNull { override ->
+            val activity = byId[override.activityId] ?: return@mapNotNull null
+            val targetDate = LocalDate.parse(override.date)
+            if (targetDate !in baseDays.map { it.date }) return@mapNotNull null
+            activity to WeeklyActivity(
+                date = targetDate,
+                title = activity.title,
+                kind = activity.kind,
+                instance = activity.instance.copy(
+                    planned = com.superplanner.app.domain.model.TimeRange(override.start, override.end),
+                ),
+            )
+        }.associateBy { it.first.instance.id.value }
+
+        val days = baseDays.map { day ->
+            val movedOut = day.activities.filter { it.instance.id.value in overriddenIds && relocated[it.instance.id.value]?.second?.date != day.date }
+            val movedIn = relocated.values.filter { it.date == day.date }.map { it }
+            val retained = day.activities.filterNot { activity -> movedOut.any { it.instance.id == activity.instance.id } }
+            val finalActivities = (retained + movedIn).distinctBy { it.instance.id }.sortedBy { it.instance.planned.start }
+            day.copy(
+                activities = finalActivities,
+                plannedDuration = finalActivities.fold(java.time.Duration.ZERO) { total, item -> total.plus(item.instance.plannedDuration) },
+                plannedCount = finalActivities.size,
+            )
+        }
         return WeeklyPlanning(startDate, startDate.plusDays(6), days)
     }
 
