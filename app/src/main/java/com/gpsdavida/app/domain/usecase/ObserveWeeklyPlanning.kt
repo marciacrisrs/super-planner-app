@@ -14,6 +14,8 @@ import com.superplanner.app.domain.port.EventRepository
 import com.superplanner.app.domain.port.HabitRepository
 import com.superplanner.app.domain.port.RoutineRepository
 import com.superplanner.app.domain.port.TaskRepository
+import com.superplanner.app.domain.port.WeeklyPlanOverride
+import com.superplanner.app.domain.port.WeeklyPlanOverrideRepository
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
@@ -29,6 +31,7 @@ class ObserveWeeklyPlanning @Inject constructor(
     private val routines: RoutineRepository,
     private val executions: ActivityExecutionRepository,
     private val availability: AvailabilityRepository,
+    private val weeklyOverrides: WeeklyPlanOverrideRepository,
     private val materialize: MaterializeDailyActivities,
     private val generateDailySchedule: GenerateDailySchedule,
     private val clock: Clock,
@@ -36,23 +39,25 @@ class ObserveWeeklyPlanning @Inject constructor(
     operator fun invoke(
         startDate: LocalDate,
         zoneId: ZoneId = clock.zone,
-    ): Flow<WeeklyPlanning> = combine(listOf(
+    ): Flow<WeeklyPlanning> = combine(
         events.observeAll(),
         tasks.observeAll(),
         habits.observeAll(),
         routines.observeAll(),
         executions.observeAll(),
         availability.observeAll(),
-    )) { values ->
+        weeklyOverrides.observe(),
+    ) { eventList, taskList, habitList, routineList, executionList, availabilityList, overrides ->
         buildWeeklyPlanning(
             startDate = startDate,
             zoneId = zoneId,
-            eventList = values[0] as List<com.superplanner.app.domain.model.Event>,
-            taskList = values[1] as List<com.superplanner.app.domain.model.Task>,
-            habitList = values[2] as List<com.superplanner.app.domain.model.Habit>,
-            routineList = values[3] as List<com.superplanner.app.domain.model.Routine>,
-            executionList = values[4] as List<ActivityExecution>,
-            availabilityList = values[5] as List<Availability>,
+            eventList = eventList,
+            taskList = taskList,
+            habitList = habitList,
+            routineList = routineList,
+            executionList = executionList,
+            availabilityList = availabilityList,
+            overrides = overrides,
         )
     }
 
@@ -65,18 +70,16 @@ class ObserveWeeklyPlanning @Inject constructor(
         routineList: List<com.superplanner.app.domain.model.Routine>,
         executionList: List<ActivityExecution>,
         availabilityList: List<Availability>,
+        overrides: List<WeeklyPlanOverride>,
     ): WeeklyPlanning {
+        val overrideById = overrides.associateBy { it.activityId }
         val days = (0L..6L).map { offset ->
             val date = startDate.plusDays(offset)
             val materialized = materialize(
                 events = eventList,
                 tasks = taskList,
                 habits = habitList.map { habit ->
-                    com.superplanner.app.domain.model.HabitDay(
-                        habit = habit,
-                        date = date,
-                        completedAt = null,
-                    )
+                    com.superplanner.app.domain.model.HabitDay(habit = habit, date = date, completedAt = null)
                 },
                 routines = routineList,
                 date = date,
@@ -91,11 +94,18 @@ class ObserveWeeklyPlanning @Inject constructor(
             val titlesById = materialized.associateBy { it.instance.id }
             val weeklyActivities = schedule.activities.mapNotNull { instance ->
                 val source = titlesById[instance.id] ?: return@mapNotNull null
+                val override = overrideById[instance.id.value]
+                if (override != null && LocalDate.parse(override.date) != date) return@mapNotNull null
+                val effectiveInstance = override?.let { saved ->
+                    instance.copy(
+                        planned = com.superplanner.app.domain.model.TimeRange(saved.start, saved.end),
+                    )
+                } ?: instance
                 WeeklyActivity(
                     date = date,
                     title = source.title,
-                    kind = instance.kind(),
-                    instance = instance,
+                    kind = effectiveInstance.kind(),
+                    instance = effectiveInstance,
                 )
             }
             val dayExecutions = executionList.filter { execution ->
@@ -114,6 +124,7 @@ class ObserveWeeklyPlanning @Inject constructor(
                 conflictCount = schedule.conflicts.size,
             )
         }
+
         return WeeklyPlanning(startDate, startDate.plusDays(6), days)
     }
 
