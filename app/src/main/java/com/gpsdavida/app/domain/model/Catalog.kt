@@ -48,14 +48,16 @@ data class Task(
     val completedAt: Instant? = null,
     val energy: Energy? = null,
     val goalId: GoalId? = null,
+    /** Explicit user-declared start. Unlike [due], this is a hard scheduling constraint. */
+    val fixedStartAt: Instant? = null,
 ) {
-    val flexibility: Flexibility get() = Flexibility.FLEXIBLE
+    val flexibility: Flexibility get() = if (fixedStartAt != null) Flexibility.FIXED else Flexibility.FLEXIBLE
 
     val isDone: Boolean get() = completedAt != null
 
     fun belongsOnDay(date: LocalDate, zone: ZoneId): Boolean {
         if (completedAt != null) return completedAt.atZone(zone).toLocalDate() == date
-        val dueDate = due?.atZone(zone)?.toLocalDate() ?: return false
+        val dueDate = due?.atZone(zone)?.toLocalDate() ?: fixedStartAt?.atZone(zone)?.toLocalDate() ?: return false
         return !dueDate.isAfter(date)
     }
 }
