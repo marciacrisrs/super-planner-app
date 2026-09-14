@@ -2,7 +2,6 @@ package com.superplanner.app.domain.ai
 
 import com.superplanner.app.BuildConfig
 import com.superplanner.app.domain.model.ActivityInstanceId
-import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.domain.planning.DayReorganizationOperation
 import com.superplanner.app.domain.planning.DayReorganizationRequest
 import java.io.BufferedReader
@@ -112,13 +111,15 @@ private fun JSONArray.toStringList(): List<String> = buildList {
     for (index in 0 until length()) add(getString(index))
 }
 
-/** Uses the remote gateway when configured and keeps the app usable without network/AI. */
+/** Uses the local interpreter only when the remote transport is unavailable. */
 class HybridAiProvider @Inject constructor(
     private val remote: RemoteAiProvider,
     private val local: RuleBasedAiProvider,
 ) : AiProvider {
     override suspend fun interpret(request: AiRequest): AiProposal {
         if (BuildConfig.AI_GATEWAY_URL.isBlank()) return local.interpret(request)
-        return runCatching { remote.interpret(request) }.getOrElse { local.interpret(request) }
+        return runCatching { remote.interpret(request) }.getOrElse { error ->
+            if (AiFallbackPolicy.shouldFallback(error)) local.interpret(request) else throw error
+        }
     }
 }
