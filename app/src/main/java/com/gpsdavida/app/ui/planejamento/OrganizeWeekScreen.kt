@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.superplanner.app.domain.ai.OrganizeWeekResponse
 import com.superplanner.app.ui.theme.SuperPlannerColors
 
 @Composable
@@ -60,21 +61,19 @@ fun OrganizeWeekScreen(
                 Text(current.message, color = SuperPlannerColors.InkSoft)
                 Button(onClick = { viewModel.organize() }) { Text("Tentar novamente") }
             }
-            is OrganizeWeekState.Ready -> ProposalContent(current, onApply = viewModel::apply)
-            is OrganizeWeekState.Applied -> {
-                ProposalContent(current, onApply = {}, applied = true)
-            }
+            is OrganizeWeekState.Ready -> ProposalContent(current.response, onApply = viewModel::apply)
+            is OrganizeWeekState.Applied -> ProposalContent(current.response, onApply = {}, applied = true)
         }
     }
 }
 
 @Composable
 private fun ProposalContent(
-    state: OrganizeWeekState.Ready,
+    response: OrganizeWeekResponse,
     onApply: () -> Unit,
     applied: Boolean = false,
 ) {
-    val summary = state.response.summary
+    val summary = response.summary
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
         item {
             Card(colors = CardDefaults.cardColors(containerColor = SuperPlannerColors.TerracottaSoft), modifier = Modifier.fillMaxWidth()) {
@@ -92,15 +91,15 @@ private fun ProposalContent(
                 }
             }
         }
-        if (state.response.conflicts.isNotEmpty()) {
+        if (response.conflicts.isNotEmpty()) {
             item { Text("Conflitos", style = MaterialTheme.typography.titleMedium) }
-            items(state.response.conflicts) { conflict ->
+            items(response.conflicts) { conflict ->
                 Text("• ${conflict.title}: ${conflict.reason}", color = SuperPlannerColors.InkSoft)
             }
         }
-        if (state.response.explanations.isNotEmpty()) {
+        if (response.explanations.isNotEmpty()) {
             item { Text("Decisões explicadas", style = MaterialTheme.typography.titleMedium) }
-            items(state.response.explanations) { explanation ->
+            items(response.explanations) { explanation ->
                 Text("• ${explanation.message}", color = SuperPlannerColors.InkSoft)
             }
         }
