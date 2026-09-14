@@ -72,15 +72,105 @@ class AiGatewayProtocolTest {
     }
 
     @Test
-    fun response_schema_version_is_a_required_client_contract() {
-        val valid = JSONObject("""
-            {"schemaVersion":"1","commandType":"MISSING_INFORMATION"}
-        """)
-        val invalid = JSONObject("""
-            {"schemaVersion":"2","commandType":"MISSING_INFORMATION"}
-        """)
+    fun proposal_validator_accepts_valid_fixed_start_draft() {
+        val proposal = JSONObject(
+            """
+            {
+              "schemaVersion":"1",
+              "commandType":"CREATE_ACTIVITY_DRAFT",
+              "explanation":"Você informou o horário explicitamente.",
+              "requiresConfirmation":true,
+              "payload":{
+                "title":"Estudar francês",
+                "durationMinutes":60,
+                "date":"2026-09-14",
+                "startTime":"18:00",
+                "priority":"IMPORTANT",
+                "energy":"HIGH"
+              }
+            }
+            """.trimIndent(),
+        )
 
-        assertEquals(AI_PROPOSAL_SCHEMA_VERSION, valid.getString("schemaVersion"))
-        assertTrue(invalid.getString("schemaVersion") != AI_PROPOSAL_SCHEMA_VERSION)
+        AiGatewayProposalValidator.validate(proposal)
+        assertEquals("18:00", proposal.getJSONObject("payload").getString("startTime"))
+    }
+
+    @Test
+    fun proposal_validator_rejects_fixed_start_without_date() {
+        val proposal = validCreateProposal().apply {
+            getJSONObject("payload").remove("date")
+        }
+
+        assertRejected(proposal, "startTime requires date")
+    }
+
+    @Test
+    fun proposal_validator_rejects_create_without_confirmation() {
+        val proposal = validCreateProposal().apply {
+            put("requiresConfirmation", false)
+        }
+
+        assertRejected(proposal, "always requires confirmation")
+    }
+
+    @Test
+    fun proposal_validator_rejects_invalid_duration() {
+        val proposal = validCreateProposal().apply {
+            getJSONObject("payload").put("durationMinutes", 0)
+        }
+
+        assertRejected(proposal, "durationMinutes")
+    }
+
+    @Test
+    fun proposal_validator_rejects_unknown_schema() {
+        val proposal = validCreateProposal().apply {
+            put("schemaVersion", "2")
+        }
+
+        assertRejected(proposal, "Unsupported AI proposal schema")
+    }
+
+    @Test
+    fun proposal_validator_requires_confirmation_for_plan_changes() {
+        val proposal = JSONObject(
+            """
+            {
+              "schemaVersion":"1",
+              "commandType":"REORGANIZE_DAY",
+              "explanation":"Atrasar a atividade.",
+              "requiresConfirmation":false,
+              "payload":{}
+            }
+            """.trimIndent(),
+        )
+
+        assertRejected(proposal, "always requires confirmation")
+    }
+
+    private fun validCreateProposal(): JSONObject = JSONObject(
+        """
+        {
+          "schemaVersion":"1",
+          "commandType":"CREATE_ACTIVITY_DRAFT",
+          "explanation":"Criar rascunho para confirmação.",
+          "requiresConfirmation":true,
+          "payload":{
+            "title":"Estudar francês",
+            "durationMinutes":60,
+            "date":"2026-09-14",
+            "startTime":"18:00",
+            "priority":"IMPORTANT",
+            "energy":null
+          }
+        }
+        """.trimIndent(),
+    )
+
+    private fun assertRejected(proposal: JSONObject, expectedMessage: String) {
+        val error = runCatching { AiGatewayProposalValidator.validate(proposal) }.exceptionOrNull()
+        assertTrue("Expected validator rejection", error is IllegalArgumentException)
+        assertTrue(error?.message.orEmpty().contains(expectedMessage))
     }
 }
