@@ -14,7 +14,7 @@ import androidx.room.RoomDatabase
         PlanEntity::class, PlanItemEntity::class,
         LeisureItemEntity::class, ReadingGoalEntity::class, ContextNoteEntity::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = false,
 )
 abstract class SuperPlannerDatabase : RoomDatabase() {
