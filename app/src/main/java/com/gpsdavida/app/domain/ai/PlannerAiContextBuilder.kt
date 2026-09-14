@@ -2,52 +2,88 @@ package com.superplanner.app.domain.ai
 
 import com.superplanner.app.domain.model.ActivityStatus
 import com.superplanner.app.domain.model.DailyActivity
+import com.superplanner.app.domain.port.ActivityExecutionRepository
+import com.superplanner.app.domain.port.AvailabilityRepository
+import com.superplanner.app.domain.port.DependencyRepository
+import com.superplanner.app.domain.port.UserPreferenceRepository
+import com.superplanner.app.domain.usecase.LearnActivityDurations
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDate
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /** Builds the smallest useful planner context for AI without exposing persistence details. */
 class PlannerAiContextBuilder @Inject constructor(
     private val clock: Clock,
+    private val availabilityRepository: AvailabilityRepository,
+    private val dependencyRepository: DependencyRepository,
+    private val userPreferenceRepository: UserPreferenceRepository,
+    private val executions: ActivityExecutionRepository,
+    private val learnActivityDurations: LearnActivityDurations,
 ) {
-    fun build(
+    suspend fun build(
         activities: List<DailyActivity>,
         activeActivityId: String? = null,
         now: Instant = clock.instant(),
     ): AiContext {
-        val today = now.atZone(clock.zone).toLocalDate()
+        val zone = clock.zone
+        val localNow = now.atZone(zone)
+        val today = localNow.toLocalDate()
+        val availability = availabilityRepository.observeForDay(localNow.dayOfWeek).first()
+        val dependencies = dependencyRepository.observeAll().first()
+        val preferences = userPreferenceRepository.observeActive().first()
+        val learnedDurations = learnActivityDurations(executions.observeAll().first())
+
+        val pending = activities
+            .asSequence()
+            .filter { it.instance.status == ActivityStatus.PENDING }
+            .sortedBy { it.instance.planned.start }
+            .toList()
+
         val facts = buildList {
-            add("date=$today")
-            add("time=${now.atZone(clock.zone).toLocalTime().withSecond(0).withNano(0)}")
+            add("fact.date=$today")
+            add("fact.time=${localNow.toLocalTime().withSecond(0).withNano(0)}")
 
             activities
                 .asSequence()
                 .filter { it.instance.status == ActivityStatus.IN_PROGRESS }
                 .take(1)
-                .forEach { add("active=${it.instance.id};title=${it.title}") }
+                .forEach { add("fact.active=${it.instance.id};title=${it.title}") }
 
-            activities
-                .asSequence()
-                .filter { it.instance.status == ActivityStatus.PENDING }
-                .sortedBy { it.instance.planned }
-                .take(8)
-                .forEach { activity ->
-                    val instance = activity.instance
-                    add(
-                        "activity=${instance.id};title=${activity.title};" +
-                            "status=${instance.status};planned=${instance.planned};" +
-                            "durationMinutes=${instance.plannedDuration.toMinutes()};" +
-                            "priority=${instance.priority};flexibility=${instance.flexibility}",
-                    )
-                }
+            pending.take(8).forEach { activity ->
+                val instance = activity.instance
+                val learned = learnedDurations[instance.id]
+                add(
+                    "fact.activity=${instance.id};title=${activity.title};" +
+                        "status=${instance.status};planned=${instance.planned};" +
+                        "durationMinutes=${instance.plannedDuration.toMinutes()};" +
+                        "priority=${instance.priority};flexibility=${instance.flexibility};" +
+                        "learnedDurationMinutes=${learned?.toMinutes()}",
+                )
+            }
+
+            availability.forEach { rule ->
+                add("fact.availability=${rule.kind};${rule.window.start}-${rule.window.end}")
+            }
+
+            dependencies.take(12).forEach { dependency ->
+                add("fact.dependency=${dependency.predecessor}->${dependency.successor}")
+            }
+
+            preferences.take(8).forEach { preference ->
+                add("preference.confirmed=${preference.title};value=${preference.value}")
+            }
+
+            pending.firstOrNull { it.instance.planned.start > now }?.let { next ->
+                add("fact.next=${next.instance.id};title=${next.title};starts=${next.instance.planned.start}")
+            }
         }
 
         return AiContext(
             nowIso = now.toString(),
             activeActivityId = activeActivityId
                 ?: activities.firstOrNull { it.instance.status == ActivityStatus.IN_PROGRESS }?.instance?.id?.toString(),
-            minimalRouteFacts = facts.take(12),
+            minimalRouteFacts = facts.take(32),
         )
     }
 }
