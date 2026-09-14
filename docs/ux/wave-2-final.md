@@ -1,0 +1,1 @@
+Wave 2 final implementation on Agora: suggestion-first framing, autonomy-first explanation copy, explicit alternatives, and neutral defer/feedback language.

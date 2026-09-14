@@ -76,7 +76,7 @@ private fun ReadyContent(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 NextLabel()
                 Text(model.title, style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Ink)
                 MetadataRow(model)
@@ -98,7 +98,7 @@ private fun ReadyContent(
             Image(
                 painter = painterResource(R.drawable.sp_illustration_next_action),
                 contentDescription = null,
-                modifier = Modifier.size(92.dp),
+                modifier = Modifier.size(76.dp),
                 contentScale = ContentScale.Fit,
             )
         }
@@ -132,7 +132,10 @@ private fun MetadataRow(model: NextActionUiModel) {
 private fun NextLabel() {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("♡", style = MaterialTheme.typography.titleMedium, color = SuperPlannerColors.Terracotta)
-        Text(stringResource(R.string.next_action_label), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
+        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Text(stringResource(R.string.next_action_suggestion_label), style = MaterialTheme.typography.labelLarge, color = SuperPlannerColors.TerracottaDark)
+            Text(stringResource(R.string.next_action_label), style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft)
+        }
     }
 }
 

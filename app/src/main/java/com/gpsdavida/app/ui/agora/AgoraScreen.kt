@@ -97,26 +97,26 @@ fun AgoraScreen(
         val feedbackActivityId = currentActivity.id.value
         AlertDialog(
             onDismissRequest = { showFeedbackDialog = false },
-            title = { Text("Como foi esta sugestão?") },
+            title = { Text(stringResource(R.string.agora_feedback_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FeedbackOption("Isso fez sentido.", RouteFeedbackReason.HELPFUL, viewModel) {
+                    FeedbackOption(stringResource(R.string.agora_feedback_helpful), RouteFeedbackReason.HELPFUL, viewModel) {
                         showFeedbackDialog = false
                         feedbackGivenFor = feedbackActivityId
                     }
-                    FeedbackOption("Eu queria fazer outra coisa.", RouteFeedbackReason.WANTED_OTHER, viewModel) {
+                    FeedbackOption(stringResource(R.string.agora_feedback_other), RouteFeedbackReason.WANTED_OTHER, viewModel) {
                         showFeedbackDialog = false
                         feedbackGivenFor = feedbackActivityId
                     }
-                    FeedbackOption("A duração estava errada.", RouteFeedbackReason.DURATION_WRONG, viewModel) {
+                    FeedbackOption(stringResource(R.string.agora_feedback_duration), RouteFeedbackReason.DURATION_WRONG, viewModel) {
                         showFeedbackDialog = false
                         feedbackGivenFor = feedbackActivityId
                     }
-                    FeedbackOption("Não quero fazer isso nesse horário.", RouteFeedbackReason.TIME_WRONG, viewModel) {
+                    FeedbackOption(stringResource(R.string.agora_feedback_time), RouteFeedbackReason.TIME_WRONG, viewModel) {
                         showFeedbackDialog = false
                         feedbackGivenFor = feedbackActivityId
                     }
-                    FeedbackOption("O Planner errou.", RouteFeedbackReason.PLANNER_WRONG, viewModel) {
+                    FeedbackOption(stringResource(R.string.agora_feedback_wrong), RouteFeedbackReason.PLANNER_WRONG, viewModel) {
                         showFeedbackDialog = false
                         feedbackGivenFor = feedbackActivityId
                     }
@@ -181,11 +181,11 @@ fun AgoraScreen(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { showFeedbackDialog = true },
             ) {
-                Text("A recomendação fez sentido?")
+                Text(stringResource(R.string.agora_feedback_title))
             }
         } else if (feedbackGivenFor == currentActivity?.id?.value) {
             Text(
-                text = "Feedback registrado.",
+                text = stringResource(R.string.agora_feedback_recorded),
                 style = MaterialTheme.typography.bodySmall,
                 color = SuperPlannerColors.InkSoft,
             )

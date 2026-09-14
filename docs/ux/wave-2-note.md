@@ -1,0 +1,1 @@
+Wave 2 Agora implementation: autonomy-first copy, suggestion framing, and explicit alternatives. Planning logic remains domain-owned.

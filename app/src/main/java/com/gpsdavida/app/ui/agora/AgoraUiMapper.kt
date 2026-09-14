@@ -131,28 +131,28 @@ object AgoraUiMapper {
     )
 
     private fun explanationFor(reasons: List<NextActionReason>): String? = when {
-        reasons.contains(NextActionReason.HIGHER_PRIORITY) && reasons.contains(NextActionReason.DUE_NOW) ->
-            "Escolhi agora porque tem prioridade mais alta e já pode ser feita."
-        reasons.contains(NextActionReason.HIGHER_PRIORITY) ->
-            "Escolhi agora porque tem prioridade mais alta entre as opções que cabem neste momento."
-        reasons.contains(NextActionReason.FIXED_COMMITMENT) ->
-            "Escolhi agora porque é um compromisso fixo."
-        reasons.contains(NextActionReason.CAPACITY_AVAILABLE) ->
-            "Escolhi agora porque ainda há espaço na sua capacidade hoje."
-        reasons.contains(NextActionReason.AVAILABLE_IN_WINDOW) ->
-            "Escolhi agora porque cabe na sua janela disponível."
-        reasons.contains(NextActionReason.ENERGY_MATCH) ->
-            "Escolhi agora porque combina com sua energia atual."
-        reasons.contains(NextActionReason.CONTEXT_MATCH) ->
-            "Escolhi agora porque combina com o seu contexto."
-        reasons.contains(NextActionReason.TRAVEL_FITS) ->
-            "Escolhi agora porque o deslocamento cabe no tempo disponível."
-        reasons.contains(NextActionReason.DEPENDENCIES_SATISFIED) ->
-            "Escolhi agora porque as dependências necessárias já foram atendidas."
-        reasons.contains(NextActionReason.DUE_NOW) ->
-            "Escolhi agora porque já pode ser feita."
         reasons.contains(NextActionReason.CURRENTLY_ACTIVE) ->
             "Você já está fazendo esta atividade."
+        reasons.contains(NextActionReason.HIGHER_PRIORITY) && reasons.contains(NextActionReason.DUE_NOW) ->
+            "Uma boa opção para agora: tem prioridade mais alta e já pode ser feita."
+        reasons.contains(NextActionReason.HIGHER_PRIORITY) ->
+            "Uma boa opção para agora: tem prioridade mais alta entre o que cabe neste momento."
+        reasons.contains(NextActionReason.FIXED_COMMITMENT) ->
+            "Faz sentido agora porque é um compromisso fixo."
+        reasons.contains(NextActionReason.CAPACITY_AVAILABLE) ->
+            "Faz sentido agora porque ainda há espaço na sua capacidade hoje."
+        reasons.contains(NextActionReason.AVAILABLE_IN_WINDOW) ->
+            "Faz sentido agora porque cabe na sua janela disponível."
+        reasons.contains(NextActionReason.ENERGY_MATCH) ->
+            "Faz sentido agora porque combina com sua energia atual."
+        reasons.contains(NextActionReason.CONTEXT_MATCH) ->
+            "Faz sentido agora porque combina com o seu contexto."
+        reasons.contains(NextActionReason.TRAVEL_FITS) ->
+            "Faz sentido agora porque o deslocamento cabe no tempo disponível."
+        reasons.contains(NextActionReason.DEPENDENCIES_SATISFIED) ->
+            "Faz sentido agora porque as dependências necessárias já foram atendidas."
+        reasons.contains(NextActionReason.DUE_NOW) ->
+            "Faz sentido agora porque já pode ser feita."
         else -> null
     }
 
@@ -164,13 +164,13 @@ object AgoraUiMapper {
         next ?: return null
         return when {
             current.priority.weight < next.priority.weight ->
-                "Deixei para depois porque esta atividade tem prioridade maior."
+                "Esta opção fica para depois para dar espaço à prioridade mais alta."
             current.planned.start <= now && next.planned.start > now ->
-                "Deixei para depois porque esta atividade já pode ser feita agora."
+                "Esta opção pode ficar para depois enquanto outra cabe melhor neste momento."
             current.flexibility.name == "FIXED" ->
-                "Deixei para depois para respeitar este compromisso."
+                "Esta opção fica para depois para respeitar o compromisso seguinte."
             else ->
-                "Deixei para depois para manter a sequência mais adequada para agora."
+                "Esta opção fica para depois para preservar uma sequência que cabe melhor agora."
         }
     }
 }
