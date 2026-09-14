@@ -29,10 +29,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
 
-      - name: Generate lockfiles
+      - name: Generate dependency lock state
         run: |
           chmod +x gradlew
-          ./gradlew resolveAndLockAll --write-locks --stacktrace --no-daemon
+          ./gradlew detekt lintDebug testDebugUnitTest koverXmlReport koverVerify assembleDebug --write-locks --stacktrace --no-daemon
 
       - name: Commit generated lockfiles
         run: |
