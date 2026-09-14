@@ -13,7 +13,14 @@ plugins {
 subprojects {
     dependencyLocking {
         lockAllConfigurations()
-        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
+    }
+
+    // AGP/KSP create implementation-detail configurations at configuration time.
+    // They are not project dependencies and must not be forced into strict locking.
+    configurations.matching { it.name.startsWith("_agp_internal_") }.configureEach {
+        dependencyLocking {
+            lockMode = org.gradle.api.artifacts.dsl.LockMode.DEFAULT
+        }
     }
 
     pluginManager.withPlugin("dev.detekt") {
@@ -36,7 +43,7 @@ tasks.register("resolveAndLockAll") {
     doLast {
         allprojects.forEach { project ->
             project.configurations
-                .filter { it.isCanBeResolved }
+                .filter { it.isCanBeResolved && !it.name.startsWith("_agp_internal_") }
                 .forEach { it.resolve() }
         }
     }
