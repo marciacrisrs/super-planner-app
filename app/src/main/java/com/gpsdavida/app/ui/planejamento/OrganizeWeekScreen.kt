@@ -29,20 +29,11 @@ import com.superplanner.app.domain.ai.OrganizeWeekResponse
 import com.superplanner.app.ui.theme.SuperPlannerColors
 
 @Composable
-fun OrganizeWeekScreen(
-    onBack: () -> Unit,
-    viewModel: OrganizeWeekViewModel = hiltViewModel(),
-) {
+fun OrganizeWeekScreen(onBack: () -> Unit, viewModel: OrganizeWeekViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) { if (state is OrganizeWeekState.Idle) viewModel.organize() }
 
-    LaunchedEffect(Unit) {
-        if (state is OrganizeWeekState.Idle) viewModel.organize()
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Organize sua semana", style = MaterialTheme.typography.headlineMedium, color = SuperPlannerColors.Ink)
@@ -68,11 +59,7 @@ fun OrganizeWeekScreen(
 }
 
 @Composable
-private fun ProposalContent(
-    response: OrganizeWeekResponse,
-    onApply: () -> Unit,
-    applied: Boolean = false,
-) {
+private fun ProposalContent(response: OrganizeWeekResponse, onApply: () -> Unit, applied: Boolean = false) {
     val summary = response.summary
     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
         item {
@@ -82,35 +69,37 @@ private fun ProposalContent(
                         Icon(Icons.Outlined.AutoAwesome, contentDescription = null, tint = SuperPlannerColors.Terracotta)
                         Text("Análise da semana", style = MaterialTheme.typography.titleMedium, color = SuperPlannerColors.TerracottaDark)
                     }
-                    Text(
-                        "Considerei ${summary.fixedCommitmentsConsidered} fixos, ${summary.desiresConsidered} desejos, " +
-                            "${summary.commuteMinutesConsidered} min de deslocamento e ${summary.preparationMinutesConsidered} min de preparação. " +
-                            "Encontrei ${summary.conflictsFound} conflitos e ${summary.opportunitiesFound} oportunidades.",
-                        color = SuperPlannerColors.Ink,
-                    )
+                    Text("Considerei ${summary.fixedCommitmentsConsidered} fixos, ${summary.desiresConsidered} desejos, ${summary.commuteMinutesConsidered} min de deslocamento e ${summary.preparationMinutesConsidered} min de preparação. Encontrei ${summary.conflictsFound} conflitos e ${summary.opportunitiesFound} oportunidades.", color = SuperPlannerColors.Ink)
+                }
+            }
+        }
+        if (response.proposedItems.isNotEmpty()) {
+            item { Text("Semana proposta", style = MaterialTheme.typography.titleMedium) }
+            items(response.proposedItems, key = { it.id }) { item ->
+                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = SuperPlannerColors.Surface)) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(item.title, style = MaterialTheme.typography.titleSmall, color = SuperPlannerColors.Ink)
+                        Text("${item.date} · ${item.startTime}–${item.endTime}", color = SuperPlannerColors.InkSoft)
+                        item.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = SuperPlannerColors.InkSoft) }
+                    }
                 }
             }
         }
         if (response.conflicts.isNotEmpty()) {
             item { Text("Conflitos", style = MaterialTheme.typography.titleMedium) }
-            items(response.conflicts) { conflict ->
-                Text("• ${conflict.title}: ${conflict.reason}", color = SuperPlannerColors.InkSoft)
-            }
+            items(response.conflicts) { conflict -> Text("• ${conflict.title}: ${conflict.reason}", color = SuperPlannerColors.InkSoft) }
+        }
+        if (response.opportunities.isNotEmpty()) {
+            item { Text("Oportunidades", style = MaterialTheme.typography.titleMedium) }
+            items(response.opportunities) { opportunity -> Text("• ${opportunity.title}: ${opportunity.reason}", color = SuperPlannerColors.InkSoft) }
         }
         if (response.explanations.isNotEmpty()) {
             item { Text("Decisões explicadas", style = MaterialTheme.typography.titleMedium) }
-            items(response.explanations) { explanation ->
-                Text("• ${explanation.message}", color = SuperPlannerColors.InkSoft)
-            }
+            items(response.explanations) { explanation -> Text("• ${explanation.message}", color = SuperPlannerColors.InkSoft) }
         }
         item {
-            if (applied) {
-                Text("Organização marcada como aplicada. O estado original continua disponível para comparação nesta revisão.", color = SuperPlannerColors.TerracottaDark)
-            } else {
-                Button(onClick = onApply, modifier = Modifier.fillMaxWidth()) {
-                    Text("✨ Aplicar organização")
-                }
-            }
+            if (applied) Text("Organização marcada como aplicada. O estado original continua disponível para comparação nesta revisão.", color = SuperPlannerColors.TerracottaDark)
+            else Button(onClick = onApply, modifier = Modifier.fillMaxWidth()) { Text("✨ Aplicar organização") }
         }
     }
 }
