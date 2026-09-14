@@ -63,7 +63,7 @@ class NaturalLanguageToScheduleFixedStartTest {
             zoneId = zone,
         )
 
-        val fixedMaterialized = dailyActivities.first { it.title == "francês" }.instance
+        val fixedMaterialized = dailyActivities.first { it.instance.source.toString().contains("task") }.instance
         assertEquals(expectedStart, fixedMaterialized.planned.start)
         assertEquals(Flexibility.FIXED, fixedMaterialized.flexibility)
 
@@ -74,8 +74,8 @@ class NaturalLanguageToScheduleFixedStartTest {
         )
 
         assertTrue(schedule.conflicts.isEmpty())
-        val scheduledFixed = schedule.activities.first { it.title == "francês" }
-        val scheduledFlexible = schedule.activities.first { it.title == "Ler" }
+        val scheduledFixed = schedule.activities.first { it.id == fixedMaterialized.id }
+        val scheduledFlexible = schedule.activities.first { it.id != fixedMaterialized.id }
         assertEquals(expectedStart, scheduledFixed.planned.start)
         assertEquals(expectedStart.plus(Duration.ofHours(1)), scheduledFixed.planned.end)
         assertEquals(targetDate.atTime(17, 0).atZone(zone).toInstant(), scheduledFlexible.planned.start)
