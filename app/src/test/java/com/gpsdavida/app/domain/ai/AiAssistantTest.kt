@@ -52,6 +52,40 @@ class AiAssistantTest {
     }
 
     @Test
+    fun `mutating command requires confirmation even when proposal omits it`() = runTest {
+        var executions = 0
+        val gateway = object : AiToolGateway {
+            override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult {
+                executions++
+                assertTrue(confirmed)
+                return AiToolResult.Success(emptyList())
+            }
+        }
+        val proposal = AiProposal(
+            command = AiCommand.CreateActivityDraft(
+                NaturalLanguageActivityDraft(
+                    title = "Estudar",
+                    plannedDuration = Duration.ofMinutes(30),
+                    date = java.time.LocalDate.of(2026, 9, 14),
+                    preferredStart = null,
+                ),
+            ),
+            explanation = "structured",
+            requiresConfirmation = false,
+        )
+        val assistant = AiAssistant(object : AiProvider {
+            override suspend fun interpret(request: AiRequest) = proposal
+        }, gateway)
+
+        val awaiting = assistant.execute(assistant.propose(AiRequest("estudar")))
+
+        assertTrue(awaiting is AiExecution.AwaitingConfirmation)
+        assertEquals(0, executions)
+        assertTrue(assistant.execute(proposal, AiConfirmation.Confirmed) is AiExecution.Executed)
+        assertEquals(1, executions)
+    }
+
+    @Test
     fun `provider can be replaced without changing assistant`() = runTest {
         val gateway = object : AiToolGateway {
             override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = AiToolResult.Success(emptyList())
