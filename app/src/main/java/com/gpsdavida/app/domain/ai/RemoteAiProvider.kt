@@ -2,7 +2,6 @@ package com.superplanner.app.domain.ai
 
 import com.superplanner.app.BuildConfig
 import com.superplanner.app.domain.model.ActivityInstanceId
-import com.superplanner.app.domain.model.Energy
 import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.domain.planning.DayReorganizationOperation
 import com.superplanner.app.domain.planning.DayReorganizationRequest
@@ -10,10 +9,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -72,7 +68,9 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         val payload = json.getJSONObject("payload")
 
         val command = when (commandType) {
-            "CREATE_ACTIVITY_DRAFT" -> AiCommand.CreateActivityDraft(mapActivityDraft(payload, request))
+            "CREATE_ACTIVITY_DRAFT" -> AiCommand.CreateActivityDraft(
+                AiGatewayProposalMapper.mapCreateActivityDraft(payload, request),
+            )
             "EXPLAIN_NEXT_ACTIVITY" -> AiCommand.ExplainNextActivity(
                 activityId = payload.optString("activityId").ifBlank { request.context.activeActivityId.orEmpty() },
                 evidence = payload.getJSONArray("evidence").toStringList(),
@@ -107,39 +105,6 @@ class RemoteAiProvider @Inject constructor() : AiProvider {
         }
 
         return AiProposal(command, explanation, requiresConfirmation)
-    }
-
-    private fun mapActivityDraft(payload: JSONObject, request: AiRequest): NaturalLanguageActivityDraft {
-        val today = request.context.nowIso?.take(10)?.let(LocalDate::parse) ?: LocalDate.now()
-        val title = payload.optString("title").trim()
-        val durationMinutes = payload.optInt("durationMinutes", 0)
-        val date = payload.optString("date").takeIf(String::isNotBlank)?.let(LocalDate::parse)
-        val startTime = payload.optString("startTime").takeIf(String::isNotBlank)?.let(LocalTime::parse)
-        val priority = payload.optString("priority")
-            .takeIf(String::isNotBlank)
-            ?.let { Priority.valueOf(it) }
-            ?: Priority.IMPORTANT
-        val energy = payload.optString("energy")
-            .takeIf(String::isNotBlank)
-            ?.let { Energy.valueOf(it) }
-
-        val parserDraft = NaturalLanguageActivityParser.parse(request.message, today)
-        val missing = buildSet {
-            if (title.isBlank()) add(MissingActivityField.TITLE)
-            if (durationMinutes <= 0) add(MissingActivityField.DURATION)
-        }
-
-        return NaturalLanguageActivityDraft(
-            sourceText = request.message,
-            title = title,
-            plannedDuration = durationMinutes.takeIf { it > 0 }?.let { Duration.ofMinutes(it.toLong()) },
-            date = date,
-            startTime = startTime,
-            recurrence = parserDraft.recurrence,
-            priority = priority,
-            energy = energy,
-            missingFields = missing,
-        )
     }
 }
 
