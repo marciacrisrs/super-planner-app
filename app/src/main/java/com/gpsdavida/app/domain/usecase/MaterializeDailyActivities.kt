@@ -26,7 +26,9 @@ class MaterializeDailyActivities @Inject constructor() {
         zoneId: ZoneId,
     ): List<DailyActivity> = buildList {
         events.forEach { add(it.toDailyActivity(date, zoneId)) }
-        tasks.filterNot { it.isDone }.forEach { add(it.toDailyActivity(date, zoneId)) }
+        tasks.filterNot { it.isDone }
+            .filter { it.belongsOnDay(date, zoneId) }
+            .forEach { add(it.toDailyActivity(date, zoneId)) }
         habits.filterNot { it.isDone }.forEach { add(it.toDailyActivity(zoneId)) }
         routines.filter { it.occursOn(date) }.forEach { routine ->
             addAll(routine.toDailyActivities(date, zoneId))
