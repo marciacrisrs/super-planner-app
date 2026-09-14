@@ -1,16 +1,16 @@
-package com.gpsdavida.app.domain.ai
+package com.superplanner.app.domain.ai
 
-import com.gpsdavida.app.domain.model.ActivityInstance
-import com.gpsdavida.app.domain.model.ActivityInstanceId
-import com.gpsdavida.app.domain.model.ActivitySource
-import com.gpsdavida.app.domain.model.Flexibility
-import com.gpsdavida.app.domain.model.NextActionDecision
-import com.gpsdavida.app.domain.model.NextActionReason
-import com.gpsdavida.app.domain.model.TaskId
-import com.gpsdavida.app.domain.model.TimeRange
-import com.gpsdavida.app.domain.port.AiToolGateway
-import com.gpsdavida.app.domain.port.AiToolResult
-import com.gpsdavida.app.domain.planning.DayReorganizationOperation
+import com.superplanner.app.domain.model.ActivityInstance
+import com.superplanner.app.domain.model.ActivityInstanceId
+import com.superplanner.app.domain.model.ActivitySource
+import com.superplanner.app.domain.model.Flexibility
+import com.superplanner.app.domain.model.NextActionDecision
+import com.superplanner.app.domain.model.NextActionReason
+import com.superplanner.app.domain.model.TaskId
+import com.superplanner.app.domain.model.TimeRange
+import com.superplanner.app.domain.port.AiToolGateway
+import com.superplanner.app.domain.port.AiToolResult
+import com.superplanner.app.domain.planning.DayReorganizationOperation
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -31,7 +31,7 @@ class AiAssistantTest {
         val provider = object : AiProvider {
             override suspend fun interpret(request: AiRequest) = AiProposal(
                 AiCommand.ReorganizeDay(
-                    com.gpsdavida.app.domain.planning.DayReorganizationRequest(
+                    com.superplanner.app.domain.planning.DayReorganizationRequest(
                         DayReorganizationOperation.DelayActivity(ActivityInstanceId("activity"), 40),
                         Instant.parse("2026-09-13T19:00:00Z"),
                     ),
@@ -112,7 +112,7 @@ class AiAssistantTest {
             flexibility = Flexibility.FLEXIBLE,
             planned = TimeRange(Instant.parse("2026-09-13T09:00:00Z"), Instant.parse("2026-09-13T10:00:00Z")),
         )
-        val domainExplanation = com.gpsdavida.app.domain.usecase.ExplainNextActivity()(
+        val domainExplanation = com.superplanner.app.domain.usecase.ExplainNextActivity()(
             NextActionDecision(null, activity, listOf(NextActionReason.HIGHER_PRIORITY, NextActionReason.CAPACITY_AVAILABLE)),
         )
         val evidence = listOf("priority: high", "capacity: available")
