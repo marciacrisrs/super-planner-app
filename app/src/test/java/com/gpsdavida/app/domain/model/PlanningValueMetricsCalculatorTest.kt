@@ -28,11 +28,11 @@ class PlanningValueMetricsCalculatorTest {
         )
 
         assertEquals(Duration.ofMinutes(4), metrics.firstPlanningDuration)
-        assertEquals(0.8, metrics.automaticDecisionRate, 0.0001)
-        assertEquals(0.7, metrics.plannedVsCompletedRate, 0.0001)
-        assertEquals(1.0, metrics.priorityPreservationRate, 0.0001)
-        assertEquals(1.0, metrics.agoraUseRate, 0.0001)
-        assertEquals(0.5, metrics.recoverySuccessRate, 0.0001)
+        assertEquals(0.8, requireNotNull(metrics.automaticDecisionRate), 0.0001)
+        assertEquals(0.7, requireNotNull(metrics.plannedVsCompletedRate), 0.0001)
+        assertEquals(1.0, requireNotNull(metrics.priorityPreservationRate), 0.0001)
+        assertEquals(1.0, requireNotNull(metrics.agoraUseRate), 0.0001)
+        assertEquals(0.5, requireNotNull(metrics.recoverySuccessRate), 0.0001)
         assertTrue(metrics.avoidsProductivityScore)
     }
 
