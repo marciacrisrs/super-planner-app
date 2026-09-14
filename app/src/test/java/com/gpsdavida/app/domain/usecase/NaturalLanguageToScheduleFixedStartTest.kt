@@ -1,6 +1,7 @@
 package com.superplanner.app.domain.usecase
 
 import com.superplanner.app.domain.ai.NaturalLanguageActivityParser
+import com.superplanner.app.domain.model.ActivitySource
 import com.superplanner.app.domain.model.Flexibility
 import com.superplanner.app.domain.model.Priority
 import com.superplanner.app.domain.model.Task
@@ -63,7 +64,9 @@ class NaturalLanguageToScheduleFixedStartTest {
             zoneId = zone,
         )
 
-        val fixedMaterialized = dailyActivities.first { it.instance.source.toString().contains("task") }.instance
+        val fixedMaterialized = dailyActivities.first {
+            it.instance.source == ActivitySource.FromTask(created.task.id)
+        }.instance
         assertEquals(expectedStart, fixedMaterialized.planned.start)
         assertEquals(Flexibility.FIXED, fixedMaterialized.flexibility)
 
