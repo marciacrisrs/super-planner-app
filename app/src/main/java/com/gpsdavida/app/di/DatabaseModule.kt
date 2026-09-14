@@ -2,6 +2,8 @@ package com.superplanner.app.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.superplanner.app.data.local.*
 import dagger.Module
 import dagger.Provides
@@ -10,6 +12,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+private val MIGRATION_14_15 = object : Migration(14, 15) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE tasks ADD COLUMN fixedStartEpochMilli INTEGER")
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -17,6 +25,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): SuperPlannerDatabase =
         Room.databaseBuilder(context, SuperPlannerDatabase::class.java, "gps-da-vida.db")
+            .addMigrations(MIGRATION_14_15)
             .fallbackToDestructiveMigration(true)
             .build()
 
