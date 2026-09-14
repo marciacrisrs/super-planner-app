@@ -113,7 +113,12 @@ class AiAssistantTest {
             planned = TimeRange(Instant.parse("2026-09-13T09:00:00Z"), Instant.parse("2026-09-13T10:00:00Z")),
         )
         val domainExplanation = com.superplanner.app.domain.usecase.ExplainNextActivity()(
-            NextActionDecision(null, activity, listOf(NextActionReason.HIGHER_PRIORITY, NextActionReason.CAPACITY_AVAILABLE)),
+            NextActionDecision(
+                current = null,
+                next = activity,
+                travelDurationToNext = Duration.ZERO,
+                nextReasons = listOf(NextActionReason.HIGHER_PRIORITY, NextActionReason.CAPACITY_AVAILABLE),
+            ),
         )
         val evidence = listOf("priority: high", "capacity: available")
         val proposal = AiAssistant(RuleBasedAiProvider(), object : AiToolGateway {
