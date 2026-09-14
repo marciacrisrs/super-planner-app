@@ -15,6 +15,7 @@ import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,12 +40,9 @@ class OrganizeWeekViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = OrganizeWeekState.Loading
             runCatching {
-                observeWeeklyPlanning(weekStart).collect { week ->
-                    if (_state.value is OrganizeWeekState.Loading || _state.value is OrganizeWeekState.Idle) {
-                        val response = gateway.organize(buildRequest(week))
-                        _state.value = OrganizeWeekState.Ready(response, week)
-                    }
-                }
+                val week = observeWeeklyPlanning(weekStart).first()
+                val response = gateway.organize(buildRequest(week))
+                _state.value = OrganizeWeekState.Ready(response, week)
             }.onFailure { error ->
                 _state.value = OrganizeWeekState.Error(error.message ?: "Não foi possível organizar a semana.")
             }
@@ -54,7 +52,6 @@ class OrganizeWeekViewModel @Inject constructor(
     fun apply() {
         val current = _state.value
         if (current is OrganizeWeekState.Ready) {
-            // Applying is intentionally explicit. The proposal remains available in state for comparison.
             _state.value = OrganizeWeekState.Applied(current.response, current.week)
         }
     }
