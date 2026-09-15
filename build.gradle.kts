@@ -10,8 +10,8 @@ plugins {
 }
 
 subprojects {
-    pluginManager.withPlugin("io.gitlab.arturbosch.detekt") {
-        extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
+    pluginManager.withPlugin("dev.detekt") {
+        extensions.configure<dev.detekt.gradle.extensions.DetektExtension> {
             config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
             buildUponDefaultConfig = true
         }
