@@ -35,6 +35,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+private const val DATE_PATTERN = "dd/MM/yyyy"
+private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale("pt", "BR"))
+private val MONTH_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("pt", "BR"))
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HorizonsScreen(viewModel: HorizonsViewModel = hiltViewModel()) {
@@ -56,7 +60,7 @@ fun HorizonsScreen(viewModel: HorizonsViewModel = hiltViewModel()) {
             items(state.months, key = { it.month.toString() }) { month ->
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(month.month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale("pt", "BR")).withLocale(Locale("pt", "BR"))).replaceFirstChar { it.uppercase() })
+                        Text(month.month.format(MONTH_FORMATTER).replaceFirstChar { it.uppercase() })
                         Text("${month.activityCount} atividades · ${month.plannedMinutes} min planejados")
                         Text("${month.completionRatio}% concluído")
                     }
@@ -68,7 +72,7 @@ fun HorizonsScreen(viewModel: HorizonsViewModel = hiltViewModel()) {
                     Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(milestone.title)
-                            Text(milestone.targetDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                            Text(milestone.targetDate.format(DATE_FORMATTER))
                         }
                         IconButton(onClick = { viewModel.deleteMilestone(milestone.id) }) { Icon(Icons.Filled.Delete, "Excluir") }
                     }
@@ -79,19 +83,19 @@ fun HorizonsScreen(viewModel: HorizonsViewModel = hiltViewModel()) {
 
     if (showMilestone) {
         var title by remember { mutableStateOf("") }
-        var dateText by remember { mutableStateOf(LocalDate.now().plusMonths(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))) }
+        var dateText by remember { mutableStateOf(LocalDate.now().plusMonths(1).format(DATE_FORMATTER)) }
         AlertDialog(
             onDismissRequest = { showMilestone = false },
             title = { Text("Novo marco") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(title, { title = it }, label = { Text("Marco") })
-                    OutlinedTextField(dateText, { dateText = it }, label = { Text("Data (dd/MM/yyyy)") })
+                    OutlinedTextField(dateText, { dateText = it }, label = { Text("Data ($DATE_PATTERN)") })
                 }
             },
             confirmButton = {
                 Button(onClick = {
-                    runCatching { LocalDate.parse(dateText, DateTimeFormatter.ofPattern("dd/MM/yyyy")) }.getOrNull()?.let { viewModel.addMilestone(title, it) }
+                    runCatching { LocalDate.parse(dateText, DATE_FORMATTER) }.getOrNull()?.let { viewModel.addMilestone(title, it) }
                     showMilestone = false
                 }) { Text("Salvar") }
             },
