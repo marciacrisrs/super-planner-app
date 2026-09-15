@@ -25,6 +25,7 @@ subprojects {
             it.name == "androidTestUtil" ||
             it.name == "androidJdkImage" ||
             it.name == "coreLibraryDesugaring" ||
+            it.name == "debugWearBundling" ||
             it.name.endsWith("AnnotationProcessorClasspath")
     }.configureEach {
         resolutionStrategy.deactivateDependencyLocking()
