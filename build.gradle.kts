@@ -26,6 +26,7 @@ subprojects {
             it.name == "androidJdkImage" ||
             it.name == "coreLibraryDesugaring" ||
             it.name == "debugWearBundling" ||
+            it.name == "hiltCompileOnlyDebugAndroidTest" ||
             it.name == "hiltAnnotationProcessorDebugAndroidTest" ||
             it.name == "hiltAnnotationProcessorDebugUnitTest" ||
             it.name == "hiltAnnotationProcessorReleaseUnitTest" ||
