@@ -106,7 +106,7 @@ class RecoveryPlanner @Inject constructor() {
         zoneId: ZoneId,
     ): Int = when {
         activity.dueAt == null -> 1
-        activity.dueAt!!.atZone(zoneId).toLocalDate().isBefore(recoveryStart) -> 0
+        activity.dueAt?.atZone(zoneId)?.toLocalDate()?.isBefore(recoveryStart) == true -> 0
         else -> 0
     }
 

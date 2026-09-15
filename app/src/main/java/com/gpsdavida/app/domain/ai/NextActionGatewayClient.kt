@@ -4,7 +4,7 @@ import com.superplanner.app.BuildConfig
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,7 +34,7 @@ class NextActionGatewayClient @Inject constructor() {
         require(endpoint.isNotEmpty()) { "AI gateway is not configured" }
 
         val requestId = UUID.randomUUID().toString()
-        val connection = (URL("$endpoint/v1/ai/next-action").openConnection() as HttpURLConnection).apply {
+        val connection = (URI("$endpoint/v1/ai/next-action").toURL().openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = 8_000
             readTimeout = 20_000

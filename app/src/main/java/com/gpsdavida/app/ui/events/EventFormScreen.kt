@@ -134,7 +134,7 @@ fun EventFormScreen(
     }
 
     if (pickRecurrenceEnd) {
-        RecurrenceEndDateSheet(
+        DatePickerSheet(
             initial = state.recurrenceEndDate ?: state.start.atZone(zone).toLocalDate(),
             onDismiss = { pickRecurrenceEnd = false },
             onConfirm = { viewModel.setRecurrenceEndDate(it); pickRecurrenceEnd = false },
@@ -170,13 +170,6 @@ private fun DateTimeRow(label: String, instant: Instant, zone: ZoneId, dateFmt: 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePickerSheet(initial: LocalDate, onDismiss: () -> Unit, onConfirm: (LocalDate) -> Unit) {
-    val state = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-    DatePickerDialog(onDismissRequest = onDismiss, confirmButton = { TextButton(onClick = { val millis = state.selectedDateMillis ?: return@TextButton; onConfirm(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()) }) { Text(stringResource(R.string.action_ok)) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } }) { DatePicker(state = state) }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun RecurrenceEndDateSheet(initial: LocalDate, onDismiss: () -> Unit, onConfirm: (LocalDate) -> Unit) {
     val state = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
     DatePickerDialog(
         onDismissRequest = onDismiss,

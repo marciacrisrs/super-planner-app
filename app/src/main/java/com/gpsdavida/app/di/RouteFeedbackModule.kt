@@ -10,10 +10,10 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class RouteFeedbackModule {
+interface RouteFeedbackModule {
     @Binds
     @Singleton
-    abstract fun bindRouteFeedbackRepository(
+    fun bindRouteFeedbackRepository(
         implementation: InMemoryRouteFeedbackRepository,
     ): RouteFeedbackRepository
 }

@@ -64,40 +64,12 @@ class WeeklyCapacityEstimator(
     }
 
     fun estimate(input: CapacityEstimateInput): DailyCapacityAssessment {
-        val protected = listOf(
-            input.fixedCommitments,
-            input.work,
-            input.sleepAndRecovery,
-            input.logistics,
-            input.preparation,
-            input.safetyMargin,
-        ).fold(Duration.ZERO, Duration::plus)
-
+        val protected = protectedTime(input)
         val free = input.availableWindow.minus(protected).coerceAtLeastZero()
         val historyFactor = historicalFactor(input)
         val capacity = Duration.ofMillis((free.toMillis() * utilizationLimit * historyFactor).toLong())
         val remaining = capacity.minus(input.desiredActivities).coerceAtLeastZero()
-        val loadRatio = if (capacity.isZero) {
-            if (input.desiredActivities.isZero) 0.0 else 2.0
-        } else {
-            input.desiredActivities.toMillis().toDouble() / capacity.toMillis().toDouble()
-        }
-
-        val load = when {
-            loadRatio <= 0.80 -> CapacityLoad.SUSTAINABLE
-            loadRatio <= 1.0 -> CapacityLoad.TIGHT
-            else -> CapacityLoad.OVER_CAPACITY
-        }
-
-        val reasons = buildList {
-            if (!input.fixedCommitments.isZero) add("compromissos fixos consomem capacidade")
-            if (!input.work.isZero) add("trabalho é tempo protegido")
-            if (!input.sleepAndRecovery.isZero) add("sono e recuperação são tempo legítimo")
-            if (!input.logistics.isZero) add("deslocamentos foram descontados")
-            if (!input.preparation.isZero) add("preparação foi descontada")
-            if (historyFactor < 1.0) add("histórico realizado sugere uma margem mais conservadora")
-            if (load == CapacityLoad.OVER_CAPACITY) add("a carga desejada excede a capacidade estimada")
-        }
+        val load = classifyLoad(loadRatio(capacity, input.desiredActivities))
 
         return DailyCapacityAssessment(
             date = input.date,
@@ -107,7 +79,7 @@ class WeeklyCapacityEstimator(
             schedulableCapacity = capacity,
             remainingCapacity = remaining,
             load = load,
-            reasons = reasons,
+            reasons = reasonsFor(input, historyFactor, load),
         )
     }
 
@@ -117,20 +89,48 @@ class WeeklyCapacityEstimator(
         val totalCapacity = days.fold(Duration.ZERO) { acc, day -> acc.plus(day.schedulableCapacity) }
         val totalDesired = days.fold(Duration.ZERO) { acc, day -> acc.plus(day.desiredLoad) }
         val remaining = totalCapacity.minus(totalDesired).coerceAtLeastZero()
-        val ratio = if (totalCapacity.isZero) {
-            if (totalDesired.isZero) 0.0 else 2.0
-        } else totalDesired.toMillis().toDouble() / totalCapacity.toMillis().toDouble()
-        val load = when {
-            ratio <= 0.80 -> CapacityLoad.SUSTAINABLE
-            ratio <= 1.0 -> CapacityLoad.TIGHT
-            else -> CapacityLoad.OVER_CAPACITY
-        }
-
+        val load = classifyLoad(loadRatio(totalCapacity, totalDesired))
         val reasons = days.flatMap { day -> day.reasons.map { "${day.date}: $it" } }
             .distinct()
             .take(8)
 
         return WeeklyCapacityAssessment(days, totalCapacity, totalDesired, remaining, load, reasons)
+    }
+
+    private fun protectedTime(input: CapacityEstimateInput): Duration = listOf(
+        input.fixedCommitments,
+        input.work,
+        input.sleepAndRecovery,
+        input.logistics,
+        input.preparation,
+        input.safetyMargin,
+    ).fold(Duration.ZERO, Duration::plus)
+
+    private fun loadRatio(capacity: Duration, desired: Duration): Double =
+        if (capacity.isZero) {
+            if (desired.isZero) 0.0 else 2.0
+        } else {
+            desired.toMillis().toDouble() / capacity.toMillis().toDouble()
+        }
+
+    private fun classifyLoad(ratio: Double): CapacityLoad = when {
+        ratio <= 0.80 -> CapacityLoad.SUSTAINABLE
+        ratio <= 1.0 -> CapacityLoad.TIGHT
+        else -> CapacityLoad.OVER_CAPACITY
+    }
+
+    private fun reasonsFor(
+        input: CapacityEstimateInput,
+        historyFactor: Double,
+        load: CapacityLoad,
+    ): List<String> = buildList {
+        if (!input.fixedCommitments.isZero) add("compromissos fixos consomem capacidade")
+        if (!input.work.isZero) add("trabalho é tempo protegido")
+        if (!input.sleepAndRecovery.isZero) add("sono e recuperação são tempo legítimo")
+        if (!input.logistics.isZero) add("deslocamentos foram descontados")
+        if (!input.preparation.isZero) add("preparação foi descontada")
+        if (historyFactor < 1.0) add("histórico realizado sugere uma margem mais conservadora")
+        if (load == CapacityLoad.OVER_CAPACITY) add("a carga desejada excede a capacidade estimada")
     }
 
     private fun historicalFactor(input: CapacityEstimateInput): Double {

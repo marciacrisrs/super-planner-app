@@ -3,7 +3,6 @@ package com.superplanner.app.domain.usecase
 import com.superplanner.app.domain.model.ActivityInstance
 import com.superplanner.app.domain.model.NextActionDecision
 import com.superplanner.app.domain.model.NextActionReason
-import java.time.Duration
 import javax.inject.Inject
 
 data class NextActionExplanation(
@@ -29,11 +28,7 @@ class ExplainNextActivity @Inject constructor() {
             hasEnoughEvidence = false,
         )
 
-        val reasons = decision.recommendedReasons
-        val facts = reasons.mapNotNull { reason ->
-            reason.toFact(activity, decision.travelDurationToNext)
-        }
-
+        val facts = decision.recommendedReasons.mapNotNull(NextActionReason::toFact)
         return NextActionExplanation(
             activity = activity,
             facts = facts,
@@ -41,10 +36,7 @@ class ExplainNextActivity @Inject constructor() {
         )
     }
 
-    private fun NextActionReason.toFact(
-        activity: ActivityInstance,
-        travelDuration: Duration,
-    ): ExplanationFact? = when (this) {
+    private fun NextActionReason.toFact(): ExplanationFact? = when (this) {
         NextActionReason.CURRENTLY_ACTIVE -> ExplanationFact(this, "a atividade já está em andamento")
         NextActionReason.DUE_NOW -> ExplanationFact(this, "o horário planejado já chegou")
         NextActionReason.HIGHER_PRIORITY -> ExplanationFact(this, "ela tem prioridade maior entre as opções elegíveis")

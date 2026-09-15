@@ -1,4 +1,4 @@
-package com.superplanner.app.domain.ai
+package com.gpsdavida.app.domain.ai
 
 import com.superplanner.app.domain.model.ActivityInstanceId
 import com.superplanner.app.domain.planning.DayReorganizationOperation
@@ -79,7 +79,7 @@ sealed interface AiExecution {
     data class Executed(val result: AiToolResult) : AiExecution
 }
 
-interface AiProvider { suspend fun interpret(request: AiRequest): AiProposal }
+fun interface AiProvider { suspend fun interpret(request: AiRequest): AiProposal }
 
 class RuleBasedAiProvider @Inject constructor() : AiProvider {
     override suspend fun interpret(request: AiRequest): AiProposal {

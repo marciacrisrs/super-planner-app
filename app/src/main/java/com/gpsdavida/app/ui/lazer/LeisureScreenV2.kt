@@ -3,7 +3,6 @@ package com.superplanner.app.ui.lazer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,16 +11,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.superplanner.app.domain.model.LeisureKind
-import com.superplanner.app.domain.model.LeisureStatus
 
 @Composable
 fun LeisureScreenV2(viewModel: LeisureViewModel = hiltViewModel()) {
@@ -52,21 +49,7 @@ fun LeisureScreenV2(viewModel: LeisureViewModel = hiltViewModel()) {
             }
             LazyColumn(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(state.items.filter { (tab == 0 && it.kind == LeisureKind.SERIES) || (tab == 1 && it.kind == LeisureKind.BOOK) }) { item ->
-                    Card(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(item.title)
-                            Text(item.status.name.lowercase())
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                TextButton({ viewModel.setStatus(item, LeisureStatus.WANT) }) { Text("Quero") }
-                                TextButton({ viewModel.setStatus(item, LeisureStatus.NEXT) }) { Text("Próximo") }
-                                TextButton({ viewModel.setStatus(item, LeisureStatus.ACTIVE) }) { Text("Ativo") }
-                                TextButton({ viewModel.setStatus(item, LeisureStatus.PAUSED) }) { Text("Pausado") }
-                                TextButton({ viewModel.setStatus(item, LeisureStatus.COMPLETED) }) { Text("Concluído") }
-                            }
-                            TextButton({ viewModel.schedule(item) }) { Text("Programar") }
-                            TextButton({ viewModel.delete(item.id) }) { Text("Excluir") }
-                        }
-                    }
+                    LeisureItemCard(item = item, onStatus = { viewModel.setStatus(item, it) }, onDelete = { viewModel.delete(item.id) }, onSchedule = { viewModel.schedule(item) })
                 }
             }
         }
