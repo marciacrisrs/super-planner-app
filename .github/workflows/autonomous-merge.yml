@@ -23,7 +23,6 @@ jobs:
     steps:
       - name: Resolve pull request
         id: pr
-        if: github.event_name != 'workflow_run' || github.event.workflow_run.pull_requests[0].number != ''
         env:
           EVENT_NAME: ${{ github.event_name }}
           EVENT_PR: ${{ github.event.pull_request.number }}
@@ -55,33 +54,37 @@ jobs:
 
           mapfile -t SENSITIVE < <(gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate --jq '.[].filename' | grep -E '^(.github/|.*(Dockerfile|docker-compose|compose\.ya?ml)$)' || true)
           if (( ${#SENSITIVE[@]} > 0 )); then
-            echo "Sensitive files changed. Validating whether this is a safe Dependabot action-only update."
+            echo "Sensitive files changed; validating whether this is a safe Dependabot checkout pin update."
             printf '%s\n' "${SENSITIVE[@]}"
 
             [[ "$AUTHOR" == "dependabot[bot]" ]] || {
-              echo "Autonomous merge disabled: sensitive files may only be auto-merged for Dependabot action-only updates."
+              echo "Autonomous merge disabled: sensitive files require a Dependabot checkout-only update."
               exit 1
             }
 
-            mapfile -t SENSITIVE_PATCHES < <(
-              gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate \
-                --jq '.[] | select(.filename | test("^(.github/|.*(Dockerfile|docker-compose|compose\\.ya?ml)$)")) | .patch // ""'
-            )
-
-            for PATCH in "${SENSITIVE_PATCHES[@]}"; do
-              CHANGES=$(printf '%s\n' "$PATCH" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' || true)
-              if [[ -z "$CHANGES" ]]; then
-                echo "Sensitive file has no textual changes; refusing autonomous merge."
+            for FILE in "${SENSITIVE[@]}"; do
+              [[ "$FILE" == ".github/workflows/ci.yml" || "$FILE" == ".github/workflows/codeql.yml" ]] || {
+                echo "Autonomous merge disabled: $FILE is not an approved Dependabot workflow update."
                 exit 1
-              fi
-              if ! printf '%s\n' "$CHANGES" | grep -Eqv '^[+-][[:space:]]*uses:[[:space:]]*actions/checkout@[A-Za-z0-9._/-]+([[:space:]]+#[[:space:]]*v[0-9][^[:space:]]*)?$'; then
-                echo "Sensitive workflow change is limited to actions/checkout pin updates."
-              else
-                echo "Autonomous merge disabled: sensitive workflow contains changes other than actions/checkout pin updates."
+              }
+            done
+
+            while IFS=$'\t' read -r FILE PATCH; do
+              [[ -n "$FILE" ]] || continue
+              CHANGES=$(printf '%s\n' "$PATCH" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' || true)
+              [[ -n "$CHANGES" ]] || {
+                echo "Autonomous merge disabled: $FILE has no inspectable patch."
+                exit 1
+              }
+              if printf '%s\n' "$CHANGES" | grep -Eqv '^[+-][[:space:]]*uses:[[:space:]]*actions/checkout@[A-Za-z0-9._/-]+([[:space:]]+#[[:space:]]*v[0-9][^[:space:]]*)?$'; then
+                echo "Autonomous merge disabled: $FILE contains changes other than actions/checkout pin updates."
                 echo "$CHANGES"
                 exit 1
               fi
-            done
+            done < <(
+              gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate \
+                --jq '.[] | select(.filename == ".github/workflows/ci.yml" or .filename == ".github/workflows/codeql.yml") | [.filename, (.patch // "")] | @tsv'
+            )
           fi
 
       - name: Verify CodeRabbit approval for current commit
