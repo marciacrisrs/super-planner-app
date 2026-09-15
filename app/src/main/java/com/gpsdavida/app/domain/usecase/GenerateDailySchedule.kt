@@ -31,34 +31,65 @@ class GenerateDailySchedule @Inject constructor() {
         travelTimes: List<TravelTime> = emptyList(),
         zoneId: ZoneId = ZoneId.systemDefault(),
     ): DailySchedule {
-        val eligible = activities
-            .filter { it.status == ActivityStatus.PENDING }
-            .filter { it.planned.start.atZone(zoneId).toLocalDate() == date }
-
-        val fixed = eligible
-            .filter { it.flexibility == Flexibility.FIXED }
-            .sortedBy { it.planned.start }
-        val conflicts = mutableListOf<ScheduleConflict>()
-
-        fixed.zipWithNext().forEach { (left, right) ->
-            if (left.planned.end.plus(bufferAfter(left, defaultBuffer)) > right.planned.start) {
-                conflicts += ScheduleConflict(right, ScheduleConflictReason.FIXED_OVERLAP)
-            }
-        }
-
+        val eligible = eligibleActivities(activities, date, zoneId)
+        val fixed = eligible.filter { it.flexibility == Flexibility.FIXED }.sortedBy { it.planned.start }
+        val conflicts = fixedConflicts(fixed, defaultBuffer).toMutableList()
         val scheduled = fixed.toMutableList()
         val pending = eligible.filter { it.flexibility != Flexibility.FIXED }.toMutableList()
 
-        while (pending.isNotEmpty()) {
-            val ready = pending.filter { activity ->
-                dependencies
-                    .filter { it.successor == activity.source }
-                    .all { dependency -> scheduled.any { it.source == dependency.predecessor } }
-            }
+        schedulePending(
+            pending = pending,
+            scheduled = scheduled,
+            conflicts = conflicts,
+            dependencies = dependencies,
+            availability = availability,
+            date = date,
+            defaultBuffer = defaultBuffer,
+            travelTimes = travelTimes,
+            zoneId = zoneId,
+        )
 
+        return DailySchedule(
+            activities = scheduled.sortedBy { it.planned.start },
+            conflicts = conflicts,
+        )
+    }
+
+    private fun eligibleActivities(
+        activities: List<ActivityInstance>,
+        date: LocalDate,
+        zoneId: ZoneId,
+    ): List<ActivityInstance> = activities
+        .filter { it.status == ActivityStatus.PENDING }
+        .filter { it.planned.start.atZone(zoneId).toLocalDate() == date }
+
+    private fun fixedConflicts(
+        fixed: List<ActivityInstance>,
+        defaultBuffer: Duration,
+    ): List<ScheduleConflict> = buildList {
+        fixed.zipWithNext().forEach { (left, right) ->
+            if (left.planned.end.plus(bufferAfter(left, defaultBuffer)) > right.planned.start) {
+                add(ScheduleConflict(right, ScheduleConflictReason.FIXED_OVERLAP))
+            }
+        }
+    }
+
+    private fun schedulePending(
+        pending: MutableList<ActivityInstance>,
+        scheduled: MutableList<ActivityInstance>,
+        conflicts: MutableList<ScheduleConflict>,
+        dependencies: List<Dependency>,
+        availability: List<Availability>,
+        date: LocalDate,
+        defaultBuffer: Duration,
+        travelTimes: List<TravelTime>,
+        zoneId: ZoneId,
+    ) {
+        while (pending.isNotEmpty()) {
+            val ready = pending.filter { dependenciesReady(it, scheduled, dependencies) }
             if (ready.isEmpty()) {
                 pending.forEach { conflicts += ScheduleConflict(it, ScheduleConflictReason.DEPENDENCY_NOT_SATISFIED) }
-                break
+                return
             }
 
             val activity = ready.minWith(
@@ -67,20 +98,8 @@ class GenerateDailySchedule @Inject constructor() {
                     .thenBy { it.planned.start },
             )
             pending.remove(activity)
-
-            val predecessors = dependencies
-                .filter { it.successor == activity.source }
-                .mapNotNull { dependency -> scheduled.firstOrNull { it.source == dependency.predecessor } }
-
-            val earliestStart = maxOf(
-                activity.planned.start,
-                predecessors.maxOfOrNull {
-                    it.planned.end
-                        .plus(bufferAfter(it, defaultBuffer))
-                        .plus(travelDuration(it, activity, travelTimes))
-                } ?: activity.planned.start,
-            )
-
+            val predecessors = predecessorsOf(activity, scheduled, dependencies)
+            val earliestStart = earliestStart(activity, predecessors, travelTimes, defaultBuffer)
             val slot = findSlot(
                 activity = activity,
                 scheduled = scheduled,
@@ -98,12 +117,37 @@ class GenerateDailySchedule @Inject constructor() {
                 scheduled += activity.copy(planned = slot)
             }
         }
-
-        return DailySchedule(
-            activities = scheduled.sortedBy { it.planned.start },
-            conflicts = conflicts,
-        )
     }
+
+    private fun dependenciesReady(
+        activity: ActivityInstance,
+        scheduled: List<ActivityInstance>,
+        dependencies: List<Dependency>,
+    ): Boolean = dependencies
+        .filter { it.successor == activity.source }
+        .all { dependency -> scheduled.any { it.source == dependency.predecessor } }
+
+    private fun predecessorsOf(
+        activity: ActivityInstance,
+        scheduled: List<ActivityInstance>,
+        dependencies: List<Dependency>,
+    ): List<ActivityInstance> = dependencies
+        .filter { it.successor == activity.source }
+        .mapNotNull { dependency -> scheduled.firstOrNull { it.source == dependency.predecessor } }
+
+    private fun earliestStart(
+        activity: ActivityInstance,
+        predecessors: List<ActivityInstance>,
+        travelTimes: List<TravelTime>,
+        defaultBuffer: Duration,
+    ): Instant = maxOf(
+        activity.planned.start,
+        predecessors.maxOfOrNull {
+            it.planned.end
+                .plus(bufferAfter(it, defaultBuffer))
+                .plus(travelDuration(it, activity, travelTimes))
+        } ?: activity.planned.start,
+    )
 
     private fun findSlot(
         activity: ActivityInstance,
