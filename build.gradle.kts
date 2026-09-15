@@ -11,6 +11,10 @@ plugins {
 }
 
 subprojects {
+    dependencyLocking {
+        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
+    }
+
     configurations.matching {
         it.name.startsWith("_") ||
             it.name.endsWith("DependenciesMetadata") ||
@@ -27,9 +31,25 @@ subprojects {
         resolutionStrategy.deactivateDependencyLocking()
     }
 
-    dependencyLocking {
-        lockAllConfigurations()
-        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
+    // Lock only stable, project-owned configurations. Internal AGP/KSP
+    // configurations are intentionally excluded because they are generated
+    // dynamically and do not have persistent lock state.
+    configurations.configureEach {
+        if (name.startsWith("_") ||
+            name.endsWith("DependenciesMetadata") ||
+            name == "androidTestUtil" ||
+            name == "androidJdkImage" ||
+            name == "coreLibraryDesugaring" ||
+            name == "debugWearBundling" ||
+            name == "hiltCompileOnlyDebugAndroidTest" ||
+            name == "hiltAnnotationProcessorDebugAndroidTest" ||
+            name == "hiltAnnotationProcessorDebugUnitTest" ||
+            name == "hiltAnnotationProcessorReleaseUnitTest" ||
+            name.endsWith("AnnotationProcessorClasspath")) {
+            resolutionStrategy.deactivateDependencyLocking()
+        } else {
+            resolutionStrategy.activateDependencyLocking()
+        }
     }
 
     pluginManager.withPlugin("dev.detekt") {
