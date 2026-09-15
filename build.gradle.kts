@@ -28,6 +28,7 @@ subprojects {
             it.name == "debugWearBundling" ||
             it.name == "hiltAnnotationProcessorDebugAndroidTest" ||
             it.name == "hiltAnnotationProcessorDebugUnitTest" ||
+            it.name == "hiltAnnotationProcessorReleaseUnitTest" ||
             it.name.endsWith("AnnotationProcessorClasspath")
     }.configureEach {
         resolutionStrategy.deactivateDependencyLocking()
