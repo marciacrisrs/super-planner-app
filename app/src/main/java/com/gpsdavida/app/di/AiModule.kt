@@ -14,16 +14,16 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AiModule {
+interface AiModule {
     @Binds
     @Singleton
-    abstract fun bindAiProvider(implementation: HybridAiProvider): AiProvider
+    fun bindAiProvider(implementation: HybridAiProvider): AiProvider
 
     @Binds
     @Singleton
-    abstract fun bindAiToolGateway(implementation: DefaultAiToolGateway): AiToolGateway
+    fun bindAiToolGateway(implementation: DefaultAiToolGateway): AiToolGateway
 
     @Binds
     @Singleton
-    abstract fun bindAiTelemetry(implementation: LogcatAiTelemetry): AiTelemetry
+    fun bindAiTelemetry(implementation: LogcatAiTelemetry): AiTelemetry
 }
