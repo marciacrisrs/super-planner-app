@@ -38,6 +38,10 @@ coroutines:
 
 naming:
   severity: warning
+  InvalidPackageDeclaration:
+    active: false
+  MatchingDeclarationName:
+    active: false
   FunctionNaming:
     active: true
     ignoreAnnotated: ['Composable']
