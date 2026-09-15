@@ -13,7 +13,10 @@ import javax.inject.Singleton
 class DefaultAiToolGateway @Inject constructor(
     private val createTaskFromDraft: CreateTaskFromNaturalLanguageDraft,
 ) : AiToolGateway {
-    override suspend fun execute(command: AiCommand, confirmed: Boolean): AiToolResult = when (command) {
+    override suspend fun execute(
+        command: AiCommand,
+        confirmed: Boolean,
+    ): AiToolResult = when (command) {
         is AiCommand.ExplainNextActivity -> AiToolResult.Success(
             buildList {
                 add("explanation_requested")
@@ -22,17 +25,38 @@ class DefaultAiToolGateway @Inject constructor(
             },
         )
         is AiCommand.CreateActivityDraft -> executeCreate(command, confirmed)
-        is AiCommand.ReorganizeDay -> AiToolResult.Success(listOf("reorganize_requested", command.request.operation.javaClass.simpleName))
-        is AiCommand.MissingInformation -> AiToolResult.Success(command.fields.map { "missing=$it" })
-        AiCommand.RecalculateRoute -> AiToolResult.Success(listOf("route_recalculation_requested"))
+        is AiCommand.ReorganizeDay -> AiToolResult.Success(
+            listOf("reorganize_requested", command.request.operation.javaClass.simpleName),
+        )
+        is AiCommand.MissingInformation -> AiToolResult.Success(
+            command.fields.map { "missing=$it" },
+        )
+        AiCommand.RecalculateRoute -> AiToolResult.Success(
+            listOf("route_recalculation_requested"),
+        )
     }
 
-    private suspend fun executeCreate(command: AiCommand.CreateActivityDraft, confirmed: Boolean): AiToolResult =
-        when (val result = createTaskFromDraft(draft = command.draft, confirmed = confirmed, now = Instant.now())) {
-            is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.Created -> AiToolResult.Success(
-                listOf("activity_created", "id=${result.task.id}", "title=${result.task.title}"),
+    private suspend fun executeCreate(
+        command: AiCommand.CreateActivityDraft,
+        confirmed: Boolean,
+    ): AiToolResult = when (
+        val result = createTaskFromDraft(
+            draft = command.draft,
+            confirmed = confirmed,
+            now = Instant.now(),
+        )
+    ) {
+        is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.Created ->
+            AiToolResult.Success(
+                listOf(
+                    "activity_created",
+                    "id=${result.task.id}",
+                    "title=${result.task.title}",
+                ),
             )
-            is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.NeedsConfirmation -> AiToolResult.Rejected(result.reason)
-            is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.NeedsMoreInformation -> AiToolResult.Rejected("missing=${result.fields.joinToString(",")}")
-        }
+        is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.NeedsConfirmation ->
+            AiToolResult.Rejected(result.reason)
+        is com.superplanner.app.domain.usecase.CreateTaskFromNaturalLanguageResult.NeedsMoreInformation ->
+            AiToolResult.Rejected("missing=${result.fields.joinToString(",")}")
+    }
 }

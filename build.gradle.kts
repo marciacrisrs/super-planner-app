@@ -16,8 +16,27 @@ subprojects {
         lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
     }
 
-    pluginManager.withPlugin("io.gitlab.arturbosch.detekt") {
-        extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
+    // Gradle/AGP/KSP create implementation-detail configurations that must not
+    // participate in dependency locking. These configurations are created
+    // dynamically by the Android/KSP toolchain and do not have stable lock state.
+    configurations.matching {
+        it.name.startsWith("_") ||
+            it.name.endsWith("DependenciesMetadata") ||
+            it.name == "androidTestUtil" ||
+            it.name == "androidJdkImage" ||
+            it.name == "coreLibraryDesugaring" ||
+            it.name == "debugWearBundling" ||
+            it.name == "hiltCompileOnlyDebugAndroidTest" ||
+            it.name == "hiltAnnotationProcessorDebugAndroidTest" ||
+            it.name == "hiltAnnotationProcessorDebugUnitTest" ||
+            it.name == "hiltAnnotationProcessorReleaseUnitTest" ||
+            it.name.endsWith("AnnotationProcessorClasspath")
+    }.configureEach {
+        resolutionStrategy.deactivateDependencyLocking()
+    }
+
+    pluginManager.withPlugin("dev.detekt") {
+        extensions.configure<dev.detekt.gradle.extensions.DetektExtension> {
             config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
             buildUponDefaultConfig = true
         }
@@ -26,20 +45,23 @@ subprojects {
 
 tasks.register("resolveAndLockAll") {
     group = "dependency management"
-    description = "Resolves all lockable configurations and writes Gradle dependency lockfiles."
-    notCompatibleWithConfigurationCache("Resolves configurations dynamically to persist dependency locks")
+    description = "Generates dependency locks through Gradle's normal task resolution."
+    notCompatibleWithConfigurationCache("Generates dependency locks through normal task resolution")
     doFirst {
         require(gradle.startParameter.isWriteDependencyLocks) {
             "Run this task with --write-locks"
         }
     }
-    doLast {
-        allprojects.forEach { project ->
-            project.configurations
-                .filter { it.isCanBeResolved }
-                .forEach { it.resolve() }
-        }
-    }
+    // Generate lock state from normal build/verification resolution only.
+    // koverVerify is intentionally excluded: it is a quality gate and must not
+    // block dependency-lock generation when coverage is below the CI threshold.
+    dependsOn(
+        ":app:detekt",
+        ":app:lintDebug",
+        ":app:testDebugUnitTest",
+        ":app:koverXmlReport",
+        ":app:assembleDebug",
+    )
 }
 
 sonar {
