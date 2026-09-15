@@ -11,9 +11,6 @@ plugins {
 }
 
 subprojects {
-    // Gradle/AGP/KSP create implementation-detail configurations that must not
-    // participate in dependency locking. These configurations are created
-    // dynamically by the Android/KSP toolchain and do not have stable lock state.
     configurations.matching {
         it.name.startsWith("_") ||
             it.name.endsWith("DependenciesMetadata") ||
@@ -52,9 +49,6 @@ tasks.register("resolveAndLockAll") {
             "Run this task with --write-locks"
         }
     }
-    // Generate lock state from normal build/verification resolution only.
-    // koverVerify is intentionally excluded: it is a quality gate and must not
-    // block dependency-lock generation when coverage is below the CI threshold.
     dependsOn(
         ":app:detekt",
         ":app:lintDebug",
