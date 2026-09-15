@@ -18,10 +18,12 @@ subprojects {
 
     // Gradle/AGP/KSP create implementation-detail configurations that must not
     // participate in dependency locking. This includes internal '_' configs,
-    // Android dependency metadata configurations and the JDK image configuration.
+    // Android dependency metadata configurations, the Android test utility
+    // configuration and the JDK image configuration.
     configurations.matching {
         it.name.startsWith("_") ||
             it.name.endsWith("DependenciesMetadata") ||
+            it.name == "androidTestUtil" ||
             it.name == "androidJdkImage"
     }.configureEach {
         resolutionStrategy.deactivateDependencyLocking()
