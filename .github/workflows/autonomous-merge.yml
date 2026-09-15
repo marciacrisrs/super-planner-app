@@ -45,16 +45,41 @@ jobs:
           STATE=$(jq -r '.state' <<<"$DATA")
           DRAFT=$(jq -r '.draft' <<<"$DATA")
           MERGEABLE=$(jq -r '.mergeable' <<<"$DATA")
+          AUTHOR=$(jq -r '.user.login' <<<"$DATA")
           HEAD_SHA=$(jq -r '.head.sha' <<<"$DATA")
           NODE_ID=$(jq -r '.node_id' <<<"$DATA")
           echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           echo "node_id=$NODE_ID" >> "$GITHUB_OUTPUT"
           [[ "$STATE" == "open" && "$DRAFT" == "false" && "$MERGEABLE" != "false" ]]
-          mapfile -t SENSITIVE < <(gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate --jq '.[].filename' | grep -E '^(.github/|.*(Dockerfile|docker-compose|compose\.ya?ml)$)' || true)
+
+          FILES_JSON=$(gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate)
+          mapfile -t SENSITIVE < <(jq -r '.[].filename' <<<"$FILES_JSON" | grep -E '^(.github/|.*(Dockerfile|docker-compose|compose\\.ya?ml)$)' || true)
           if (( ${#SENSITIVE[@]} > 0 )); then
-            echo "Sensitive files changed; autonomous merge is disabled."
+            echo "Sensitive files changed; applying restricted autonomous-merge policy."
             printf '%s\n' "${SENSITIVE[@]}"
-            exit 1
+
+            [[ "$AUTHOR" == "dependabot[bot]" ]] || {
+              echo "Autonomous merge disabled: sensitive files require a Dependabot checkout-only update."
+              exit 1
+            }
+
+            for FILE in "${SENSITIVE[@]}"; do
+              [[ "$FILE" == ".github/workflows/ci.yml" || "$FILE" == ".github/workflows/codeql.yml" ]] || {
+                echo "Autonomous merge disabled: $FILE is not an approved Dependabot workflow update."
+                exit 1
+              }
+            done
+
+            CHANGED=$(jq '[.[] | select(.filename == ".github/workflows/ci.yml" or .filename == ".github/workflows/codeql.yml") | (.patch // "") | split("\\n")[] | select((startswith("+") or startswith("-")) and (startswith("+++") | not) and (startswith("---") | not))] | length' <<<"$FILES_JSON")
+            INVALID=$(jq '[.[] | select(.filename == ".github/workflows/ci.yml" or .filename == ".github/workflows/codeql.yml") | (.patch // "") | split("\\n")[] | select((startswith("+") or startswith("-")) and (startswith("+++") | not) and (startswith("---") | not)) | select(test("^[+-][[:space:]]*uses:[[:space:]]*actions/checkout@[A-Za-z0-9._/-]+([[:space:]]+#[[:space:]]*v[0-9][^[:space:]]*)?$") | not)] | length' <<<"$FILES_JSON")
+            [[ "$CHANGED" -gt 0 ]] || {
+              echo "Autonomous merge disabled: workflow patch has no inspectable changes."
+              exit 1
+            }
+            [[ "$INVALID" -eq 0 ]] || {
+              echo "Autonomous merge disabled: workflow changes include content other than actions/checkout pin updates."
+              exit 1
+            }
           fi
 
       - name: Verify CodeRabbit approval for current commit
