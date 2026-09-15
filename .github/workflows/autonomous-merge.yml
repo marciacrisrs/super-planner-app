@@ -52,8 +52,7 @@ jobs:
           echo "node_id=$NODE_ID" >> "$GITHUB_OUTPUT"
           [[ "$STATE" == "open" && "$DRAFT" == "false" && "$MERGEABLE" != "false" ]]
 
-          FILES_JSON=$(gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate)
-          mapfile -t SENSITIVE < <(jq -r '.[].filename' <<<"$FILES_JSON" | grep -E '^(.github/|.*(Dockerfile|docker-compose|compose\.ya?ml)$)' || true)
+          mapfile -t SENSITIVE < <(gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate --jq '.[].filename' | grep -E '^(.github/|.*(Dockerfile|docker-compose|compose\.ya?ml)$)' || true)
           if (( ${#SENSITIVE[@]} > 0 )); then
             echo "Sensitive files changed; validating whether this is a safe Dependabot checkout pin update."
             printf '%s\n' "${SENSITIVE[@]}"
@@ -70,17 +69,22 @@ jobs:
               }
             done
 
-            INVALID=$(jq '[.[] | select(.filename == ".github/workflows/ci.yml" or .filename == ".github/workflows/codeql.yml") | (.patch // "") | split("\n")[] | select((startswith("+") or startswith("-")) and (startswith("+++") | not) and (startswith("---") | not)) | select(test("^[+-][[:space:]]*uses:[[:space:]]*actions/checkout@[A-Za-z0-9._/-]+([[:space:]]+#[[:space:]]*v[0-9][^[:space:]]*)?$") | not)] | length' <<<"$FILES_JSON")
-            CHANGED=$(jq '[.[] | select(.filename == ".github/workflows/ci.yml" or .filename == ".github/workflows/codeql.yml") | (.patch // "") | split("\n")[] | select((startswith("+") or startswith("-")) and (startswith("+++") | not) and (startswith("---") | not))] | length' <<<"$FILES_JSON")
-            [[ "$CHANGED" -gt 0 ]] || {
-              echo "Autonomous merge disabled: workflow patch has no inspectable changes."
-              exit 1
-            }
-            [[ "$INVALID" -eq 0 ]] || {
-              echo "Autonomous merge disabled: workflow changes include content other than actions/checkout pin updates."
-              exit 1
-            }
-            echo "Safe Dependabot checkout pin update detected; continuing with normal gates."
+            while IFS=$'\t' read -r FILE PATCH; do
+              [[ -n "$FILE" ]] || continue
+              CHANGES=$(printf '%s\n' "$PATCH" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' || true)
+              [[ -n "$CHANGES" ]] || {
+                echo "Autonomous merge disabled: $FILE has no inspectable patch."
+                exit 1
+              }
+              if printf '%s\n' "$CHANGES" | grep -Eqv '^[+-][[:space:]]*uses:[[:space:]]*actions/checkout@[A-Za-z0-9._/-]+([[:space:]]+#[[:space:]]*v[0-9][^[:space:]]*)?$'; then
+                echo "Autonomous merge disabled: $FILE contains changes other than actions/checkout pin updates."
+                echo "$CHANGES"
+                exit 1
+              fi
+            done < <(
+              gh api "repos/${{ github.repository }}/pulls/$PR/files?per_page=100" --paginate \
+                --jq '.[] | select(.filename == ".github/workflows/ci.yml" or .filename == ".github/workflows/codeql.yml") | [.filename, (.patch // "")] | @tsv'
+            )
           fi
 
       - name: Verify CodeRabbit approval for current commit
