@@ -7,15 +7,61 @@ plugins {
     alias(libs.plugins.kover) apply false
     alias(libs.plugins.detekt) apply false
     id("org.sonarqube") version "7.4.0.8496"
+    id("org.cyclonedx.bom") version "3.3.0"
 }
 
 subprojects {
+    dependencyLocking {
+        lockAllConfigurations()
+        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
+    }
+
+    // Gradle/AGP/KSP create implementation-detail configurations that must not
+    // participate in dependency locking. These configurations are created
+    // dynamically by the Android/KSP toolchain and do not have stable lock state.
+    configurations.matching {
+        it.name.startsWith("_") ||
+            it.name.endsWith("DependenciesMetadata") ||
+            it.name == "androidTestUtil" ||
+            it.name == "androidJdkImage" ||
+            it.name == "coreLibraryDesugaring" ||
+            it.name == "debugWearBundling" ||
+            it.name == "hiltCompileOnlyDebugAndroidTest" ||
+            it.name == "hiltAnnotationProcessorDebugAndroidTest" ||
+            it.name == "hiltAnnotationProcessorDebugUnitTest" ||
+            it.name == "hiltAnnotationProcessorReleaseUnitTest" ||
+            it.name.endsWith("AnnotationProcessorClasspath")
+    }.configureEach {
+        resolutionStrategy.deactivateDependencyLocking()
+    }
+
     pluginManager.withPlugin("dev.detekt") {
         extensions.configure<dev.detekt.gradle.extensions.DetektExtension> {
             config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
             buildUponDefaultConfig = true
         }
     }
+}
+
+tasks.register("resolveAndLockAll") {
+    group = "dependency management"
+    description = "Generates dependency locks through Gradle's normal task resolution."
+    notCompatibleWithConfigurationCache("Generates dependency locks through normal task resolution")
+    doFirst {
+        require(gradle.startParameter.isWriteDependencyLocks) {
+            "Run this task with --write-locks"
+        }
+    }
+    // Generate lock state from normal build/verification resolution only.
+    // koverVerify is intentionally excluded: it is a quality gate and must not
+    // block dependency-lock generation when coverage is below the CI threshold.
+    dependsOn(
+        ":app:detekt",
+        ":app:lintDebug",
+        ":app:testDebugUnitTest",
+        ":app:koverXmlReport",
+        ":app:assembleDebug",
+    )
 }
 
 sonar {

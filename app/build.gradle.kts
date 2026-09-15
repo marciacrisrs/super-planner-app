@@ -105,6 +105,8 @@ kover {
                     "**.*_MembersInjector",
                     "**.ui.**",
                     "**.presentation.**",
+                    "**.data.local.**",
+                    "**.data.Room*Repository",
                     "**.*ComposableSingletons*",
                 )
             }

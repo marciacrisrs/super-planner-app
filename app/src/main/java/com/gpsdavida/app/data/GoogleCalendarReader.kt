@@ -7,18 +7,23 @@ import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
 import com.superplanner.app.data.local.EventEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Reads Google calendars already synchronized to the Android Calendar provider. */
 class GoogleCalendarReader @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     suspend fun readUpcoming(): List<EventEntity> = withContext(Dispatchers.IO) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+        if (
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_CALENDAR,
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             return@withContext emptyList()
         }
 
@@ -54,15 +59,21 @@ class GoogleCalendarReader @Inject constructor(
                 arrayOf(calendarId.toString()),
                 "${CalendarContract.Instances.BEGIN} ASC",
             )?.use { cursor ->
-                val eventIdIndex = cursor.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID)
-                val titleIndex = cursor.getColumnIndexOrThrow(CalendarContract.Instances.TITLE)
-                val beginIndex = cursor.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN)
-                val endIndex = cursor.getColumnIndexOrThrow(CalendarContract.Instances.END)
+                val eventIdIndex =
+                    cursor.getColumnIndexOrThrow(CalendarContract.Instances.EVENT_ID)
+                val titleIndex =
+                    cursor.getColumnIndexOrThrow(CalendarContract.Instances.TITLE)
+                val beginIndex =
+                    cursor.getColumnIndexOrThrow(CalendarContract.Instances.BEGIN)
+                val endIndex =
+                    cursor.getColumnIndexOrThrow(CalendarContract.Instances.END)
                 while (cursor.moveToNext()) {
                     val eventId = cursor.getLong(eventIdIndex)
                     val begin = cursor.getLong(beginIndex)
                     val end = cursor.getLong(endIndex)
-                    val title = cursor.getString(titleIndex).orEmpty().ifBlank { "Evento sem título" }
+                    val title = cursor.getString(titleIndex)
+                        .orEmpty()
+                        .ifBlank { "Evento sem título" }
                     if (end <= begin) continue
                     result += EventEntity(
                         id = "google-calendar:$calendarId:$eventId:$begin",
