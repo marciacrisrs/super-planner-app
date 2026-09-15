@@ -11,11 +11,6 @@ plugins {
 }
 
 subprojects {
-    dependencyLocking {
-        lockAllConfigurations()
-        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
-    }
-
     // Gradle/AGP/KSP create implementation-detail configurations that must not
     // participate in dependency locking. These configurations are created
     // dynamically by the Android/KSP toolchain and do not have stable lock state.
@@ -33,6 +28,11 @@ subprojects {
             it.name.endsWith("AnnotationProcessorClasspath")
     }.configureEach {
         resolutionStrategy.deactivateDependencyLocking()
+    }
+
+    dependencyLocking {
+        lockAllConfigurations()
+        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
     }
 
     pluginManager.withPlugin("dev.detekt") {
