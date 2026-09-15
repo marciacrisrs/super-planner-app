@@ -28,7 +28,7 @@ data class AgoraUpcomingItem(
 
 data class AgoraUiState(
     val currentTime: LocalTime = LocalTime.MIDNIGHT,
-    val currentDate: LocalDate = LocalDate.EPOCH,
+    val currentDate: LocalDate = LocalDate.of(1970, 1, 1),
     val title: String = "",
     val durationMinutes: Long? = null,
     val scheduledTime: LocalTime? = null,
