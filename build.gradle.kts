@@ -11,44 +11,29 @@ plugins {
 }
 
 subprojects {
-    dependencyLocking {
-        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
-    }
-
-    configurations.matching {
-        it.name.startsWith("_") ||
-            it.name.endsWith("DependenciesMetadata") ||
-            it.name == "androidTestUtil" ||
-            it.name == "androidJdkImage" ||
-            it.name == "coreLibraryDesugaring" ||
-            it.name == "debugWearBundling" ||
-            it.name == "hiltCompileOnlyDebugAndroidTest" ||
-            it.name == "hiltAnnotationProcessorDebugAndroidTest" ||
-            it.name == "hiltAnnotationProcessorDebugUnitTest" ||
-            it.name == "hiltAnnotationProcessorReleaseUnitTest" ||
-            it.name.endsWith("AnnotationProcessorClasspath")
-    }.configureEach {
-        resolutionStrategy.deactivateDependencyLocking()
-    }
-
-    // Lock only stable, project-owned configurations. Internal AGP/KSP
-    // configurations are intentionally excluded because they are generated
-    // dynamically and do not have persistent lock state.
+    // Lock stable, project-owned configurations. Gradle/AGP/KSP create many
+    // internal configurations during configuration and plugin/report tasks;
+    // those must stay unlocked because they do not have persistent lock state.
     configurations.configureEach {
-        if (name.startsWith("_") ||
-            name.endsWith("DependenciesMetadata") ||
-            name == "androidTestUtil" ||
-            name == "androidJdkImage" ||
-            name == "coreLibraryDesugaring" ||
-            name == "debugWearBundling" ||
-            name == "hiltCompileOnlyDebugAndroidTest" ||
-            name == "hiltAnnotationProcessorDebugAndroidTest" ||
-            name == "hiltAnnotationProcessorDebugUnitTest" ||
-            name == "hiltAnnotationProcessorReleaseUnitTest" ||
-            name.endsWith("AnnotationProcessorClasspath")) {
+        val internalConfiguration =
+            name.startsWith("_") ||
+                name.endsWith("DependenciesMetadata") ||
+                name == "androidTestUtil" ||
+                name == "androidJdkImage" ||
+                name == "coreLibraryDesugaring" ||
+                name == "debugWearBundling" ||
+                name.contains("hiltCompileOnly", ignoreCase = true) ||
+                name.contains("hiltAnnotationProcessor", ignoreCase = true) ||
+                name.endsWith("AnnotationProcessorClasspath") ||
+                name.contains("kspClasspath", ignoreCase = true) ||
+                name.contains("unified-test-platform", ignoreCase = true) ||
+                name.contains("ddmlib", ignoreCase = true)
+
+        if (internalConfiguration) {
             resolutionStrategy.deactivateDependencyLocking()
         } else {
             resolutionStrategy.activateDependencyLocking()
+            resolutionStrategy { failOnVersionConflict() }
         }
     }
 
