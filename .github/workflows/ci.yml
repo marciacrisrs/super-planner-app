@@ -29,12 +29,6 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
 
-      - name: Generate dependency lock state
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          chmod +x gradlew
-          ./gradlew resolveAndLockAll --write-locks --stacktrace --no-daemon
-
       - name: Grant execute permission
         run: chmod +x gradlew
 
