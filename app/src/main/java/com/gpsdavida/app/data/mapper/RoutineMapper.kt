@@ -10,11 +10,13 @@ import com.superplanner.app.domain.model.RoutineStepId
 import java.time.DayOfWeek
 import java.time.LocalTime
 
+private const val MINUTES_PER_HOUR = 60
+
 fun RoutineEntity.toDomain(steps: List<RoutineStepEntity>): Routine = Routine(
     id = RoutineId(id),
     title = title,
     steps = steps.map { it.toDomain() },
-    startTime = startTimeMinute?.let { LocalTime.of(it / 60, it % 60) },
+    startTime = startTimeMinute?.let { LocalTime.of(it / MINUTES_PER_HOUR, it % MINUTES_PER_HOUR) },
     daysOfWeek = decodeDays(daysOfWeek),
     priority = Priority.valueOf(priority),
 )
@@ -29,7 +31,7 @@ fun RoutineStepEntity.toDomain(): RoutineStep = RoutineStep(
 fun Routine.toEntity(): RoutineEntity = RoutineEntity(
     id = id.value,
     title = title,
-    startTimeMinute = startTime?.let { it.hour * 60 + it.minute },
+    startTimeMinute = startTime?.let { it.hour * MINUTES_PER_HOUR + it.minute },
     daysOfWeek = daysOfWeek.joinToString(",") { it.name },
     priority = priority.name,
 )
