@@ -152,22 +152,27 @@ class RuleBasedAiProvider @Inject constructor() : AiProvider {
             ?.toLongOrNull()
         if (hasInvalidReorganizationInput(activityId, now, minutes)) {
             return AiProposal(
-                AiCommand.MissingInformation(buildMissingReorganizationFields(activityId, now, minutes)),
+                AiCommand.MissingInformation(
+                    buildMissingReorganizationFields(activityId, now, minutes),
+                ),
                 "Preciso de mais uma informação para reorganizar o dia com segurança.",
                 false,
             )
         }
+        val confirmedActivityId = checkNotNull(activityId)
+        val confirmedNow = checkNotNull(now)
+        val confirmedMinutes = checkNotNull(minutes)
         return AiProposal(
             AiCommand.ReorganizeDay(
                 DayReorganizationRequest(
                     DayReorganizationOperation.DelayActivity(
-                        ActivityInstanceId(activityId!!),
-                        minutes!!,
+                        ActivityInstanceId(confirmedActivityId),
+                        confirmedMinutes,
                     ),
-                    now!!,
+                    confirmedNow,
                 ),
             ),
-            "Entendi um atraso de $minutes minutos. Vou propor o recálculo, sem editar a rota diretamente.",
+            "Entendi um atraso de $confirmedMinutes minutos. Vou propor o recálculo, sem editar a rota diretamente.",
             true,
         )
     }
