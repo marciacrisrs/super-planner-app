@@ -28,7 +28,6 @@ import com.superplanner.app.domain.port.LifeAreaRepository
 import com.superplanner.app.domain.port.MilestoneRepository
 import com.superplanner.app.domain.port.PlanRepository
 import com.superplanner.app.domain.port.ProjectRepository
-import com.superplanner.app.domain.port.Repository
 import com.superplanner.app.domain.port.RoutineRepository
 import com.superplanner.app.domain.port.TaskRepository
 import com.superplanner.app.domain.port.WeeklyPlanOverrideRepository
