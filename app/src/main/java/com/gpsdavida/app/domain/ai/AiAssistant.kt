@@ -17,12 +17,18 @@ class AiAssistant @Inject constructor(
 ) {
     suspend fun propose(request: AiRequest): AiProposal = provider.interpret(request)
 
-    suspend fun execute(proposal: AiProposal, confirmation: AiConfirmation = AiConfirmation.NotConfirmed): AiExecution {
+    suspend fun execute(
+        proposal: AiProposal,
+        confirmation: AiConfirmation = AiConfirmation.NotConfirmed,
+    ): AiExecution {
         val commandType = commandTypeOf(proposal.command)
         val explicitlyConfirmed = confirmation is AiConfirmation.Confirmed
-        val requiresConfirmation = proposal.requiresConfirmation || requiresExplicitConfirmation(proposal.command)
+        val requiresConfirmation =
+            proposal.requiresConfirmation || requiresExplicitConfirmation(proposal.command)
         if (requiresConfirmation && !explicitlyConfirmed) {
-            return AiExecution.AwaitingConfirmation(proposal.copy(requiresConfirmation = true))
+            return AiExecution.AwaitingConfirmation(
+                proposal.copy(requiresConfirmation = true),
+            )
         }
         if (explicitlyConfirmed) telemetry.proposalConfirmed(commandType)
         return when (val result = tools.execute(proposal.command, confirmed = explicitlyConfirmed)) {
@@ -62,7 +68,11 @@ data class AiContext(
     val minimalRouteFacts: List<String> = emptyList(),
 )
 
-data class AiProposal(val command: AiCommand, val explanation: String, val requiresConfirmation: Boolean)
+data class AiProposal(
+    val command: AiCommand,
+    val explanation: String,
+    val requiresConfirmation: Boolean,
+)
 
 sealed interface AiCommand {
     data class CreateActivityDraft(val draft: NaturalLanguageActivityDraft) : AiCommand
@@ -72,47 +82,109 @@ sealed interface AiCommand {
     data object RecalculateRoute : AiCommand
 }
 
-sealed interface AiConfirmation { data object Confirmed : AiConfirmation; data object NotConfirmed : AiConfirmation }
+sealed interface AiConfirmation {
+    data object Confirmed : AiConfirmation
+    data object NotConfirmed : AiConfirmation
+}
 
 sealed interface AiExecution {
     data class AwaitingConfirmation(val proposal: AiProposal) : AiExecution
     data class Executed(val result: AiToolResult) : AiExecution
 }
 
-interface AiProvider { suspend fun interpret(request: AiRequest): AiProposal }
+interface AiProvider {
+    suspend fun interpret(request: AiRequest): AiProposal
+}
 
 class RuleBasedAiProvider @Inject constructor() : AiProvider {
     override suspend fun interpret(request: AiRequest): AiProposal {
         val normalized = request.message.trim()
         return when {
-            normalized.contains("por que", ignoreCase = true) || normalized.contains("por quê", ignoreCase = true) -> {
+            normalized.contains("por que", ignoreCase = true) ||
+                normalized.contains("por quê", ignoreCase = true) -> {
                 val evidence = request.context.minimalRouteFacts
-                if (evidence.isEmpty()) AiProposal(AiCommand.MissingInformation(listOf("evidências da decisão atual")), "Não tenho evidências suficientes para explicar esta escolha.", false)
-                else AiProposal(AiCommand.ExplainNextActivity(request.context.activeActivityId.orEmpty(), evidence), "Vou explicar somente com base nas evidências estruturadas da decisão.", false)
+                if (evidence.isEmpty()) {
+                    AiProposal(
+                        AiCommand.MissingInformation(listOf("evidências da decisão atual")),
+                        "Não tenho evidências suficientes para explicar esta escolha.",
+                        false,
+                    )
+                } else {
+                    AiProposal(
+                        AiCommand.ExplainNextActivity(
+                            request.context.activeActivityId.orEmpty(),
+                            evidence,
+                        ),
+                        "Vou explicar somente com base nas evidências estruturadas da decisão.",
+                        false,
+                    )
+                }
             }
-            normalized.contains("reorgan", ignoreCase = true) || normalized.contains("atras", ignoreCase = true) -> buildReorganizationProposal(normalized, request.context)
+            normalized.contains("reorgan", ignoreCase = true) ||
+                normalized.contains("atras", ignoreCase = true) ->
+                buildReorganizationProposal(normalized, request.context)
             else -> {
-                val today = request.context.nowIso?.take(10)?.let(LocalDate::parse) ?: LocalDate.now()
-                AiProposal(AiCommand.CreateActivityDraft(NaturalLanguageActivityParser.parse(normalized, today)), "Entendi estes dados estruturados. Nada é persistido antes da sua confirmação.", true)
+                val today = request.context.nowIso
+                    ?.take(10)
+                    ?.let(LocalDate::parse)
+                    ?: LocalDate.now()
+                AiProposal(
+                    AiCommand.CreateActivityDraft(
+                        NaturalLanguageActivityParser.parse(normalized, today),
+                    ),
+                    "Entendi estes dados estruturados. Nada é persistido antes da sua confirmação.",
+                    true,
+                )
             }
         }
     }
 
-    private fun buildReorganizationProposal(message: String, context: AiContext): AiProposal {
+    private fun buildReorganizationProposal(
+        message: String,
+        context: AiContext,
+    ): AiProposal {
         val activityId = context.activeActivityId?.takeIf(String::isNotBlank)
         val now = context.nowIso?.let(Instant::parse)
-        val minutes = Regex("(?i)(\\d+)\\s*min").find(message)?.groupValues?.get(1)?.toLongOrNull()
-        if (activityId == null || now == null || minutes == null || minutes <= 0) {
-            return AiProposal(AiCommand.MissingInformation(buildList {
-                if (activityId == null) add("qual atividade deve ser alterada")
-                if (now == null) add("o horário atual")
-                if (minutes == null || minutes <= 0) add("quantos minutos mudou")
-            }), "Preciso de mais uma informação para reorganizar o dia com segurança.", false)
+        val minutes = Regex("(?i)(\\d+)\\s*min")
+            .find(message)
+            ?.groupValues
+            ?.get(1)
+            ?.toLongOrNull()
+        if (hasInvalidReorganizationInput(activityId, now, minutes)) {
+            return AiProposal(
+                AiCommand.MissingInformation(buildMissingReorganizationFields(activityId, now, minutes)),
+                "Preciso de mais uma informação para reorganizar o dia com segurança.",
+                false,
+            )
         }
         return AiProposal(
-            AiCommand.ReorganizeDay(DayReorganizationRequest(DayReorganizationOperation.DelayActivity(ActivityInstanceId(activityId), minutes), now)),
+            AiCommand.ReorganizeDay(
+                DayReorganizationRequest(
+                    DayReorganizationOperation.DelayActivity(
+                        ActivityInstanceId(activityId!!),
+                        minutes!!,
+                    ),
+                    now!!,
+                ),
+            ),
             "Entendi um atraso de $minutes minutos. Vou propor o recálculo, sem editar a rota diretamente.",
             true,
         )
+    }
+
+    private fun hasInvalidReorganizationInput(
+        activityId: String?,
+        now: Instant?,
+        minutes: Long?,
+    ): Boolean = activityId == null || now == null || minutes == null || minutes <= 0
+
+    private fun buildMissingReorganizationFields(
+        activityId: String?,
+        now: Instant?,
+        minutes: Long?,
+    ): List<String> = buildList {
+        if (activityId == null) add("qual atividade deve ser alterada")
+        if (now == null) add("o horário atual")
+        if (minutes == null || minutes <= 0) add("quantos minutos mudou")
     }
 }
