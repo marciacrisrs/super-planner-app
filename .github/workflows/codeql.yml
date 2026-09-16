@@ -35,12 +35,13 @@ jobs:
           java-version: '17'
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v6
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
 
-      - name: Generate dependency lock state
-        run: |
-          chmod +x gradlew
-          ./gradlew resolveAndLockAll --write-locks --stacktrace --no-daemon
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build for CodeQL
+        run: ./gradlew assembleDebug --stacktrace --no-daemon
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
