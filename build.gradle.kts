@@ -16,9 +16,12 @@ allprojects {
 }
 
 subprojects {
+    dependencyLocking {
+        lockAllConfigurations()
+    }
+
     // AGP/KSP create implementation-detail configurations dynamically. They are
-    // intentionally not subject to dependency locking until stable lockfiles
-    // are generated and committed for the complete dependency graph.
+    // intentionally excluded from locking because they do not have stable lock state.
     configurations.configureEach {
         if (name.startsWith("_") ||
             name.endsWith("DependenciesMetadata") ||
@@ -45,6 +48,27 @@ subprojects {
             buildUponDefaultConfig = true
         }
     }
+}
+
+// Kept as a dedicated task because dependency-locks.yml invokes it with
+// --write-locks. It resolves the same configurations used by CI without making
+// strict locking a prerequisite for normal development builds.
+tasks.register("resolveAndLockAll") {
+    group = "dependency management"
+    description = "Resolves CI dependencies and writes Gradle dependency locks."
+    notCompatibleWithConfigurationCache("Generates dependency locks through normal task resolution")
+    doFirst {
+        require(gradle.startParameter.isWriteDependencyLocks) {
+            "Run this task with --write-locks"
+        }
+    }
+    dependsOn(
+        ":app:detekt",
+        ":app:lintDebug",
+        ":app:testDebugUnitTest",
+        ":app:koverXmlReport",
+        ":app:assembleDebug",
+    )
 }
 
 sonar {
