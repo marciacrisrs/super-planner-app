@@ -16,13 +16,9 @@ allprojects {
 }
 
 subprojects {
-    dependencyLocking {
-        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
-    }
-
-    // Lock only configurations that can have stable, committed lock state.
-    // AGP/KSP implementation configurations are generated dynamically and
-    // intentionally remain outside dependency locking.
+    // AGP/KSP create implementation-detail configurations dynamically. They are
+    // intentionally not subject to dependency locking until stable lockfiles
+    // are generated and committed for the complete dependency graph.
     configurations.configureEach {
         if (name.startsWith("_") ||
             name.endsWith("DependenciesMetadata") ||
@@ -51,23 +47,6 @@ subprojects {
     }
 }
 
-tasks.register("resolveAndLockAll") {
-    group = "dependency management"
-    description = "Generates dependency locks for stable, project-owned configurations."
-    notCompatibleWithConfigurationCache("Generates dependency locks through normal task resolution")
-    doFirst {
-        require(gradle.startParameter.isWriteDependencyLocks) {
-            "Run this task with --write-locks"
-        }
-    }
-    dependsOn(
-        ":app:lintDebug",
-        ":app:testDebugUnitTest",
-        ":app:koverXmlReport",
-        ":app:assembleDebug",
-    )
-}
-
 sonar {
     properties {
         property("sonar.projectKey", "marciacrisrs_super-planner-app")
@@ -81,4 +60,19 @@ sonar {
         property("sonar.coverage.exclusions", "**/BuildConfig.*,**/R.*,**/*Hilt_*,**/*_HiltModules*.*,**/*_Factory.*,**/*_MembersInjector*.*,**/ui/**,**/di/**")
         property("sonar.qualitygate.wait", "true")
     }
+}
+
+tasks.named("sonar") {
+    dependsOn(":app:detekt", ":app:lintDebug", ":app:testDebugUnitTest", ":app:koverXmlReport")
+}
+
+tasks.register("verifyCi") {
+    group = "verification"
+    description = "Checks de CI antes do release (detekt, lint, testes e cobertura)"
+    dependsOn(
+        ":app:detekt",
+        ":app:lintDebug",
+        ":app:testDebugUnitTest",
+        ":app:koverVerify",
+    )
 }
