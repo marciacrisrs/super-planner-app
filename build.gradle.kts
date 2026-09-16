@@ -10,6 +10,11 @@ plugins {
     id("org.cyclonedx.bom") version "3.3.0"
 }
 
+allprojects {
+    group = "com.superplanner"
+    version = "0.1.0"
+}
+
 subprojects {
     dependencyLocking {
         lockAllConfigurations()
