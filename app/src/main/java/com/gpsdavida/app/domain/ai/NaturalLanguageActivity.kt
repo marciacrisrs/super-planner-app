@@ -9,7 +9,11 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
-/** Structured interpretation of natural-language activity input. Nothing is persisted from this type alone. */
+private const val MIN_HOUR = 0
+private const val MAX_HOUR = 23
+private const val MIN_MINUTE = 0
+private const val MAX_MINUTE = 59
+
 data class NaturalLanguageActivityDraft(
     val sourceText: String,
     val title: String,
@@ -82,10 +86,9 @@ object NaturalLanguageActivityParser {
         if (text.contains("por uma hora", ignoreCase = true)) return Duration.ofHours(1)
         if (text.contains("por meia hora", ignoreCase = true)) return Duration.ofMinutes(30)
 
-        // If the input contains an explicit clock time, the numeric hour belongs to
-        // startTime rather than plannedDuration. Generic numeric durations remain
-        // supported when no clock expression is present.
-        val hasExplicitClock = Regex("(?i)\\b(?:às|as)\\s*\\d{1,2}(?::\\d{2})?\\s*h?").containsMatchIn(text)
+        val hasExplicitClock = Regex(
+            "(?i)\\b(?:às|as)\\s*\\d{1,2}(?::\\d{2})?\\s*h?",
+        ).containsMatchIn(text)
         if (!hasExplicitClock) {
             Regex("(?i)(\\d+)\\s*(?:h|hora|horas)\\b").find(text)?.let {
                 return Duration.ofHours(it.groupValues[1].toLong())
@@ -100,16 +103,22 @@ object NaturalLanguageActivityParser {
     }
 
     private fun parseTime(text: String): LocalTime? {
-        Regex("(?i)\\b(?:às|as)\\s*(\\d{1,2})(?::(\\d{2}))?\\s*h?").find(text)?.let {
+        Regex(
+            "(?i)\\b(?:às|as)\\s*(\\d{1,2})(?::(\\d{2}))?\\s*h?",
+        ).find(text)?.let {
             val hour = it.groupValues[1].toInt()
-            val minute = it.groupValues[2].takeIf(String::isNotBlank)?.toInt() ?: 0
-            if (hour in 0..23 && minute in 0..59) return LocalTime.of(hour, minute)
+            val minute = it.groupValues[2].takeIf(String::isNotBlank)?.toInt() ?: MIN_MINUTE
+            if (hour in MIN_HOUR..MAX_HOUR && minute in MIN_MINUTE..MAX_MINUTE) {
+                return LocalTime.of(hour, minute)
+            }
         }
         return null
     }
 
     private fun parseRecurrence(text: String, today: LocalDate): RecurrenceRule? {
-        if (text.contains("todo dia", ignoreCase = true) || text.contains("todos os dias", ignoreCase = true)) {
+        if (text.contains("todo dia", ignoreCase = true) ||
+            text.contains("todos os dias", ignoreCase = true)
+        ) {
             return RecurrenceRule(startDate = today, interval = 1, unit = RecurrenceUnit.DAY)
         }
         if (text.contains("segunda a sexta", ignoreCase = true)) {
