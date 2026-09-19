@@ -3,8 +3,15 @@ package com.superplanner.app.data.local
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Query
+import androidx.room.Upsert
 import com.superplanner.app.domain.model.ActivitySource
 import com.superplanner.app.domain.model.Dependency
+import com.superplanner.app.domain.model.EventId
+import com.superplanner.app.domain.model.HabitId
+import com.superplanner.app.domain.model.RoutineId
+import com.superplanner.app.domain.model.RoutineStepId
+import com.superplanner.app.domain.model.TaskId
 import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "dependencies")
@@ -16,9 +23,14 @@ data class DependencyEntity(
 
 @Dao
 interface DependencyDao {
-    @androidx.room.Query("SELECT * FROM dependencies") fun observeAll(): Flow<List<DependencyEntity>>
-    @androidx.room.Upsert suspend fun upsert(entity: DependencyEntity)
-    @androidx.room.Query("DELETE FROM dependencies WHERE id = :id") suspend fun delete(id: String)
+    @Query("SELECT * FROM dependencies")
+    fun observeAll(): Flow<List<DependencyEntity>>
+
+    @Upsert
+    suspend fun upsert(entity: DependencyEntity)
+
+    @Query("DELETE FROM dependencies WHERE id = :id")
+    suspend fun delete(id: String)
 }
 
 object DependencyCodec {
@@ -26,17 +38,28 @@ object DependencyCodec {
         is ActivitySource.FromEvent -> "event:${source.id.value}"
         is ActivitySource.FromTask -> "task:${source.id.value}"
         is ActivitySource.FromHabit -> "habit:${source.id.value}"
-        is ActivitySource.FromRoutineStep -> "routine:${source.routineId.value}:${source.stepId.value}"
+        is ActivitySource.FromRoutineStep ->
+            "routine:${source.routineId.value}:${source.stepId.value}"
     }
 
     fun decode(value: String): ActivitySource? {
         val parts = value.split(":")
         return when (parts.firstOrNull()) {
-            "event" -> parts.getOrNull(1)?.let { ActivitySource.FromEvent(com.superplanner.app.domain.model.EventId(it)) }
-            "task" -> parts.getOrNull(1)?.let { ActivitySource.FromTask(com.superplanner.app.domain.model.TaskId(it)) }
-            "habit" -> parts.getOrNull(1)?.let { ActivitySource.FromHabit(com.superplanner.app.domain.model.HabitId(it)) }
-            "routine" -> if (parts.size >= 3) ActivitySource.FromRoutineStep(com.superplanner.app.domain.model.RoutineId(parts[1]), com.superplanner.app.domain.model.RoutineStepId(parts[2])) else null
+            "event" -> parts.getOrNull(1)?.let { ActivitySource.FromEvent(EventId(it)) }
+            "task" -> parts.getOrNull(1)?.let { ActivitySource.FromTask(TaskId(it)) }
+            "habit" -> parts.getOrNull(1)?.let { ActivitySource.FromHabit(HabitId(it)) }
+            "routine" -> decodeRoutine(parts)
             else -> null
         }
     }
+
+    private fun decodeRoutine(parts: List<String>): ActivitySource? =
+        if (parts.size >= 3) {
+            ActivitySource.FromRoutineStep(
+                RoutineId(parts[1]),
+                RoutineStepId(parts[2]),
+            )
+        } else {
+            null
+        }
 }

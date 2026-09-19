@@ -10,3 +10,4 @@ data class AvailabilityEntity(
     val endMinute: Int,
     val kind: String,
 )
+

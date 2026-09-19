@@ -17,3 +17,4 @@ abstract class RouteFeedbackModule {
         implementation: InMemoryRouteFeedbackRepository,
     ): RouteFeedbackRepository
 }
+

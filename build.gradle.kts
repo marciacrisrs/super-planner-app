@@ -10,29 +10,36 @@ plugins {
     id("org.cyclonedx.bom") version "3.3.0"
 }
 
+allprojects {
+    group = "com.superplanner"
+    version = "0.1.0"
+}
+
 subprojects {
     dependencyLocking {
         lockAllConfigurations()
-        lockMode = org.gradle.api.artifacts.dsl.LockMode.STRICT
     }
 
-    // Gradle/AGP/KSP create implementation-detail configurations that must not
-    // participate in dependency locking. These configurations are created
-    // dynamically by the Android/KSP toolchain and do not have stable lock state.
-    configurations.matching {
-        it.name.startsWith("_") ||
-            it.name.endsWith("DependenciesMetadata") ||
-            it.name == "androidTestUtil" ||
-            it.name == "androidJdkImage" ||
-            it.name == "coreLibraryDesugaring" ||
-            it.name == "debugWearBundling" ||
-            it.name == "hiltCompileOnlyDebugAndroidTest" ||
-            it.name == "hiltAnnotationProcessorDebugAndroidTest" ||
-            it.name == "hiltAnnotationProcessorDebugUnitTest" ||
-            it.name == "hiltAnnotationProcessorReleaseUnitTest" ||
-            it.name.endsWith("AnnotationProcessorClasspath")
-    }.configureEach {
-        resolutionStrategy.deactivateDependencyLocking()
+    // AGP/KSP create implementation-detail configurations dynamically. They are
+    // intentionally excluded from locking because they do not have stable lock state.
+    configurations.configureEach {
+        if (name.startsWith("_") ||
+            name.endsWith("DependenciesMetadata") ||
+            name == "androidTestUtil" ||
+            name == "androidJdkImage" ||
+            name == "coreLibraryDesugaring" ||
+            name == "debugWearBundling" ||
+            name == "hiltCompileOnlyDebugAndroidTest" ||
+            name == "hiltAnnotationProcessorDebugAndroidTest" ||
+            name == "hiltAnnotationProcessorDebugUnitTest" ||
+            name == "hiltAnnotationProcessorReleaseUnitTest" ||
+            name.endsWith("AnnotationProcessorClasspath") ||
+            name.contains("ksp") ||
+            name.contains("androidTest") ||
+            name.contains("UnitTest")
+        ) {
+            resolutionStrategy.deactivateDependencyLocking()
+        }
     }
 
     pluginManager.withPlugin("dev.detekt") {
@@ -43,18 +50,18 @@ subprojects {
     }
 }
 
+// Kept as a dedicated task because dependency-locks.yml invokes it with
+// --write-locks. It resolves the same configurations used by CI without making
+// strict locking a prerequisite for normal development builds.
 tasks.register("resolveAndLockAll") {
     group = "dependency management"
-    description = "Generates dependency locks through Gradle's normal task resolution."
+    description = "Resolves CI dependencies and writes Gradle dependency locks."
     notCompatibleWithConfigurationCache("Generates dependency locks through normal task resolution")
     doFirst {
         require(gradle.startParameter.isWriteDependencyLocks) {
             "Run this task with --write-locks"
         }
     }
-    // Generate lock state from normal build/verification resolution only.
-    // koverVerify is intentionally excluded: it is a quality gate and must not
-    // block dependency-lock generation when coverage is below the CI threshold.
     dependsOn(
         ":app:detekt",
         ":app:lintDebug",

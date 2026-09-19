@@ -13,10 +13,17 @@ interface ActivityExecutionDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfAbsent(entity: ActivityExecutionEntity): Long
 
-    @Query("UPDATE activity_executions SET status = 'IN_PROGRESS', actualStart = :actualStart, actualEnd = NULL WHERE activityInstanceId = :id AND status = 'PENDING'")
+    @Query(
+        "UPDATE activity_executions SET status = 'IN_PROGRESS', actualStart = :actualStart, " +
+            "actualEnd = NULL WHERE activityInstanceId = :id AND status = 'PENDING'",
+    )
     suspend fun markStartedIfPending(id: String, actualStart: String): Int
 
-    @Query("UPDATE activity_executions SET status = 'DONE', actualEnd = :actualEnd WHERE activityInstanceId = :id AND status = 'IN_PROGRESS' AND actualStart IS NOT NULL AND actualStart <= :actualEnd")
+    @Query(
+        "UPDATE activity_executions SET status = 'DONE', actualEnd = :actualEnd " +
+            "WHERE activityInstanceId = :id AND status = 'IN_PROGRESS' AND " +
+            "actualStart IS NOT NULL AND actualStart <= :actualEnd",
+    )
     suspend fun markCompletedIfInProgress(id: String, actualEnd: String): Int
 
     @Upsert
